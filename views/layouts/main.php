@@ -40,9 +40,16 @@ AppAsset::register($this);
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
             ['label' => 'О системе', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
+            ['label' => 'Контакты', 'url' => ['/site/contact']],
+            ['label' => 'Справочники', 'items' => [
+				['label' => 'Проекты', 'url'=>['/pmis/test1']],
+				['label' => 'Этапы работ', 'url'=>['/site/about']],
+            ]],
+             
+            Yii::$app->user->isGuest ? ['label' => 'Регистрация', 'url' => ['/site/signup']] : ['label' => 'Личный кабинет', 'url' => ['/site/personalcabinet']],
             Yii::$app->user->isGuest ? (
-                ['label' => 'Login', 'url' => ['/site/login']]
+                  ['label' => 'Login', 'url' => ['/site/login']]
+                
             ) : (
                 '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
@@ -53,8 +60,14 @@ AppAsset::register($this);
                 . Html::endForm()
                 . '</li>'
             )
+            
+            
+          //  ['label' => 'Регистрация', 'url' => ['/site/signup']]
+            
         ],
     ]);
+ 
+    
     NavBar::end();
     ?>
 
@@ -63,6 +76,7 @@ AppAsset::register($this);
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
         <?= Alert::widget() ?>
+        <?= $this->render('main/flashes')?>
         <?= $content ?>
     </div>
 </div>

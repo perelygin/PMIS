@@ -6,15 +6,26 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    //'bootstrap' => ['log'],
+    
+    'bootstrap' => ['debug'],
+	'modules' => [
+    'debug' => [
+        'class' => 'yii\debug\Module',
+		],
+	],
+    
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+		'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'rXyzAkRiSSymu-fqQqXT5hw808QuM9VV',
+            'cookieValidationKey' => '6eym9cOPeHjoXvDvnEcQKcxD8QUiPtHj',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',

@@ -9,6 +9,10 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\SignupForm;
+use app\models\User;
+use app\models\PersonalCabinetForm;
+
 
 class SiteController extends Controller
 {
@@ -108,7 +112,6 @@ class SiteController extends Controller
         $model = new ContactForm();
         if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
             Yii::$app->session->setFlash('contactFormSubmitted');
-
             return $this->refresh();
         }
         return $this->render('contact', [
@@ -125,4 +128,52 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+    
+    //личный кабинет
+	public function actionPersonalcabinet(){
+		//$model = new PersonalCabinetForm();
+		return $this->render('personalcabinet');
+	}
+	
+    //регистрация пользователя
+    public function actionSignup(){
+	 if (!Yii::$app->user->isGuest) {
+		return $this->goHome();
+	 }
+	 $model = new SignupForm();
+	 if($model->load(\Yii::$app->request->post()) && $model->validate()){
+		 $user = new User();
+		 $user->username = $model->username;
+		 $user->email = $model->email;
+		 $user->setPassword($model->password);
+		 $user->generateAuthKey();
+		 
+		 
+		 if($user->save()){
+			return $this->goHome();
+		 } 
+		 else{
+			 if($user->hasErrors()){
+				$ErrorsArray = $user->getErrors(); 	 
+				foreach ($ErrorsArray as $key => $value1){
+					foreach($value1 as $value2){
+						if($key == 'username'){
+							$model->addError($key, $value2);
+						} else {
+							Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+						}
+					}
+				}	
+				//echo '<pre>'; print_r($ErrorsArray); die;
+			 }
+			 
+			 
+			 
+		 }
+	  }
+	 return $this->render('signup', compact('model'));
+	}
+	
+	
+    
 }
