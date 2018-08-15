@@ -41,9 +41,9 @@ AppAsset::register($this);
             ['label' => 'Home', 'url' => ['/site/index']],
             ['label' => 'О системе', 'url' => ['/site/about']],
             ['label' => 'Контакты', 'url' => ['/site/contact']],
-            ['label' => 'Справочники', 'items' => [
+            ['label' => 'Проектная работа', 'items' => [
 				['label' => 'Проекты', 'url'=>['/pmis/test1']],
-				['label' => 'Этапы работ', 'url'=>['/site/about']],
+				['label' => 'Фазы проекта', 'url'=>['/br/index']],
             ]],
              
             Yii::$app->user->isGuest ? ['label' => 'Регистрация', 'url' => ['/site/signup']] : ['label' => 'Личный кабинет', 'url' => ['/site/personalcabinet']],
