@@ -150,6 +150,7 @@ class SiteController extends Controller
 		 
 		 
 		 if($user->save()){
+					
 			return $this->goHome();
 		 } 
 		 else{

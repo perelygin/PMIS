@@ -3,14 +3,14 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\BusinessRequests;
-use yii\data\ActiveDataProvider;
+use app\models\VwListOfBR;
+use app\models\VwListOfBRSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * BrController implements the CRUD actions for BusinessRequests model.
+ * BrController implements the CRUD actions for VwListOfBR model.
  */
 class BrController extends Controller
 {
@@ -30,22 +30,22 @@ class BrController extends Controller
     }
 
     /**
-     * Lists all BusinessRequests models.
+     * Lists all VwListOfBR models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => BusinessRequests::find(),
-        ]);
+        $searchModel = new VwListOfBRSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single BusinessRequests model.
+     * Displays a single VwListOfBR model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -58,13 +58,13 @@ class BrController extends Controller
     }
 
     /**
-     * Creates a new BusinessRequests model.
+     * Creates a new VwListOfBR model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new BusinessRequests();
+        $model = new VwListOfBR();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->idBR]);
@@ -76,7 +76,7 @@ class BrController extends Controller
     }
 
     /**
-     * Updates an existing BusinessRequests model.
+     * Updates an existing VwListOfBR model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -96,7 +96,7 @@ class BrController extends Controller
     }
 
     /**
-     * Deletes an existing BusinessRequests model.
+     * Deletes an existing VwListOfBR model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -110,15 +110,15 @@ class BrController extends Controller
     }
 
     /**
-     * Finds the BusinessRequests model based on its primary key value.
+     * Finds the VwListOfBR model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return BusinessRequests the loaded model
+     * @return VwListOfBR the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = BusinessRequests::findOne($id)) !== null) {
+        if (($model = VwListOfBR::findOne($id)) !== null) {
             return $model;
         }
 
