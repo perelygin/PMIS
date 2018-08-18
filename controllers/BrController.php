@@ -5,6 +5,9 @@ namespace app\controllers;
 use Yii;
 use app\models\VwListOfBR;
 use app\models\VwListOfBRSearch;
+use app\models\BusinessRequests;  
+use app\models\RoleModel;
+use app\models\ProjectCommand;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -59,15 +62,28 @@ class BrController extends Controller
 
     /**
      * Creates a new VwListOfBR model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * If creation is successful, the browser will be redirected to the 'update' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new VwListOfBR();
+        $model = new BusinessRequests();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->idBR]);
+			//создаем роли для BR
+			$roleModel = new RoleModel();
+			$roles = $roleModel->get_RoleModel($model->BRRoleModelType);
+			foreach ($roles as $role) {
+				$prjComm = new ProjectCommand();
+				$prjComm->parent_id = 0;
+				$prjComm->idBR = $model->idBR;
+				$prjComm->idRole = $role['idRole'];
+				$prjComm->idHuman = null;
+				$prjComm->save();
+			}
+			
+			
+            return $this->redirect(['update','id' => $model->idBR]);
         }
 
         return $this->render('create', [
@@ -85,6 +101,8 @@ class BrController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $prjComm = new ProjectCommand();
+		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->idBR]);
@@ -92,6 +110,7 @@ class BrController extends Controller
 
         return $this->render('update', [
             'model' => $model,
+            'prj_comm_model'=>$prj_comm_model
         ]);
     }
 
@@ -118,7 +137,7 @@ class BrController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = VwListOfBR::findOne($id)) !== null) {
+        if (($model = BusinessRequests::findOne($id)) !== null) {
             return $model;
         }
 

@@ -2,14 +2,15 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use app\models\Organization;
+use app\models\Projects;
+
 use yii\helpers\ArrayHelper;
 /* @var $this yii\web\View */
 /* @var $model app\models\VwListOfBRSearch */
 /* @var $form yii\widgets\ActiveForm */
 
- $Organization = Organization::find()->all();
- $items = ArrayHelper::map($Organization,'ShortName','CustomerName');
+ $Organization = Projects::find()->all();
+ $items = ArrayHelper::map($Organization,'ProjectName','ProjectName');
   $params = [
         'prompt' => 'Выберите проект'
     ];

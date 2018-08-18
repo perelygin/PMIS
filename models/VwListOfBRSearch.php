@@ -47,6 +47,9 @@ class VwListOfBRSearch extends VwListOfBR
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+             'pagination' => [
+				'pageSize' => 10,
+			],
         ]);
 
         $this->load($params);
