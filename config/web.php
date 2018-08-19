@@ -18,6 +18,7 @@ $config = [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+        '@PIC_PATH' => '/pmis_app/picture/',
     ],
     'components' => [
 		'authManager' => [
