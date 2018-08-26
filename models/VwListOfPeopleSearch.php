@@ -5,12 +5,12 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\VwListOfBR;
+use app\models\VwListOfPeople;
 
 /**
- * VwListOfBRSearch represents the model behind the search form of `app\models\VwListOfBR`.
+ * VwListOfPeopleSearch represents the model behind the search form of `app\models\VwListOfPeople`.
  */
-class VwListOfBRSearch extends VwListOfBR
+class VwListOfPeopleSearch extends VwListOfPeople
 {
     /**
      * {@inheritdoc}
@@ -18,8 +18,8 @@ class VwListOfBRSearch extends VwListOfBR
     public function rules()
     {
         return [
-            [['idBR', 'BRDeleted', 'BRnumber'], 'integer'],
-            [['BRName', 'ProjectName', 'StageName', 'StagesStatusName', 'Family', 'CustomerName'], 'safe'],
+            [['fio', 'CustomerName'], 'safe'],
+            [['idHuman', 'idOrganization'], 'integer'],
         ];
     }
 
@@ -41,15 +41,12 @@ class VwListOfBRSearch extends VwListOfBR
      */
     public function search($params)
     {
-        $query = VwListOfBR::find();
+        $query = VwListOfPeople::find();
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-             'pagination' => [
-				'pageSize' => 5,
-			],
         ]);
 
         $this->load($params);
@@ -62,17 +59,11 @@ class VwListOfBRSearch extends VwListOfBR
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'idBR' => $this->idBR,
-            'BRDeleted' => $this->BRDeleted,
-           // 'BRnumber' => $this->BRnumber,
-            //'ProjectName'=> $this->ProjectName,
+            'idHuman' => $this->idHuman,
+            'idOrganization' => $this->idOrganization,
         ]);
 
-        $query->andFilterWhere(['like', 'BRName', $this->BRName])
-            ->andFilterWhere(['like', 'BRnumber', $this->BRnumber])
-            ->andFilterWhere(['like', 'ProjectName', $this->ProjectName])
-            ->andFilterWhere(['like', 'StageName', $this->StageName])
-            ->andFilterWhere(['like', 'Family', $this->Family])
+        $query->andFilterWhere(['like', 'fio', $this->fio])
             ->andFilterWhere(['like', 'CustomerName', $this->CustomerName]);
 
         return $dataProvider;

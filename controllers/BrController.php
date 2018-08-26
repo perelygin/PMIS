@@ -5,12 +5,17 @@ namespace app\controllers;
 use Yii;
 use app\models\VwListOfBR;
 use app\models\VwListOfBRSearch;
+use app\models\VwListOfPeopleSearch;
 use app\models\BusinessRequests;  
 use app\models\RoleModel;
 use app\models\ProjectCommand;
+use app\models\LifeCycleStages;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\models\Wbs;
+use app\models\WbsSearch;
+
 
 /**
  * BrController implements the CRUD actions for VwListOfBR model.
@@ -78,9 +83,48 @@ class BrController extends Controller
 				$prjComm->parent_id = 0;
 				$prjComm->idBR = $model->idBR;
 				$prjComm->idRole = $role['idRole'];
-				$prjComm->idHuman = null;
+				$prjComm->idHuman = -1;
 				$prjComm->save();
+				if($prjComm->hasErrors()){
+					Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону ролевой модели ");
+				}
 			}
+			//создаем wBS по шаблону(два уровня)
+			$LifeCycleStages = new LifeCycleStages();
+			$wbs_template = $LifeCycleStages->getLifeCycleStages($model->BRLifeCycleType);
+			//корень - номер BR
+			$root = new Wbs(['name' => 'BR '.$model->BRNumber,'tree'=>$model->idBR]);
+				$root->mantis = 'www.mantis.com';
+				$root->idBr = $model->idBR;
+				$root->makeRoot();
+				$root->save();
+				if($root->hasErrors()){
+					Yii::$root->session->addFlash('error',"Ошибка сохранения по шаблону WBS. корневой узел ");
+					echo('<pre> '.print_r($root->errors).'</pre>'); die;
+				}
+			foreach($wbs_template as $wbst){
+				$stage_l1 = new Wbs(['name' => $wbst['StageName'],'tree'=>$model->idBR]);
+				$stage_l1->mantis = 'www.mantis.com';
+				$stage_l1->idBr = $model->idBR;
+				$stage_l1->appendTo($root);
+				$stage_l1->save();
+				if($stage_l1->hasErrors()){
+					Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону WBS ");
+					echo('<pre> '.print_r($stage_l1->errors).'</pre>'); die;
+				}
+				foreach($wbst['lvl2'] as $lvl2){ 
+						$stage_l2 = new Wbs(['name' => $lvl2['StageName']]);
+						$stage_l2->mantis = 'www.mantis.com';
+						$stage_l2->idBr = $model->idBR;
+						$stage_l2->appendTo($stage_l1);
+						$stage_l2->save();
+						if($stage_l2->hasErrors()){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону WBS ");
+							echo('<pre> '.print_r($stage_l2->errors).'</pre>'); die;
+						}
+				}
+			}
+			
 			
 			
             return $this->redirect(['update','id' => $model->idBR]);
@@ -98,19 +142,30 @@ class BrController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id,$page_number=1)   //id BR и номер активной вкладки
     {
         $model = $this->findModel($id);
         $prjComm = new ProjectCommand();
 		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
-
+		
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->idBR]);
-        }
+            return $this->redirect(['index']);
+        } else{
+			 if($model->hasErrors()){
+				$ErrorsArray = $model->getErrors(); 	 
+				foreach ($ErrorsArray as $key => $value1){
+					foreach($value1 as $value2){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+					}
+				}	
+				//echo '<pre>'; print_r($ErrorsArray); die;
+			 }
+		}
 
         return $this->render('update', [
             'model' => $model,
-            'prj_comm_model'=>$prj_comm_model
+            'prj_comm_model'=>$prj_comm_model,
+            'page_number' =>$page_number
         ]);
     }
 
@@ -143,4 +198,75 @@ class BrController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-}
+    /*
+     * добавляет ФЛ в команду проекта с заданной ролью.
+     * 
+     */
+     
+    public function actionAdd_user_to_role($idBr,$idRole,$ParentId,$idHuman=0)   
+    {
+
+	   $model_w = array('idBr'=>$idBr,'idRole'=>$idRole,'ParentId'=>$ParentId);
+       $searchModel = new VwListOfPeopleSearch();
+       $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+       if($idHuman==0){
+		  //выбор человека из списка
+         return $this->render('select_human', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'model_w'=> $model_w
+        ]);
+	  }	else{
+		  
+		$prjComm = new ProjectCommand();
+		$prjComm->parent_id = $ParentId;
+		$prjComm->idBR = $idBr;
+		$prjComm->idRole = $idRole;
+		$prjComm->idHuman = $idHuman;
+		
+		
+		
+		 if($prjComm->save()){
+				
+			return $this->redirect(['update','id' => $idBr, 'page_number'=>2]);
+		 } 
+		 else{
+			 if($prjComm->hasErrors()){
+				$ErrorsArray = $prjComm->getErrors(); 	 
+				foreach ($ErrorsArray as $key => $value1){
+					foreach($value1 as $value2){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+					}
+				}	
+				//echo '<pre>'; print_r($ErrorsArray); die;
+			 }
+			 // если не удалось сохранить  продолжаем выбирать
+			return $this->render('select_human', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'model_w'=> $model_w
+        ]);
+		 }
+		
+	
+		
+		
+	 } 
+		
+        
+
+    }
+        /*
+     * добавляет ФЛ в команду проекта с заданной ролью.
+     * 
+     */
+     
+    public function actionDelete_user_from_role($idPrjCom,$idBr)   //id - первичный ключ в projectCommand
+    {
+		$prjComm = new ProjectCommand();
+        $prjComm->findOne($idPrjCom)->delete();
+
+        //return $this->redirect(['index']);
+        return $this->redirect(['update','id' => $idBr, 'page_number'=>2]);
+    }
+  }

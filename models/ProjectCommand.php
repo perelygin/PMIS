@@ -30,6 +30,8 @@ class ProjectCommand extends \yii\db\ActiveRecord
     {
         return [
             [['parent_id', 'idBR', 'idRole', 'idHuman'], 'integer'],
+            [['parent_id', 'idBR', 'idRole', 'idHuman'], 'required'],
+            [['idHuman'], 'unique', 'targetAttribute' => ['parent_id', 'idBR', 'idRole', 'idHuman'],'message' =>'Этот человек с такой ролью уже есть в команде'],
           
         ];
     }
@@ -74,13 +76,13 @@ class ProjectCommand extends \yii\db\ActiveRecord
 				 $peoples = $this::findBySql($sql1, [':idBr' => $idBR,':parent_id'=>$role['id']])->asArray()->all();
 				 $person_of_role = array();
 				 foreach ($peoples as $people) {
-					 $person= array('idHuman' => $people['idHuman'],'Name'=>$people['Family'].' '.$people['Name'],'idRole'=>$people['idRole']);
+					 $person= array('idHuman' => $people['idHuman'],'Name'=>$people['Family'].' '.$people['Name'],'idRole'=>$people['idRole'],'idPrjCom'=>$people['id']);
 					 
 					 $person_of_role[] = $person;
 				 }
 				 //var_dump($person_of_role);
 				 //die;
-				 $prjLine = array('idRole' => $role['idRole'],'RoleName'=>$role['RoleName'],'Persons'=>$person_of_role);
+				 $prjLine = array('parent_id'=>$role['id'],'idRole' => $role['idRole'],'RoleName'=>$role['RoleName'],'Persons'=>$person_of_role);
 				 $prjCommand[]=$prjLine;
 				 
 			 }

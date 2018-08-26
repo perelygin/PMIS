@@ -39,6 +39,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
             [['idProject'], 'required','message' => 'Пожалуйста, укажите проект'],
             [['BRName'], 'required','message' => 'Пожалуйста, введите имя'],
             [['BRRoleModelType'], 'required','message' => 'Пожалуйста, укажите тип ролевой модели'],
+            [['BRLifeCycleType'], 'required','message' => 'Пожалуйста, укажите шаблон WBS'],
             [['BRName'], 'string', 'max' => 150],
             
         ];
@@ -53,7 +54,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
             'idBR' => 'Id Br',
             'BRName' => 'Название BR',
             'idProject' => 'Проект',
-            'BRLifeCycleType' => 'Brlife Cycle Type',
+            'BRLifeCycleType' => 'Шаблон WBS',
             'BRCurrentStage' => 'Brcurrent Stage',
             'BRCurrentStageStatus' => 'Brcurrent Stage Status',
             'BRCurrentResponsible' => 'Brcurrent Responsible',
