@@ -81,4 +81,11 @@ class Wbs extends \yii\db\ActiveRecord
             'idBr' => 'Id Br',
         ];
     }
+    //public function getChildren()
+    //{
+		
+		//$Children = $this->find()->leaves()->all();
+		
+		//return $Children;
+	//}
 }

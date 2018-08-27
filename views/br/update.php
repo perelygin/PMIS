@@ -17,7 +17,8 @@ $this->params['breadcrumbs'][] = 'Редактирование';
     <?= $this->render('_form', [
         'model' => $model,
         'prj_comm_model'=>$prj_comm_model,
-        'page_number' =>$page_number
+        'page_number' =>$page_number,
+        'wbs_leaves'=>$wbs_leaves
     ]) ?>
 
 </div>

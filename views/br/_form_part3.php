@@ -4,6 +4,7 @@
 	//use app\models\LifeCycleType;
     use yii\helpers\ArrayHelper;
     use app\models\Projects;
+    use yii\grid\GridView;
     
 		//$Organization = Projects::find()->all();
 		//$items = ArrayHelper::map($Organization,'idProject','ProjectName');
@@ -23,12 +24,23 @@
   
    <div class="container">
 	   <div class="row">
-		   <div class="col-sm-6">
-				   
+		   <div class="col-sm">
+			   'wbs_leaves'=>$
+				 <?= GridView::widget([
+			        'dataProvider' => $wbs_leaves,
+			       // 'filterModel' => $searchModel,
+			        'columns' => [
+			            ['class' => 'yii\grid\SerialColumn'],
+			
+			            'id',
+			            'depth',
+			            'name',
+			            			
+			            ['class' => 'yii\grid\ActionColumn'],
+			        ],
+			    ]); 
+			  ?>   
 	      </div>
-	      <div class="col-sm-6">
-					
-		      </div>
 	   </div>
 	   <div class="row">
 		   <div class="col-sm-6">

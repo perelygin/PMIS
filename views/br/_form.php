@@ -18,8 +18,8 @@ use yii\bootstrap\Tabs;
   		
   		$item1 = array('label' => 'Общая информация','content' => $this->render('_form_part1', ['model' => $model, 'form' => $form]));
   		$item2 = array('label' => 'Команда','content' => $this->render('_form_part2', ['model' => $model,'prj_comm_model'=>$prj_comm_model, 'form' => $form]),);
-  		$item3 = array('label' => 'Структура работ','content' => $this->render('_form_part3', ['model' => $model, 'form' => $form]));
-	  	switch ($page_number) { //оперделяем активную вкладку
+  		$item3 = array('label' => 'Структура работ','content' => $this->render('_form_part3', ['wbs_leaves'=>$wbs_leaves, 'model' => $model, 'form' => $form]));
+	  	switch ($page_number) { //определяем активную вкладку
 		    case 1:
 		        $item1['active'] = true;
 		        break;

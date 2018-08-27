@@ -13,8 +13,10 @@ use app\models\LifeCycleStages;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\data\ArrayDataProvider;
 use app\models\Wbs;
 use app\models\WbsSearch;
+
 
 
 /**
@@ -109,7 +111,7 @@ class BrController extends Controller
 				$stage_l1->appendTo($root);
 				$stage_l1->save();
 				if($stage_l1->hasErrors()){
-					Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону WBS ");
+					Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону WBS.  Уровень 1 ");
 					echo('<pre> '.print_r($stage_l1->errors).'</pre>'); die;
 				}
 				foreach($wbst['lvl2'] as $lvl2){ 
@@ -119,7 +121,7 @@ class BrController extends Controller
 						$stage_l2->appendTo($stage_l1);
 						$stage_l2->save();
 						if($stage_l2->hasErrors()){
-							Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону WBS ");
+							Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону WBS. Уровень 2 ");
 							echo('<pre> '.print_r($stage_l2->errors).'</pre>'); die;
 						}
 				}
@@ -144,7 +146,19 @@ class BrController extends Controller
      */
     public function actionUpdate($id,$page_number=1)   //id BR и номер активной вкладки
     {
-        $model = $this->findModel($id);
+		$root = Wbs::findOne(['id'=>'86']);
+		$wbs_leaves_data = $root->children(1)->all();
+		$wbs_provider = new ArrayDataProvider([
+						    'allModels' => $wbs_leaves_data,
+						    //'pagination' => [
+						        //'pageSize' => 10,
+						    //],
+						    'sort' => [
+						        'attributes' => ['name'],
+						    ],
+						]);
+		//var_dump($wbs_leaves);die;
+		$model = $this->findModel($id);
         $prjComm = new ProjectCommand();
 		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
 		
@@ -165,7 +179,8 @@ class BrController extends Controller
         return $this->render('update', [
             'model' => $model,
             'prj_comm_model'=>$prj_comm_model,
-            'page_number' =>$page_number
+            'page_number' =>$page_number,
+            'wbs_leaves'=>$wbs_provider
         ]);
     }
 
