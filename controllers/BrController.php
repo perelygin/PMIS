@@ -144,9 +144,17 @@ class BrController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id,$page_number=1)   //id BR и номер активной вкладки
+    public function actionUpdate($id,$page_number=1,$root_id = 0)   //id BR и номер активной вкладки
     {
-		$root = Wbs::findOne(['id'=>'86']);
+		$model = $this->findModel($id);
+		
+		if($root_id <> 0){
+			$root = Wbs::findOne(['id'=>$root_id]);	
+		} else{
+			
+			$root = $model->findModelWbs($id);
+		}
+		
 		$wbs_leaves_data = $root->children(1)->all();
 		$wbs_provider = new ArrayDataProvider([
 						    'allModels' => $wbs_leaves_data,
@@ -158,7 +166,7 @@ class BrController extends Controller
 						    ],
 						]);
 		//var_dump($wbs_leaves);die;
-		$model = $this->findModel($id);
+		
         $prjComm = new ProjectCommand();
 		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
 		
@@ -180,7 +188,8 @@ class BrController extends Controller
             'model' => $model,
             'prj_comm_model'=>$prj_comm_model,
             'page_number' =>$page_number,
-            'wbs_leaves'=>$wbs_provider
+            'wbs_leaves'=>$wbs_provider,
+            'root_id'=>$root_id  //для wbs
         ]);
     }
 
@@ -213,6 +222,7 @@ class BrController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
     /*
      * добавляет ФЛ в команду проекта с заданной ролью.
      * 

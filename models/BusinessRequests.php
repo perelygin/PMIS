@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\models\Wbs;
 
 
 /**
@@ -62,5 +63,13 @@ class BusinessRequests extends \yii\db\ActiveRecord
             'BRNumber' => 'Номер BR',
             'BRRoleModelType' =>'Тип ролевой модели',
         ];
+    }
+    public function findModelWbs($idBr)
+    {
+        if (($model = Wbs::findOne(['idBr'=>$idBr,'depth'=>'0'])) !== null) {
+            return $model;
+        }
+		throw new \yii\web\NotFoundHttpException('Запись не найдена');
+       // throw new NotFoundHttpException('The requested page does not exist.');
     }
 }
