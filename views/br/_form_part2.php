@@ -17,12 +17,15 @@
 	foreach ($prj_comm_model as $role) {
 		echo('<tr><td>');
 		    echo Html::a( '<span class="glyphicon glyphicon-plus-sign"></span>',
-					['br/add_user_to_role', 'idBr' => $model->idBR, 'idRole' => $role['idRole'],'ParentId'=>$role['parent_id']] );
+					['br/add_user_to_role', 'idBr' => $model->idBR, 'idRole' => $role['idRole'],'ParentId'=>$role['parent_id']],
+					['title' => 'Добавить в команду']);
 	        echo('</td><td colspan="2"><b>'.$role['RoleName'].': </b></td></tr>'); 
 		$persons = $role['Persons'];
 		foreach($persons as $person){
 			echo('<tr><td></td><td>');
-			echo(Html::a( '<span class="glyphicon glyphicon-minus-sign"></span>',['br/delete_user_from_role', 'idPrjCom' => $person['idPrjCom'],'idBr'=>$model->idBR]));
+			echo(Html::a( '<span class="glyphicon glyphicon-minus-sign"></span>',
+							['br/delete_user_from_role', 'idPrjCom' => $person['idPrjCom'],'idBr'=>$model->idBR],
+							['title' => 'Удалить из команды']));
 			echo('</td><td>'.$person['Name'].'</td></tr>');
 		}
 	} 

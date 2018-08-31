@@ -242,17 +242,12 @@ class BrController extends Controller
             'model_w'=> $model_w
         ]);
 	  }	else{
-		  
 		$prjComm = new ProjectCommand();
 		$prjComm->parent_id = $ParentId;
 		$prjComm->idBR = $idBr;
 		$prjComm->idRole = $idRole;
 		$prjComm->idHuman = $idHuman;
-		
-		
-		
 		 if($prjComm->save()){
-				
 			return $this->redirect(['update','id' => $idBr, 'page_number'=>2]);
 		 } 
 		 else{
@@ -272,14 +267,7 @@ class BrController extends Controller
             'model_w'=> $model_w
         ]);
 		 }
-		
-	
-		
-		
 	 } 
-		
-        
-
     }
         /*
      * добавляет ФЛ в команду проекта с заданной ролью.
@@ -294,4 +282,43 @@ class BrController extends Controller
         //return $this->redirect(['index']);
         return $this->redirect(['update','id' => $idBr, 'page_number'=>2]);
     }
+     /*
+     * добавляет новый узел в WBS 
+     * 
+     */
+     
+    public function actionAdd_wbs_child($idBR, $parent_node_id)   //
+    {
+		$parent_node = Wbs::findOne(['id'=>$parent_node_id]);
+		$new_child = new Wbs(['name' => 'новый узел']);
+		$new_child->mantis = 'www.mantis.com';
+		$new_child->idBr = $idBR;
+		$new_child->appendTo($parent_node);
+		$new_child->save();
+		if($new_child->hasErrors()){
+			Yii::$app->session->addFlash('error',"Ошибка сохранения дочернего узла WBS ");
+			echo('<pre> '.print_r($new_child->errors).'</pre>'); die;
+		}
+        return $this->redirect(['update','id' => $idBR, 'page_number'=>3]);
+    }
+    /**
+     * Удаляет узел,  если у него нет подчиненных узлов
+     * 
+     */
+    public function actionDelete_wbs_node($id_node,$idBR)
+    {
+		$Node = Wbs::findOne(['id'=>$id_node]);
+        $children = $Node->children()->all();
+       // var_dump($children);die;
+		if(!empty($children)){
+			Yii::$app->session->addFlash('error',"Не могу удалить узел - есть подчиненные узлы ");
+			return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$id_node]);
+		}else{
+			$parent = $Node->parents(1)->one();
+			$deleted_node_name =$Node->name;
+			$Number_of_deleted = $Node->deleteWithChildren();
+			Yii::$app->session->addFlash('success',"Узел (".$deleted_node_name.") удален");
+			return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
+		}
+   }
   }
