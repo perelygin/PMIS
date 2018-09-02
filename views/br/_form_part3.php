@@ -40,10 +40,23 @@
  ?>
   
   
-  
+  <div class="container1">
+
+  </div>  
    <div class="container">
+	  <div class="row">
+		<div class="col-sm-4">
+		   <?php  
+		     $url1 = Url::to(['site/help']);
+			 echo  Html::a('<span class="glyphicon glyphicon-question-sign"></span>', $url1.'#WorkBreakdownStructure',['title' => 'Помощь по разделу',]);
+			 echo "   ";
+			  $url2 = Url::to(['br/add_wbs_child', 'idBR'=>$model->idBR,'parent_node_id'=>$root_id]);;
+			 echo  Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить подчиненный узел',]);
+			?>
+	    </div>
+	   </div>
 	   <div class="row">
-		   <div class="col-sm">
+			<div class="col-sm4">
 			   <?= Breadcrumbs::widget([
 			    'homeLink' => ['label' => 'WBS'],
 			    'links' => isset($this->params['breadcrumbs_wbs']) ? $this->params['breadcrumbs_wbs'] : [],
@@ -58,7 +71,7 @@
 			       // 'filterModel' => $searchModel,
 			        'columns' => [
 			            [
-					    'label' => 'name',
+					    'label' => 'Результат проекта',
 					    'format' => 'raw',
 					    'value' => function($data){
 							$haveChild = $data->rgt - $data->lft;
@@ -81,7 +94,7 @@
 				            'class' => 'yii\grid\ActionColumn',
 				            'header'=>'Выбери', 
 				            'headerOptions' => ['width' => '80'],
-				            'template' => '{add_wbs_child}{delete_wbs_node}',
+				            'template' => '{add_wbs_child} {update_wbs_node} {delete_wbs_node}',
 				            //Замыкание в анонимной функции PHP- я нихера не понял как это работает  -(((
 				            'buttons' => [
 				                'add_wbs_child' => function ($url,$model){  
@@ -89,6 +102,12 @@
 				                    return Html::a(
 				                    '<span class="glyphicon glyphicon-plus"></span>', 
 				                    $url,['title' => 'Добавить подчиненный узел']);
+				                },
+				                'update_wbs_node' => function ($url,$model){  
+									$url = Url::to(['br/update_wbs_node', 'idBR'=>$model->idBr,'id_node'=>$model->id]);
+				                    return Html::a(
+				                    '<span class="glyphicon glyphicon-pencil"></span>', 
+				                    $url,['title' => 'Изменить узел']);
 				                },
 				                'delete_wbs_node' => function ($url,$model){  
 									$url = Url::to(['br/delete_wbs_node', 'idBR'=>$model->idBr,'id_node'=>$model->id]);

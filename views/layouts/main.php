@@ -39,8 +39,11 @@ AppAsset::register($this);
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'О системе', 'url' => ['/site/about']],
             ['label' => 'Контакты', 'url' => ['/site/contact']],
+            ['label' => 'Справочная информация', 'items' => [
+				['label' => 'О системе', 'url'=>['/site/about']],
+				['label' => 'Справка', 'url'=>['/site/help']],
+            ]],
             ['label' => 'Проектная работа', 'items' => [
 				['label' => 'Проекты', 'url'=>['/pmis/test1']],
 				['label' => 'Фазы проекта', 'url'=>['/br/index']],

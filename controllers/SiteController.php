@@ -128,7 +128,15 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
-    
+    /**
+     * Displays help page.
+     *
+     * @return string
+     */
+    public function actionHelp($anchor = '')
+    {
+        return $this->render('help');
+    }
     //личный кабинет
 	public function actionPersonalcabinet(){
 		//$model = new PersonalCabinetForm();

@@ -189,7 +189,7 @@ class BrController extends Controller
             'prj_comm_model'=>$prj_comm_model,
             'page_number' =>$page_number,
             'wbs_leaves'=>$wbs_provider,
-            'root_id'=>$root_id  //для wbs
+            'root_id'=>$root->id  //для wbs
         ]);
     }
 
@@ -297,9 +297,10 @@ class BrController extends Controller
 		$new_child->save();
 		if($new_child->hasErrors()){
 			Yii::$app->session->addFlash('error',"Ошибка сохранения дочернего узла WBS ");
-			echo('<pre> '.print_r($new_child->errors).'</pre>'); die;
+			//echo('<pre> '.print_r($new_child->errors).'</pre>'); die;
 		}
-        return $this->redirect(['update','id' => $idBR, 'page_number'=>3]);
+        return $this->redirect(['update_wbs_node','idBR' => $idBR, 'id_node'=>$new_child->id]);
+        
     }
     /**
      * Удаляет узел,  если у него нет подчиненных узлов
@@ -320,5 +321,52 @@ class BrController extends Controller
 			Yii::$app->session->addFlash('success',"Узел (".$deleted_node_name.") удален");
 			return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
 		}
+   }
+    public function actionUpdate_wbs_node($id_node,$idBR)
+    {
+		//if ($model = Wbs::findOne(['id'=>$id_node]) !== null) {
+			$model = Wbs::findOne(['id'=>$id_node]);
+			if(!is_null($model)){
+				if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+		        
+		            $model->save();
+		            $parent = $model->parents(1)->one();
+		            return  $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
+		        } else{
+				 if($model->hasErrors()){
+					$ErrorsArray = $model->getErrors(); 	 
+					foreach ($ErrorsArray as $key => $value1){
+						foreach($value1 as $value2){
+								Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+						}
+					}	
+					//echo '<pre>'; print_r($ErrorsArray); die;
+				 }
+				}
+		    
+			}
+	
+		    return $this->render('wbs_update', [
+		        'model' => $model,
+		    ]);
+		//}	
+		//throw new NotFoundHttpException('The requested page does not exist.');
+		
+		
+
+
+       
+        //$children = $Node->children()->all();
+       //// var_dump($children);die;
+		//if(!empty($children)){
+			//Yii::$app->session->addFlash('error',"Не могу удалить узел - есть подчиненные узлы ");
+			//return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$id_node]);
+		//}else{
+			//$parent = $Node->parents(1)->one();
+			//$deleted_node_name =$Node->name;
+			//$Number_of_deleted = $Node->deleteWithChildren();
+			//Yii::$app->session->addFlash('success',"Узел (".$deleted_node_name.") удален");
+			//return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
+		//}
    }
   }

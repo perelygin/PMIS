@@ -75,9 +75,9 @@ class Wbs extends \yii\db\ActiveRecord
             'lft' => 'Lft',
             'rgt' => 'Rgt',
             'depth' => 'Depth',
-            'name' => 'Name',
+            'name' => 'Результат',
             'mantis' => 'Mantis',
-            'description' => 'Description',
+            'description' => 'Описание',
             'idBr' => 'Id Br',
         ];
     }
