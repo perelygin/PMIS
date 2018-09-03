@@ -19,7 +19,8 @@ $this->params['breadcrumbs'][] = 'Редактирование';
         'prj_comm_model'=>$prj_comm_model,
         'page_number' =>$page_number,
         'wbs_leaves'=>$wbs_leaves,
-        'root_id'=>$root_id
+        'root_id'=>$root_id,
+        'EstimateListdataProvider' => $EstimateListdataProvider, //для трудозатрат
     ]) ?>
 
 </div>

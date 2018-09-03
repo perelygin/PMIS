@@ -19,6 +19,8 @@ use yii\bootstrap\Tabs;
   		$item1 = array('label' => 'Общая информация','content' => $this->render('_form_part1', ['model' => $model, 'form' => $form]));
   		$item2 = array('label' => 'Команда','content' => $this->render('_form_part2', ['model' => $model,'prj_comm_model'=>$prj_comm_model, 'form' => $form]),);
   		$item3 = array('label' => 'Структура работ','content' => $this->render('_form_part3', ['root_id'=>$root_id,'wbs_leaves'=>$wbs_leaves, 'model' => $model, 'form' => $form]));
+  		$item4 = array('label' => 'Оценки трудозатрат','content' => $this->render('_form_part4', ['model' => $model, 'EstimateListdataProvider' => $EstimateListdataProvider, 'form' => $form]));
+  		
 	  	switch ($page_number) { //определяем активную вкладку
 		    case 1:
 		        $item1['active'] = true;
@@ -29,6 +31,9 @@ use yii\bootstrap\Tabs;
 		    case 3:
 		        $item3['active'] = true;
 		        break;
+		    case 4:
+		        $item4['active'] = true;
+		        break;    
 		    default:
 		         $item1['active'] = true;
 		        break;
@@ -39,6 +44,7 @@ use yii\bootstrap\Tabs;
   		$items[]= $item1;
   		$items[]= $item2;
   		$items[]= $item3;
+  		$items[]= $item4;
   		//var_dump($items);die;
   		echo Tabs::widget([		  	'items' => $items			]);
 		?>

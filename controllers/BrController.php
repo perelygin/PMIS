@@ -14,8 +14,10 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\data\ArrayDataProvider;
+use yii\data\ActiveDataProvider;
 use app\models\Wbs;
 use app\models\WbsSearch;
+use app\models\EstimateWorkPackages;
 
 
 
@@ -170,6 +172,13 @@ class BrController extends Controller
         $prjComm = new ProjectCommand();
 		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
 		
+		
+		$QueryEstimateList = EstimateWorkPackages::find()->where(['deleted' => 0]);
+        $EstimateListdataProvider = new ActiveDataProvider([
+            'query' => $QueryEstimateList,
+   
+        ]);
+		
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['index']);
         } else{
@@ -189,7 +198,8 @@ class BrController extends Controller
             'prj_comm_model'=>$prj_comm_model,
             'page_number' =>$page_number,
             'wbs_leaves'=>$wbs_provider,
-            'root_id'=>$root->id  //для wbs
+            'root_id'=>$root->id,  //для wbs
+            'EstimateListdataProvider' => $EstimateListdataProvider, //для трудозатрат
         ]);
     }
 
