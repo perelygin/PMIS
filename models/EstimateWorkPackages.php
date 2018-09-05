@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 
 /**
+ * Пакет оцениваемых работ. включает в себя перечень работ и их оценку на дату
  * This is the model class for table "EstimateWorkPackages".
  *
  * @property int $idEstimateWorkPackages
@@ -48,5 +49,14 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
             'EstimateName' => 'Наименование оценки',
             'idBR' => 'Id Br',
         ];
+    }
+    /*
+     * возвращает название BR, по которой делалась оценка
+     */
+    public function getBrInfo()
+    {
+		$BR = BusinessRequests::findOne($this->idBR);
+		$BrInfo = array('BRName' => $BR->BRName,'BRNumber'=>$BR->BRNumber);
+        return $BrInfo;
     }
 }

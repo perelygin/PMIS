@@ -17,12 +17,7 @@
 			//'prompt' => 'Выберите проект'
 		//];
 		
-		//$RoleModelType = RoleModelType::find()->all();
-		//$items1 = ArrayHelper::map($RoleModelType,'idRoleModelType','RoleModelTypeName');
-		//$params1 = [
-			//'prompt' => 'Выберите ролевую модель',
-			//'disabled'=>"disabled"
-		//];
+		
 		//ищем родителей для rootid
 		  
 			$wbs_current_node = Wbs::findOne(['id'=>$root_id]);
@@ -93,8 +88,8 @@
 			            [
 				            'class' => 'yii\grid\ActionColumn',
 				            'header'=>'Выбери', 
-				            'headerOptions' => ['width' => '80'],
-				            'template' => '{add_wbs_child} {update_wbs_node} {delete_wbs_node}',
+				            'headerOptions' => ['width' => '120'],
+				            'template' => '{add_wbs_child} {update_wbs_node} {delete_wbs_node} {estimate}',
 				            //Замыкание в анонимной функции PHP- я нихера не понял как это работает  -(((
 				            'buttons' => [
 				                'add_wbs_child' => function ($url,$model){  
@@ -110,11 +105,25 @@
 				                    $url,['title' => 'Изменить узел']);
 				                },
 				                'delete_wbs_node' => function ($url,$model){  
+									$haveChild = $model->rgt - $model->lft;
 									$url = Url::to(['br/delete_wbs_node', 'idBR'=>$model->idBr,'id_node'=>$model->id]);
-				                    return Html::a(
-				                    '<span class="glyphicon glyphicon-trash"></span>', 
-				                    $url,['title' => 'Удалить узел']);
-				                },				        
+									if($haveChild > 1){  //есть подчиненные узлы
+										return '';
+									} else{
+										return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url,['title' => 'Удалить узел']);
+									}
+									
+				                },	
+				                'estimate'  =>function ($url,$model){ 
+									$haveChild = $model->rgt - $model->lft;
+									//$url = Url::to(['br/show_estimates', 'idBR'=>$model->idBr,'id_node'=>$model->id]);
+									$url = Url::to(['works_of_estimate/index', 'idBR'=>$model->idBr,'id_node'=>$model->id]);
+									if($haveChild > 1){  //есть подчиненные узлы
+										return '';
+									} else{
+					                    return Html::a('<span class="glyphicon glyphicon-usd"></span>',$url,['title' => 'Работы и трудозатраты по реализации  результата']);
+									}
+								}
 				            ],
 				            
 				        ],

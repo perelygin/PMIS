@@ -18,6 +18,7 @@ use yii\data\ActiveDataProvider;
 use app\models\Wbs;
 use app\models\WbsSearch;
 use app\models\EstimateWorkPackages;
+use app\models\WorksOfEstimate;
 
 
 
@@ -359,24 +360,101 @@ class BrController extends Controller
 		    return $this->render('wbs_update', [
 		        'model' => $model,
 		    ]);
-		//}	
-		//throw new NotFoundHttpException('The requested page does not exist.');
-		
-		
-
-
-       
-        //$children = $Node->children()->all();
-       //// var_dump($children);die;
-		//if(!empty($children)){
-			//Yii::$app->session->addFlash('error',"Не могу удалить узел - есть подчиненные узлы ");
-			//return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$id_node]);
-		//}else{
-			//$parent = $Node->parents(1)->one();
-			//$deleted_node_name =$Node->name;
-			//$Number_of_deleted = $Node->deleteWithChildren();
-			//Yii::$app->session->addFlash('success',"Узел (".$deleted_node_name.") удален");
-			//return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
-		//}
    }
+   /*
+    * Создает оценку трудозатрат для BR
+    */
+   public function actionCreate_ewp($idBR){
+	   $EstimateWorkPackages =  new EstimateWorkPackages();
+	   $EstimateWorkPackages->EstimateName = 'Предварительная оценка';
+	   $EstimateWorkPackages->idBR = $idBR;
+	   $EstimateWorkPackages->dataEstimate = date("Y-m-d");   //'2018-09-10'
+	   $EstimateWorkPackages->save();
+	   if($EstimateWorkPackages->hasErrors()){
+					Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");
+	   }else{
+		    return $this->redirect(['update_estimate_work_packages','idBR' => $idBR, 'idEWP'=>$EstimateWorkPackages->idEstimateWorkPackages]); 
+	   }
+	   
+	  
+   }
+   
+   /*
+    * Удаляет оценку трудозатрат для BR
+    */
+   public function actionDelete_ewp($idEWP){
+	   $EstimateWorkPackages =  EstimateWorkPackages::findOne($idEWP);
+	   if(!is_null($EstimateWorkPackages)){
+		   $EstimateWorkPackages->deleted = 1;
+		   $EstimateWorkPackages-> save();
+		    if($EstimateWorkPackages->hasErrors()){
+					Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");
+			}		
+		   }
+	   return 	$this->redirect(['update','id' => $EstimateWorkPackages->idBR, 'page_number'=>4]);   
+	  
+   }
+     
+   
+    /*
+    * корректировка оценки трудозатрат для BR
+    */
+   public function actionUpdate_estimate_work_packages($idEWP,$idBR){
+	   $EstimateWorkPackages =  EstimateWorkPackages::findOne($idEWP);
+	  	if(!is_null($EstimateWorkPackages)){
+				if ($EstimateWorkPackages->load(Yii::$app->request->post()) && $EstimateWorkPackages->validate()) {
+		            $EstimateWorkPackages->save();
+		          if($EstimateWorkPackages->hasErrors()){
+					$ErrorsArray = $EstimateWorkPackages->getErrors(); 	 
+					foreach ($ErrorsArray as $key => $value1){
+						foreach($value1 as $value2){
+							   
+								Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+						}
+					}
+					echo var_dump($ErrorsArray); die;
+					
+				  }
+		            return  $this->redirect(['update','id' => $idBR, 'page_number'=>4]);
+		        } 		    
+			}
+	
+		    return $this->render('UpdateEstimateWorkPackages', [
+		        'model' => $EstimateWorkPackages,
+		    ]);
+	   
+	  
+   }
+   /*
+    //* отображает перечень работ, которые необходимо выполнить что бы получить данный результат, и трудозатраты на них
+    //*/
+    //public function actionShow_estimates($id_node,$idBR,$idEstimateWorkPackages = -1){
+	 ////пытаемся найти конкретный пакет оценок
+	 //$BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR,'idEstimateWorkPackages'=>$idEstimateWorkPackages])->one();
+	 ////если конкретный не нашли, то проверка на то, что по даной BR есть хотя бы одна оценка
+	 //if(!isset($BREstimateList)){
+		  //$BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->one();
+		   //if(is_null($BREstimateList)){
+			 //Yii::$app->session->addFlash('error',"Для данной BR нет ни одной оценки трудозатрат. Создайте ее пожалуйста");
+			 //return $this->redirect(['update','id' => $idBR, 'page_number'=>4]);
+		   //}
+     //}	 
+         ////выводим форму с перечнем работ, необходимых для достижения результата.  на форме,  в обязательном порядке указывается пакет оценок.
+		 //$WorksOfEstimate =  new WorksOfEstimate();
+		 //$QueryWorksOfEstimate = $WorksOfEstimate->find()->where(['deleted' => 0, 'idWbs'=>$id_node, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
+	        //$WorksOfEstimateProvider = new ActiveDataProvider([
+	            //'query' => $QueryWorksOfEstimate,
+	   
+	        //]);
+       //return $this->render('Show_estimates', [
+            //'idBR' => $idBR,
+            //'id_node'=>$id_node,
+            //'idEstimateWorkPackages'=>$idEstimateWorkPackages,
+            //'WorksOfEstimateProvider' => $WorksOfEstimateProvider,
+            
+        //]);  
+   
+		  
+        
+	//}
   }
