@@ -44,7 +44,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
     {
         return [
             'idWorksOfEstimate' => 'Id Works Of Estimate',
-            'idEstimateWorkPackages' => 'Id Estimate Work Packages',
+            'idEstimateWorkPackages' => 'Выбери оценку трудозатрат:',
             'WorkName' => 'Наименование работы',
             'idWbs' => 'Id Wbs',
             'WorkDescription' => 'Work Description',

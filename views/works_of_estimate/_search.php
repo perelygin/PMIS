@@ -18,13 +18,27 @@ use yii\helpers\ArrayHelper;
 					->indexBy('idEstimateWorkPackages')
 					->column();
 		$params = [
-			'prompt' => 'Выберите оценку',
-			//'4' => ['Selected' => true]
-			//$idEstimateWorkPackages => ['Selected' => true]
+			//'prompt' => 'Выберите оценку',
+			////'4' => ['Selected' => true]
+			////$idEstimateWorkPackages => ['Selected' => true]
 			
 		];
 		
-// 		
+
+        //скрипт для обновления страницы при выборе пакета оценок
+		$script = <<< JS
+		var b = document.getElementById("searchworksofestimate-idestimateworkpackages");
+			b.onchange = function() {
+				//alert("Спасибо, что выбрали!"); 
+				document.getElementById("w111").submit();
+			};
+			
+			//b.addEventListener("click", function() {alert('Еще раз спасибо!')}, false); 
+JS;
+//маркер конца строки, обязательно сразу, без пробелов и табуляции
+		
+		$this->registerJs($script, yii\web\View::POS_READY);
+
 ?>
 
 
@@ -32,24 +46,21 @@ use yii\helpers\ArrayHelper;
 
     <?php $form = ActiveForm::begin([
         'action' => ['index','idBR'=>$idBR, 'id_node'=>$id_node],
-        'method' => 'get',
+        'method' => 'post',
+        'id' =>'w111'
     ]); ?>
 
     <?php // $form->field($model, 'idWorksOfEstimate') ?>
 
     <?= $form->field($model, 'idEstimateWorkPackages')->dropDownList($items,$params); ?>
-
-    <?php // $form->field($model, 'WorkName') ?>
-
-    <?php // $form->field($model, 'idWbs') ?>
-
-    <?php // $form->field($model, 'WorkDescription') ?>
-
-    <?php // echo $form->field($model, 'deleted') ?>
+   
+   
 
     <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+        <?php 
+        // вскрыть, если перестанет рабоать по id
+        // Html::submitButton('Выбрать', ['class' => 'btn btn-primary']) ?>
+       
     </div>
 
     <?php ActiveForm::end(); ?>

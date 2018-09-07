@@ -371,7 +371,8 @@ class BrController extends Controller
 	   $EstimateWorkPackages->dataEstimate = date("Y-m-d");   //'2018-09-10'
 	   $EstimateWorkPackages->save();
 	   if($EstimateWorkPackages->hasErrors()){
-					Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");
+			Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");
+			return 	$this->redirect(['update','id' => $idBR, 'page_number'=>4]); 		
 	   }else{
 		    return $this->redirect(['update_estimate_work_packages','idBR' => $idBR, 'idEWP'=>$EstimateWorkPackages->idEstimateWorkPackages]); 
 	   }

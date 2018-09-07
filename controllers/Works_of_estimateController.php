@@ -6,6 +6,7 @@ use Yii;
 use app\models\WorksOfEstimate;
 use app\models\SearchWorksOfEstimate;
 use app\models\EstimateWorkPackages;
+use app\models\VwListOfWorkEffort;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -51,28 +52,42 @@ class Works_of_estimateController extends Controller
      * Lists all WorksOfEstimate models.
      * @return mixed
      */
-    public function actionIndex($id_node,$idBR,$idEstimateWorkPackages=-1)
+     
+    public function actionIndex1($id_node,$idBR)
     {
-		 //пытаемся найти конкретный пакет оценок
-		 $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR,'idEstimateWorkPackages'=>$idEstimateWorkPackages])->one();
-		 //если конкретный не нашли, то проверка на то, что по даной BR есть хотя бы одна оценка
-		 if(!isset($BREstimateList)){
-			  $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->one();
-			   if(is_null($BREstimateList)){
-				 Yii::$app->session->addFlash('error',"Для данной BR нет ни одной оценки трудозатрат. Создайте ее пожалуйста");
-				 return $this->redirect(['update','id' => $idBR, 'page_number'=>4]);
-			   }
-	     }	 
-		
+		 echo('index1');
+		 echo(var_dump(Yii::$app->request->post())); 
+		 die;
+	} 
+	
+	
+    public function actionIndex($id_node,$idBR)
+    {
+        
+        		
         $searchModel = new SearchWorksOfEstimate();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id_node,$BREstimateList->idEstimateWorkPackages);
-		//$searchModel -> idEstimateWorkPackages = $BREstimateList->idEstimateWorkPackages;
-        return $this->render('index', [
+        if ($searchModel->load(Yii::$app->request->post())){    //если idEstimateWorkPackages(пакет оценок) был выбран на форме,  то используем его
+		   $idEstimateWorkPackages = $searchModel->idEstimateWorkPackages;
+		} else{ //иначе ищем любой по этой BR
+		   $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->one();
+		   if(is_null($BREstimateList)){
+			 Yii::$app->session->addFlash('error',"Для данной BR нет ни одной оценки трудозатрат. Создайте ее пожалуйста");
+			 return $this->redirect(['update','id' => $idBR, 'page_number'=>4]);
+		   } 
+		   $idEstimateWorkPackages = $BREstimateList->idEstimateWorkPackages;
+		}
+         
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id_node,$idEstimateWorkPackages);
+        
+        $VwListOfWorkEffort = VwListOfWorkEffort::find()->where(['idEstimateWorkPackages'=>$idEstimateWorkPackages, 'idWbs'=>$id_node])->orderBy('idWorksOfEstimate')->all();
+   
+		return $this->render('index', [
 				 'idBR'=>$idBR,
                  'id_node'=>$id_node,
-                 'idEstimateWorkPackages'=>$BREstimateList->idEstimateWorkPackages,  //значение по умолчанию для фильтра
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                 'idEstimateWorkPackages'=>$idEstimateWorkPackages,  //значение по умолчанию для фильтра
+                 'VwListOfWorkEffort'=>$VwListOfWorkEffort,
+				 'searchModel' => $searchModel,
+				'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -94,18 +109,41 @@ class Works_of_estimateController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($idEstimateWorkPackages,$idWbs,$idBR)
     {
-        $model = new WorksOfEstimate();
+       $modelWOS = new WorksOfEstimate();
+	   $modelWOS->idEstimateWorkPackages = $idEstimateWorkPackages;
+	   $modelWOS->idWbs = $idWbs;
+	   $modelWOS->WorkName = 'Название работы';
+	   $modelWOS->WorkDescription = 'Описание работы';
+	   $modelWOS->save();
+	   if($modelWOS->hasErrors()){
+				Yii::$app->session->addFlash('error',"Ошибка сохранения работ ");
+				return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]); 
+	   }else{
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->idWorksOfEstimate]);
-        }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+	   }
+	   
     }
+    ///**
+     //* Creates a new WorksOfEstimate model.
+     //* If creation is successful, the browser will be redirected to the 'view' page.
+     //* @return mixed
+     //* создает новую работу в оценке и передает на форму редактирования
+     //*/
+    //public function actionCreate_work()
+    //{
+        //$model = new WorksOfEstimate();
+
+        //if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            //return $this->redirect(['view', 'id' => $model->idWorksOfEstimate]);
+        //}
+
+        //return $this->render('create', [
+            //'model' => $model,
+        //]);
+    //}
 
     /**
      * Updates an existing WorksOfEstimate model.
