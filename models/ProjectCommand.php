@@ -89,4 +89,16 @@ class ProjectCommand extends \yii\db\ActiveRecord
 			
 		 return $prjCommand;	
 	 }
+	 
+	 public function getAnyTeamMember($idBR){
+		 $sql = 'SELECT * FROM ProjectCommand WHERE idBR=:idBR and parent_id != 0';
+		 $pc = ProjectCommand::findBySql($sql, [
+		':idBR' =>$idBR])->one();
+		 
+		 if(isset($pc)){
+			 return $pc->id;
+			 } else{
+				 return -1;
+				 }
+	}
 }

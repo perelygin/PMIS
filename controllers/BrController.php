@@ -174,7 +174,7 @@ class BrController extends Controller
 		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
 		
 		
-		$QueryEstimateList = EstimateWorkPackages::find()->where(['deleted' => 0]);
+		$QueryEstimateList = EstimateWorkPackages::find()->where(['deleted' => 0,'idBR' => $id]);
         $EstimateListdataProvider = new ActiveDataProvider([
             'query' => $QueryEstimateList,
    

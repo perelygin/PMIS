@@ -30,13 +30,13 @@
    <div class="container">
 	   <div class="row">
 		  <div class="col-sm-4">
-				    <?= $form->field($model, 'idProject')->dropDownList($items,$params); ?>
+				<?= $form->field($model, 'idProject')->dropDownList($items,$params); ?>
 	      </div>
 	      <div class="col-sm-4">
-					    <?= $form->field($model, 'BRRoleModelType')->dropDownList($items1,$params1); ?>
+				<?= $form->field($model, 'BRRoleModelType')->dropDownList($items1,$params1); ?>
 		  </div>
 		  <div class="col-sm-4">
-					    <?= $form->field($model, 'BRLifeCycleType')->dropDownList($items2,$params2); ?>
+				<?= $form->field($model, 'BRLifeCycleType')->dropDownList($items2,$params2); ?>
 		  </div>
 		 </div>
 	   <div class="row">

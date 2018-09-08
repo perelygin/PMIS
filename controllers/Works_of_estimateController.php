@@ -7,6 +7,8 @@ use app\models\WorksOfEstimate;
 use app\models\SearchWorksOfEstimate;
 use app\models\EstimateWorkPackages;
 use app\models\VwListOfWorkEffort;
+use app\models\WorkEffort;
+use app\models\ProjectCommand;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -61,21 +63,51 @@ class Works_of_estimateController extends Controller
 	} 
 	
 	
-    public function actionIndex($id_node,$idBR)
+    public function actionIndex($id_node,$idBR,$idEWP=-1)  //$idEWP - идентификатор пакета оценок
     {
         
-        		
-        $searchModel = new SearchWorksOfEstimate();
-        if ($searchModel->load(Yii::$app->request->post())){    //если idEstimateWorkPackages(пакет оценок) был выбран на форме,  то используем его
-		   $idEstimateWorkPackages = $searchModel->idEstimateWorkPackages;
-		} else{ //иначе ищем любой по этой BR
-		   $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->one();
-		   if(is_null($BREstimateList)){
-			 Yii::$app->session->addFlash('error',"Для данной BR нет ни одной оценки трудозатрат. Создайте ее пожалуйста");
-			 return $this->redirect(['update','id' => $idBR, 'page_number'=>4]);
-		   } 
-		   $idEstimateWorkPackages = $BREstimateList->idEstimateWorkPackages;
+       	$a = Yii::$app->request->post();
+       	$searchModel = new SearchWorksOfEstimate();
+       	$idEstimateWorkPackages = $idEWP;
+       	
+       	if(isset($a['workEffort']) or isset($a['team_member'])){  //Если на форме нажали кнопку "сохранить" под оценками трудозатрат,  сохраняем трудозатраты в базе и переотображаем форму с тем же пакетом оценок
+			//$idEstimateWorkPackages = $idEWP;
+
+			foreach($a['workEffort'] as $key => $value){
+				$WorkEffort = WorkEffort::findOne($key);
+				$WorkEffort->workEffort = $value;
+				if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния трудозатарт WorkEffort' );
+			}
+			foreach($a['team_member'] as $key => $value){
+				$WorkEffort = WorkEffort::findOne($key);
+				$WorkEffort->idTeamMember = $value;
+				if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния членов команды WorkEffort' );
+			}
+			//Yii::$app->session->addFlash('error',$idEstimateWorkPackages);
+			
+		} 
+		if (isset($a['SearchWorksOfEstimate'])){ 
+			if ($searchModel->load(Yii::$app->request->post())){    //если idEstimateWorkPackages(пакет оценок) был выбран на форме,  то используем его
+				 
+			   $idEstimateWorkPackages = $searchModel->idEstimateWorkPackages;
+	 
+			   
+			}
+		}	
+		 
+		if($idEstimateWorkPackages == -1){ //если вс еще -1, то ищем любой по этой BR
+			   $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->one();
+			   if(is_null($BREstimateList)){
+				 Yii::$app->session->addFlash('error',"Для данной BR нет ни одной оценки трудозатрат. Создайте ее пожалуйста");
+				 return $this->redirect(['br/update','id' => $idBR, 'page_number'=>4]);
+			   } 
+			   $idEstimateWorkPackages = $BREstimateList->idEstimateWorkPackages;
 		}
+		
+
+		
+        
+
          
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id_node,$idEstimateWorkPackages);
         
@@ -121,11 +153,36 @@ class Works_of_estimateController extends Controller
 				Yii::$app->session->addFlash('error',"Ошибка сохранения работ ");
 				return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]); 
 	   }else{
-
+				return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
 
 	   }
 	   
     }
+    
+    public function actionCreate_workeffort($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
+    {
+       $modelWE = new WorkEffort();
+       $modelWE->idWorksOfEstimate = $idWorksOfEstimate;
+       $modelWE->workEffort = 0;
+       $idAnyTeamMember = ProjectCommand::getAnyTeamMember($idBR);
+       if($idAnyTeamMember != -1){
+		   $modelWE->idTeamMember = $idAnyTeamMember;
+	   } else {
+		   Yii::$app->session->addFlash('error',"для данной BR нет ни одного члена команды. Регистрация трудозатрат невозможна ");
+		   return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]);
+	   }
+       
+	   $modelWE->save();
+	   if($modelWE->hasErrors()){
+				Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
+				return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]); 
+	   }else{
+				return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
+
+	   }
+	   
+    }    
+    
     ///**
      //* Creates a new WorksOfEstimate model.
      //* If creation is successful, the browser will be redirected to the 'view' page.
