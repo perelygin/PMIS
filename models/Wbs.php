@@ -88,4 +88,13 @@ class Wbs extends \yii\db\ActiveRecord
 		
 		//return $Children;
 	//}
+	
+	  /*
+     * возвращает название BR, по которой делалась оценка
+     */
+    public function getWbsInfo()
+    {
+		$WBSInfo = array('name' => $this->name);
+        return $WBSInfo;
+    }
 }

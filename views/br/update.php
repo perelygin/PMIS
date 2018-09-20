@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model app\models\VwListOfBR */
 
-$this->title = 'Корректировка Br: ' . $model->BRNumber;
+$this->title = 'Корректировка Br-' . $model->BRNumber. ' '.$model->BRName ;
 $this->params['breadcrumbs'][] = ['label' => 'Список BR', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => 'BR-'.$model->BRNumber, 'url' => ['view', 'id' => $model->idBR]];
 $this->params['breadcrumbs'][] = 'Редактирование';

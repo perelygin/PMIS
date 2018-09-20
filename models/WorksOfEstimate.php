@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\models\WorkEffort;
 
 /**
  * Перечень работ, которые входят в оценку на дату
@@ -51,5 +52,20 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
         ];
     }
    
+    public function beforeDelete(){
+        if (parent::beforeDelete()){
+			//смотрим наличие  записей в подчиненной таблице с трудозатратами	
+            $WorkEffort = WorkEffort::find()->where(['idWorksOfEstimate' => $this->idWorksOfEstimate])->all();
+            if(count($WorkEffort)>0){
+				//Yii::$app->session->addFlash('error','ошибка удаления,  есть подчиненные записи' );
+				//return false;
+	            foreach ($WorkEffort as $model) {
+					$model->delete();
+				}	
+			}
+            return true;
+        }
+        return false;
+    }
    
 }

@@ -54,7 +54,7 @@ use app\models\VwProjectCommand;
 
 	   <div class="container">
 		   <div class="row">
-				<div class="col-sm4">
+				<div class="col-sm">
 				   <?= Breadcrumbs::widget([
 				    'homeLink' => ['label' => 'WBS'],
 				    'links' => isset($this->params['breadcrumbs_wbs']) ? $this->params['breadcrumbs_wbs'] : [],
@@ -63,43 +63,28 @@ use app\models\VwProjectCommand;
 		   </div> 
 		  	   	
 		   <div class="row">
-				<div class="col-sm4">
+				<div class="col-sm">
 					<?php  echo $this->render('_search', ['model' => $searchModel, 'idBR'=>$idBR, 'id_node'=>$id_node, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]); ?>				   
 			    </div>
 		   </div> 
 		    <div class="row">
-				<div class="col-sm4">
+				<div class="col-sm-4">
+				 	
 				   <?php
 				     $url1 = Url::to(['site/help']);
 					 echo  Html::a('<span class="glyphicon glyphicon-question-sign"></span>', $url1.'#WorkBreakdownStructure',['title' => 'Помощь по разделу',]);
 					 echo "   ";
 					 $url2 = Url::to(['works_of_estimate/create', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
-					 echo  Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить работу',]);
+					 echo  Html::a('<span class="glyphicon glyphicon-plus-sign"></span>', $url2,['title' => 'Добавить работу',]);
 					 echo "   ";
 					  $url2 = Url::to(['works_of_estimate/works_template', 'idBR'=>$idBR]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-save-file"></span>', $url2,['title' => 'Добавить работы по шаблону',]);
 				   ?>
+
 			    </div>
 		   </div> 	
 	   </div> 	
-    <?php
-    //GridView::widget([
-        //'dataProvider' => $dataProvider,
-        //'filterModel' => $searchModel,
-        //'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            ////'idWorksOfEstimate',
-            ////'idEstimateWorkPackages',
-            //'WorkName',
-            ////'idWbs',
-            ////'WorkDescription',
-            ////'deleted',
-
-            //['class' => 'yii\grid\ActionColumn'],
-        //],
-    //]); 
-    ?>
+  
     <div class="works-of-estimate-search">
 	 <?php $form1 = ActiveForm::begin([
         'action' => ['index','idBR'=>$idBR, 'id_node'=>$id_node,'idEWP'=>$idEstimateWorkPackages],
@@ -117,35 +102,48 @@ use app\models\VwProjectCommand;
         $id = $VwListOfWorkEffort[0]['idWorksOfEstimate'];
         $i =0;
         $url2 = Url::to(['works_of_estimate/create_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id ]);  //добавление трудозатрат в работу
-        $url3 = Url::to(['works_of_estimate/edit_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);
-        echo('<tr><td  ><b>'.$VwListOfWorkEffort[$i]['WorkName'].'</td><td></td><td>'
-			.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
-			.Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
-			.'</td></tr>');
+        $url3 = Url::to(['works_of_estimate/update', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //изменить работу
+        $url5 = Url::to(['works_of_estimate/deletework', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //Удалить работу
+        echo('<tr><td colspan="3" ><b>'
+		        //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
+		        .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',])
+				.Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
+		        .$VwListOfWorkEffort[$i]['WorkName'].'</td></tr>');
         
 		foreach($VwListOfWorkEffort as $vlwe){
-			
-		    if($vlwe['idWorksOfEstimate'] == $id){
+			$url4 = Url::to(['works_of_estimate/delete_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id, 'idLaborExpenditures'=>$vlwe['idLaborExpenditures']]);   //удаление трудозарат из работы			
+			if($vlwe['idWorksOfEstimate'] == $id){
 				if(isset($vlwe['workEffort'])){
-					echo('<tr><td></td><td>'
-						.$form1->field($vlwe, 'idTeamMember',['inputOptions' => ['name'=>'team_member['.$vlwe['idLaborExpenditures'].']']])->dropDownList($items1,$params1)
-						.'</td><td>'.$form1->field($vlwe, 'workEffort',
-						['inputOptions' => ['name'=>'workEffort['.$vlwe['idLaborExpenditures'].']']]).
-							    '</td></tr>');	
+					echo('<tr><td>'
+						//.Html::a('<span class="glyphicon glyphicon-minus"></span>', $url4,['title' => 'Удалить трудозатраты по работе',])
+						//.'</td><td>'
+						.$vlwe['team_member']
+						//.$form1->field($vlwe, 'idTeamMember',['inputOptions' => ['name'=>'team_member['.$vlwe['idLaborExpenditures'].']']])->dropDownList($items1,$params1)
+						.'</td><td>'
+						.$vlwe['workEffort'].' ч.д.'
+						//.$form1->field($vlwe, 'workEffort',['inputOptions' => ['name'=>'workEffort['.$vlwe['idLaborExpenditures'].']']])
+						.'</td></tr>');	
 			    }
 			}	else{
 				 $id = $vlwe['idWorksOfEstimate'];	
 				 $url2 = Url::to(['works_of_estimate/create_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id ]);  //добавление трудозатрат в работу
-				 $url3 = Url::to(['works_of_estimate/edit_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);
-				 echo('<tr><td  ><b>'.$vlwe['WorkName'].'</td><td></td><td>'
-				 .Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
+				 $url3 = Url::to(['works_of_estimate/update', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);   //изменить работу
+				 $url5 = Url::to(['works_of_estimate/deletework', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //Удалить работу
+				 echo('<tr><td colspan="3"><b>'
+				 //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
+				 .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',])
 				 .Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
-				 .'</td><td></td></tr>');
+				 .$vlwe['WorkName'].'</td></tr>');
 				 if(isset($vlwe['workEffort'])){
-					 echo('<tr><td></td><td>'
-					 .$form1->field($vlwe, 'idTeamMember',['inputOptions' => ['name'=>'team_member['.$vlwe['idLaborExpenditures'].']']])->dropDownList($items1,$params1)
-					 .'</td><td>'.$form1->field($vlwe, 'workEffort',
-					 ['inputOptions' => ['name'=>'workEffort['.$vlwe['idLaborExpenditures'].']']]).'</td></tr>');		
+					 echo('<tr><td>'
+					 //.Html::a('<span class="glyphicon glyphicon-minus"></span>', $url4,['title' => 'Удалить трудозатраты по работе',])
+					 //.'</td><td>'
+					 .$vlwe['team_member']
+					 //.$form1->field($vlwe, 'idTeamMember',['inputOptions' => ['name'=>'team_member['.$vlwe['idLaborExpenditures'].']']])->dropDownList($items1,$params1)
+					 .'</td><td>'
+					 .$vlwe['workEffort'].' ч.д.'
+					 //.$form1->field($vlwe, 'workEffort', ['inputOptions' => ['name'=>'workEffort['.$vlwe['idLaborExpenditures'].']']])
+					 .'</td></tr>');		
 				 }	 
 			}
 			
@@ -158,7 +156,7 @@ use app\models\VwProjectCommand;
   
      <div class="form-group">
        <?php         
-         echo Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) 
+         //echo Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) 
         ?>
        
     </div>

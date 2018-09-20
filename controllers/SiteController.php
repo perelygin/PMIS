@@ -68,6 +68,11 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
+   public function actionTestsoup()
+    {
+        return $this->render('testsoup');
+    }
+
     /**
      * Login action.
      *

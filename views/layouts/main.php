@@ -45,7 +45,7 @@ AppAsset::register($this);
 				['label' => 'Справка', 'url'=>['/site/help']],
             ]],
             ['label' => 'Проектная работа', 'items' => [
-				['label' => 'Проекты', 'url'=>['/pmis/test1']],
+				['label' => 'Проекты', 'url'=>['/site/testsoup']],
 				['label' => 'Фазы проекта', 'url'=>['/br/index']],
             ]],
              

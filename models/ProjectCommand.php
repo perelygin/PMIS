@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\models\WorkEffort;
 
 /**
  * This is the model class for table "ProjectCommand".
@@ -101,4 +102,16 @@ class ProjectCommand extends \yii\db\ActiveRecord
 				 return -1;
 				 }
 	}
+	 public function beforeDelete(){
+        if (parent::beforeDelete()){
+			//смотрим наличие  записей в подчиненной таблице с трудозатратами	
+            $WorkEffort = WorkEffort::find()->where(['idTeamMember' => $this->id])->all();
+            if(count($WorkEffort)>0){
+				Yii::$app->session->addFlash('error','ошибка удаления,  есть подчиненные записи в оценке трудозатрат' );
+				return false;
+			}
+            return true;
+        }
+        return false;
+    }
 }
