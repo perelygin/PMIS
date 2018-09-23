@@ -60,7 +60,7 @@ class Wbs extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 255],
             [['mantis'], 'string', 'max' => 150],
             [['description'], 'string', 'max' => 1000],
-            [['lft', 'rgt', 'depth','tree'],'safe']
+            [['lft', 'rgt', 'depth','tree','idResultType'],'safe']
         ];
     }
 
@@ -79,6 +79,7 @@ class Wbs extends \yii\db\ActiveRecord
             'mantis' => 'Mantis',
             'description' => 'Описание',
             'idBr' => 'Id Br',
+            'idResultType'=>'Тип результата'
         ];
     }
     //public function getChildren()

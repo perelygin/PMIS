@@ -19,7 +19,7 @@ use app\models\Wbs;
 use app\models\WbsSearch;
 use app\models\EstimateWorkPackages;
 use app\models\WorksOfEstimate;
-
+use SoapClient;
 
 
 /**
@@ -336,12 +336,36 @@ class BrController extends Controller
     public function actionUpdate_wbs_node($id_node,$idBR)
     {
 		//if ($model = Wbs::findOne(['id'=>$id_node]) !== null) {
+		    $a = Yii::$app->request->post();
+		
 			$model = Wbs::findOne(['id'=>$id_node]);
 			if(!is_null($model)){
 				if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-		        
 		            $model->save();
 		            $parent = $model->parents(1)->one();
+		            
+		            if(isset($a['btn'])) {   // анализируем нажатые кнопки
+						$btn_info = explode("_", $a['btn']);
+						if($btn_info[0] == 'crtm') {   // создание инцидента mantis
+							//$WSDL_POINT = 'http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl';
+							//$client = new nusoap_client($WSDL_POINT, false);
+							
+							//Yii::$app->session->addFlash('success',"Создание инцидента");
+							  $client = new SoapClient('http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl');
+							    $username = 'perelygin';
+								$password = '141186ptv';
+								$issue_id = 1;
+								$params = array(
+									'username' => $username,
+									'password' => $password,
+									'issue_id' => $issue_id
+								);
+								
+  								 $result =  $client->mc_issue_get($username, $password, $issue_id);
+								var_dump($result); die;
+							return $this->render('wbs_update', [   'model' => $model,   ]);
+						}	
+		            }
 		            return  $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
 		        } else{
 				 if($model->hasErrors()){

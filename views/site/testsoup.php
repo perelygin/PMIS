@@ -18,9 +18,14 @@ $this->params['breadcrumbs'][] = $this->title;
   
   //$client = new SoapClient('http://ws.gismeteo.ru/Weather/Weather.asmx?WSDL');
   //$client = new SoapClient('http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl');
-  $client = new SoapClient('http://172.16.2.135/mantis/api/soap/mantisconnect.php?wsdl');
+  $client = new SoapClient('http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl');
   
-  $result = $client->mc_version();
+ // $result = $client->mc_version();
+ $result = $client->mc_issue_get([
+   'username'=>'perelygin',
+   'password'=>'141186ptv',
+   'issue_id'=>'0000001',
+	]);
  //$result = $client->GetSunInfo([
     //'serial' => '...',
     //'townID' => 57,
