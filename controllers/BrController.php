@@ -350,19 +350,45 @@ class BrController extends Controller
 							//$WSDL_POINT = 'http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl';
 							//$client = new nusoap_client($WSDL_POINT, false);
 							
-							//Yii::$app->session->addFlash('success',"Создание инцидента");
-							  $client = new SoapClient('http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl');
-							    $username = 'perelygin';
-								$password = '141186ptv';
-								$issue_id = 1;
-								$params = array(
-									'username' => $username,
-									'password' => $password,
-									'issue_id' => $issue_id
+							
+							
+							  $username = 'perelygin';
+							  $password = '141186ptv';
+							  $issue_id = 1;
+							  $client = new SoapClient('http://172.16.2.135/mantis/api/soap/mantisconnect.php?wsdl', array('trace'=>1,'exceptions' => 0));
+							  $result =  $client->mc_issue_get($username, $password, $issue_id);
+							  if (is_soap_fault($result)){
+								  Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
+								//trigger_error("Ошибка SOAP: (faultcode: {$result->faultcode}, faultstring: {$result->faultstring})", E_USER_ERROR);
+							   }
+							   //echo($result->project->id.'  '.$result->project->name );
+							   //echo('<br>');
+							   
+							   //echo "<pre>".print_r($result)."</pre>"; die;
+							   
+							   $issue = array(
+									'project' => array( 'name' => 'ВТБ' ),
+									'category' => 'General',
+									'summary' => 'Sample Summary ' . time(),
+									'description' => 'Sample Description ' . time(),
 								);
+								 $result =  $client->mc_issue_add($username, $password, $issue);
+								 if (is_soap_fault($result)){
+								  Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
 								
-  								 $result =  $client->mc_issue_get($username, $password, $issue_id);
-								var_dump($result); die;
+							   }
+							   print_r($result); die;
+							//try{
+								 //$client = new SoapClient('http://172.16.2.135/mantis/api/soap/mantisconnect.php?wsdl');
+								 ////if (is_soap_fault($result)){
+										////echo 'gиздец';  die;
+									 ////}
+								////var_dump($result); die;
+								//}
+								//catch(SoapFault $fault){
+									//trigger_error("Ошибка SOAP: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
+								//}
+
 							return $this->render('wbs_update', [   'model' => $model,   ]);
 						}	
 		            }
