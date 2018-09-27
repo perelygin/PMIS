@@ -39,9 +39,7 @@ class VwListOfBR extends \yii\db\ActiveRecord
             [['idBR', 'BRDeleted', 'BRnumber'], 'integer'],
             [['BRName'], 'string', 'max' => 150],
             [['ProjectName'], 'string', 'max' => 100],
-            [['StageName', 'StagesStatusName', 'Family'], 'string', 'max' => 45],
-            [['CustomerName'], 'string', 'max' => 120],
-        ];
+         ];
     }
 
     /**
@@ -55,10 +53,6 @@ class VwListOfBR extends \yii\db\ActiveRecord
             'BRnumber' => 'Номер BR',
             'BRName' => 'Наименование BR',
             'ProjectName' => 'Проект',
-            'StageName' => 'Этап',
-            'StagesStatusName' => 'Текущее состояние',
-            'Family' => 'Ответственный',
-            'CustomerName' => 'Ответственная сторона',
         ];
     }
 }

@@ -10,6 +10,8 @@ use app\models\BusinessRequests;
 use app\models\RoleModel;
 use app\models\ProjectCommand;
 use app\models\LifeCycleStages;
+use app\models\vw_ResultEvents;
+use app\models\ResultEvents;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -337,7 +339,9 @@ class BrController extends Controller
     {
 		//if ($model = Wbs::findOne(['id'=>$id_node]) !== null) {
 		    $a = Yii::$app->request->post();
-		
+		    //$request = Yii::$app->getRequest();
+		    Yii::$app->getUser()->setReturnUrl( Yii::$app->getRequest()->getUrl()); ///Запомнили текущую страницу
+		   
 			$model = Wbs::findOne(['id'=>$id_node]);
 			if(!is_null($model)){
 				if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -389,10 +393,39 @@ class BrController extends Controller
 									//trigger_error("Ошибка SOAP: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
 								//}
 
-							return $this->render('wbs_update', [   'model' => $model,   ]);
+							//return $this->render('wbs_update', [   'model' => $model,   ]);
+						}
+						if($btn_info[0] == 'addevent') {   //Добавить событие для результата
+						
+							return  $this->redirect(['create_result_event','idWbs' => $id_node]);
+						}		
+						if($btn_info[0] == 'del') {   //Удалить событие для результата
+							$modelRE = ResultEvents::findOne($btn_info[1]); //...->delete();    //$idLaborExpenditures  =$btn_info[1] (int)
+							if(!is_null($modelRE)){
+								
+								$modelRE->deleted = 1;
+								$modelRE->save();
+								if($modelRE->hasErrors()){
+									Yii::$app->session->addFlash('error',"Ошибка удаления события " );
+								}
+							}
+							
+						}
+						if($btn_info[0] == 'edit') {   //изменить событие для результата
+							
+							return  $this->redirect(['update_result_event','idResultEvents' => $btn_info[1]]);
+							
+						}
+						if($btn_info[0] == 'save') {   //Добавить событие для результата
+							return  $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
 						}	
 		            }
-		            return  $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$parent->id]);
+		            // получаем список  событий для результата
+		           
+		            
+		            
+		            
+		            //
 		        } else{
 				 if($model->hasErrors()){
 					$ErrorsArray = $model->getErrors(); 	 
@@ -406,9 +439,10 @@ class BrController extends Controller
 				}
 		    
 			}
-	
+			$events = vw_ResultEvents::find()->where(['deleted' => 0, 'idwbs'=>$id_node])->all();
 		    return $this->render('wbs_update', [
 		        'model' => $model,
+		        'events'=>$events,
 		    ]);
    }
    /*
@@ -474,6 +508,34 @@ class BrController extends Controller
 		        'model' => $EstimateWorkPackages,
 		    ]);
 	   
+	  
+   }
+   
+   public function actionUpdate_result_event($idResultEvents){
+	   $model = ResultEvents::findOne($idResultEvents);
+	   
+	   if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+		   $model->save();
+		   return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+		           
+		}            
+	   return $this->render('Edit_result_event', [
+		        'model' => $model,
+		    ]);
+   }
+   
+   /*
+    * регистрация события по результату
+    *///
+   
+   public function actionCreate_result_event($idWbs){
+	   $model = new ResultEvents();
+	   $model->idwbs = $idWbs;
+	   $model->ResultEventsName = 'Новое событие';
+	   $model->ResultEventsDate = date("Y-m-d");
+	   $model->save();
+	   
+	   return  $this->redirect(['update_result_event','idResultEvents' => $model->idResultEvents]);	            
 	  
    }
    /*

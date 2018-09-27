@@ -101,6 +101,7 @@ $params1 = [
 		   
 		   <table border = "1" cellpadding="4" cellspacing="2"> 
 			   <tr><th></th><th>Исполнтель</th><th></th></tr>
+			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=3>&nbsp;</td></tr>
 			   <?php
 			   	
 						

@@ -19,7 +19,7 @@ class VwListOfBRSearch extends VwListOfBR
     {
         return [
             [['idBR', 'BRDeleted', 'BRnumber'], 'integer'],
-            [['BRName', 'ProjectName', 'StageName', 'StagesStatusName', 'Family', 'CustomerName'], 'safe'],
+            [['BRName', 'ProjectName'], 'safe'],
         ];
     }
 
@@ -70,10 +70,7 @@ class VwListOfBRSearch extends VwListOfBR
 
         $query->andFilterWhere(['like', 'BRName', $this->BRName])
             ->andFilterWhere(['like', 'BRnumber', $this->BRnumber])
-            ->andFilterWhere(['like', 'ProjectName', $this->ProjectName])
-            ->andFilterWhere(['like', 'StageName', $this->StageName])
-            ->andFilterWhere(['like', 'Family', $this->Family])
-            ->andFilterWhere(['like', 'CustomerName', $this->CustomerName]);
+            ->andFilterWhere(['like', 'ProjectName', $this->ProjectName]);
 
         return $dataProvider;
     }

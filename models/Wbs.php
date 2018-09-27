@@ -95,7 +95,8 @@ class Wbs extends \yii\db\ActiveRecord
      */
     public function getWbsInfo()
     {
-		$WBSInfo = array('name' => $this->name);
+		$WBSInfo = array('name' => $this->name,
+							'idBr'=>$this->idBr	);
         return $WBSInfo;
     }
 }
