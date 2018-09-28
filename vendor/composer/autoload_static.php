@@ -38,6 +38,7 @@ class ComposerStaticInit99c233d4786ddb1031b7c31511b3c143
         ),
         'k' => 
         array (
+            'kartik\\datetime\\' => 16,
             'kartik\\date\\' => 12,
             'kartik\\base\\' => 12,
         ),
@@ -129,6 +130,10 @@ class ComposerStaticInit99c233d4786ddb1031b7c31511b3c143
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+        ),
+        'kartik\\datetime\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/kartik-v/yii2-widget-datetimepicker/src',
         ),
         'kartik\\date\\' => 
         array (

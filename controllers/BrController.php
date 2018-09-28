@@ -529,13 +529,20 @@ class BrController extends Controller
     *///
    
    public function actionCreate_result_event($idWbs){
+	   $WBSInfo = Wbs::findOne(['id'=>$idWbs])->getWbsInfo();
+	   $idAnyTeamMember = ProjectCommand::getAnyTeamMember($WBSInfo['idBr']);
 	   $model = new ResultEvents();
 	   $model->idwbs = $idWbs;
 	   $model->ResultEventsName = 'Новое событие';
-	   $model->ResultEventsDate = date("Y-m-d");
-	   $model->save();
-	   
-	   return  $this->redirect(['update_result_event','idResultEvents' => $model->idResultEvents]);	            
+	   $model->ResultEventsDate = date("Y-m-d H:i:s");
+	   $model->ResultEventResponsible = $idAnyTeamMember;
+	   if ($model->validate()){
+		   $model->save();
+		   return  $this->redirect(['update_result_event','idResultEvents' => $model->idResultEvents]);	            
+		} else {
+			Yii::$app->session->addFlash('error',"Ошибка создания. ");
+			return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+		}   
 	  
    }
    /*

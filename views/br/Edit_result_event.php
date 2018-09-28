@@ -6,7 +6,8 @@ use yii\widgets\ActiveForm;
 use app\models\Wbs;
 use app\models\VwProjectCommand;
 use vova07\imperavi\Widget;
-use kartik\date\DatePicker;
+//use kartik\date\DatePicker;
+use kartik\datetime\DateTimePicker;
 
 
 /* @var $this yii\web\View */
@@ -21,6 +22,8 @@ $items1 = ArrayHelper::map($ProjectCommand,'id','team_member');
 $params1 = [
 
 ];
+//phpinfo();
+//die;
 ?>
 
     <h3>Событие по результату "<?= $WBSInfo['name'].'"'  ?></h3>
@@ -55,10 +58,11 @@ $params1 = [
 		
 	  <div class="row">
         <div class="col-sm-4">
-			<?= $form->field($model, 'ResultEventsDate')->widget(DatePicker::className(),[
+			<?= $form->field($model, 'ResultEventsDate')->widget(DateTimePicker::className(),[
 			    'pluginOptions' => [
 			        'autoclose'=>true,
-			        'format' => 'yyyy-mm-dd'
+			        'format' => 'yyyy-mm-dd hh:ii:ss',
+			         'todayHighlight' => true
 			    ]
 			]) ?>
 		</div>
