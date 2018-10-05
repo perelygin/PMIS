@@ -514,37 +514,53 @@ class BrController extends Controller
     * вывод  оценки трудозатрат для BR в таблицу
     */
    public function actionPrint_estimate_work_packages($idEWP,$idBR){
-	 
-	$sql = "SELECT 
-				wbs.id,
-				wbs.tree, 
-				wbs.lft,
-				wbs.rgt,
-				wbs.depth,
-				wbs.name,
-				wbs.idBr,
-				wbs.idOrgResponsible,
-				woe.idEstimateWorkPackages,
-				woe.idWorksOfEstimate,
-				woe.WorkName,
-				wef.workEffort,
-				wef.idLaborExpenditures,
-				rst.ResultStatusName,
-				concat(rlm.RoleName,' ',ppl.Family,' ',ppl.Name) as fio
-				FROM Yii2pmis.wbs  
-				LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
-				LEFT OUTER JOIN WorkEffort wef ON wef.idWorksOfEstimate=woe.idWorksOfEstimate
-				LEFT OUTER JOIN ProjectCommand prc ON prc.id = wef.idTeamMember
-				LEFT OUTER JOIN People ppl ON ppl.idHuman = prc.idHuman
-				LEFT OUTER JOIN RoleModel rlm ON rlm.idRole = prc.idRole
-				LEFT OUTER JOIN ResultStatus rst ON rst.idResultStatus = wbs.idResultStatus
-	  		    where wbs.idBr = ".$idBR." and woe.idEstimateWorkPackages =".$idEWP."
-				order by lft,depth ";
+	$sql1 = "SELECT 
+		sum(wef.workEffort) as summ,
+		rlm.RoleName,
+		rlm.idRole
+		FROM Yii2pmis.wbs  
+		LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
+		LEFT OUTER JOIN WorkEffort wef ON wef.idWorksOfEstimate=woe.idWorksOfEstimate
+		LEFT OUTER JOIN ProjectCommand prc ON prc.id = wef.idTeamMember
+		LEFT OUTER JOIN People ppl ON ppl.idHuman = prc.idHuman
+		LEFT OUTER JOIN RoleModel rlm ON rlm.idRole = prc.idRole
+		LEFT OUTER JOIN ResultStatus rst ON rst.idResultStatus = wbs.idResultStatus
+		where wbs.idBr = ".$idBR." and woe.idEstimateWorkPackages =".$idEWP."
+		group by rlm.idRole
+		order by rlm.idRole";
+		
+			$sql = "SELECT 
+						wbs.id,
+						wbs.tree, 
+						wbs.lft,
+						wbs.rgt,
+						wbs.depth,
+						wbs.name,
+						wbs.idBr,
+						wbs.idOrgResponsible,
+						woe.idEstimateWorkPackages,
+						woe.idWorksOfEstimate,
+						woe.WorkName,
+						wef.workEffort,
+						wef.idLaborExpenditures,
+						rst.ResultStatusName,
+						concat(rlm.RoleName,' ',ppl.Family,' ',ppl.Name) as fio
+						FROM Yii2pmis.wbs  
+						LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
+						LEFT OUTER JOIN WorkEffort wef ON wef.idWorksOfEstimate=woe.idWorksOfEstimate
+						LEFT OUTER JOIN ProjectCommand prc ON prc.id = wef.idTeamMember
+						LEFT OUTER JOIN People ppl ON ppl.idHuman = prc.idHuman
+						LEFT OUTER JOIN RoleModel rlm ON rlm.idRole = prc.idRole
+						LEFT OUTER JOIN ResultStatus rst ON rst.idResultStatus = wbs.idResultStatus
+			  		    where wbs.idBr = ".$idBR." and woe.idEstimateWorkPackages =".$idEWP."
+						order by id,idWorksOfEstimate ";
 	  $Print_wbs = Yii::$app->db->createCommand($sql)->queryAll(); 
+	  $Print_wbs_sum = Yii::$app->db->createCommand($sql1)->queryAll(); 
 	  $BR = BusinessRequests::findOne($idBR);
 	  $EWP= EstimateWorkPackages::findOne($idEWP); //оценка
 	  return $this->render('PrintEstimateWorkPackages', [
 		        'Print_wbs' => $Print_wbs,
+		        'Print_wbs_sum'=>$Print_wbs_sum,
 		        'BR'=>$BR,
 		        'EWP'=>$EWP,
 		    ]);

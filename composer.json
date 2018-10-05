@@ -21,7 +21,8 @@
         "creocoder/yii2-nested-sets": "^0.9.0",
         "vova07/yii2-imperavi-widget": "*",
         "kartik-v/yii2-widget-datepicker": "@dev",
-        "kartik-v/yii2-widget-datetimepicker": "*"
+        "kartik-v/yii2-widget-datetimepicker": "*",
+        "phpoffice/phpspreadsheet": "^1.4"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

@@ -50,7 +50,17 @@ use kartik\date\DatePicker;
 		  
 		 
 	  </table>
-  
+    <br>
+    <table border = "1" cellpadding="4" cellspacing="2">
+		<?php
+		if(count($Print_wbs_sum)>0){
+			foreach($Print_wbs_sum as $pwbss){
+				echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].'</td></tr>');
+			}
+		}
+		?>	
+	</table>
+	 	
       <div class="form-group">
             <?= Html::submitButton('Обновить', ['class' => 'btn btn-primary']) ?>
       </div>
