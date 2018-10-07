@@ -12,6 +12,8 @@ use app\models\ContactForm;
 use app\models\SignupForm;
 use app\models\User;
 use app\models\PersonalCabinetForm;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
 class SiteController extends Controller
@@ -70,7 +72,15 @@ class SiteController extends Controller
 
    public function actionTestsoup()
     {
-        return $this->render('testsoup');
+		//phpinfo(); die;
+		//var_dump(extension_loaded('zip')); die;
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+		$sheet->setCellValue('A1', 'Hello World !');
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('hwd1.xlsx');
+			
+        return Yii::$app->response->sendFile('/var/www/html/pmis_app/web/hwd1.xlsx')->send();
     }
 
     /**
