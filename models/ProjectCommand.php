@@ -99,7 +99,7 @@ class ProjectCommand extends \yii\db\ActiveRecord
 		 if(isset($pc)){
 			 return $pc->id;
 			 } else{
-				 return -1;
+				 return null;
 				 }
 	}
 	 public function beforeDelete(){

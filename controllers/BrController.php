@@ -587,6 +587,11 @@ class BrController extends Controller
    public function actionCreate_result_event($idWbs){
 	   $WBSInfo = Wbs::findOne(['id'=>$idWbs])->getWbsInfo();
 	   $idAnyTeamMember = ProjectCommand::getAnyTeamMember($WBSInfo['idBr']);
+	  // print_r($idAnyTeamMember);  die;
+	   if(is_null($idAnyTeamMember)){
+		   Yii::$app->session->addFlash('error',"Ошибка создания. Нет ни одного члена команды");
+			 return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+		   }
 	   $model = new ResultEvents();
 	   $model->idwbs = $idWbs;
 	   $model->ResultEventsName = 'Новое событие';
