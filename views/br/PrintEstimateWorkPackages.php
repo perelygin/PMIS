@@ -18,7 +18,19 @@ use kartik\date\DatePicker;
        
     ?>
       <div class="form-group">
-            <?= Html::submitButton('Обновить', ['class' => 'btn btn-primary']) ?>
+		  
+            <?php
+                  echo Html::submitButton('Обновить', ['class' => 'btn btn-primary',
+                 		'title'=>'Обновить  страницу',
+						'name'=>'btn',
+						'value' => 'reload'
+                   ]).'  '.
+				   Html::submitButton('в Excel', ['class' => 'btn btn-primary',
+						'title'=>'Выгрузить в Excel',
+						'name'=>'btn',
+						'value' => 'excel'
+				   ]) ;
+              ?>
       </div>
       <table border = "1" cellpadding="4" cellspacing="2">
 		  <?php 
@@ -53,16 +65,39 @@ use kartik\date\DatePicker;
     <br>
     <table border = "1" cellpadding="4" cellspacing="2">
 		<?php
+		$total =0;
 		if(count($Print_wbs_sum)>0){
 			foreach($Print_wbs_sum as $pwbss){
-				echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].'</td></tr>');
+			  if($pwbss['idRole'] ==6 ){  //инженер по тестированию
+				    $test = $pwbss['summ'];
+				    $test10 = $test*0.1;
+				    $test10p=$test+$test10;
+					echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].' + 10%('.$test10.')='.$test10p.'</td></tr>');  
+					$total =$total + $test10p;
+				} else {
+					echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].'</td></tr>');
+					$total =$total +$pwbss['summ'];
+				}
+				
 			}
 		}
+		echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
 		?>	
 	</table>
 	 	
       <div class="form-group">
-            <?= Html::submitButton('Обновить', ['class' => 'btn btn-primary']) ?>
+           <?php
+                  echo Html::submitButton('Обновить', ['class' => 'btn btn-primary',
+                 		'title'=>'Обновить  страницу',
+						'name'=>'btn',
+						'value' => 'reload'
+                   ]).'  '.
+				   Html::submitButton('в Excel', ['class' => 'btn btn-primary',
+						'title'=>'Выгрузить в Excel',
+						'name'=>'btn',
+						'value' => 'excel'
+				   ]) ;
+              ?>
       </div>
     <?php ActiveForm::end(); ?>
 

@@ -35,43 +35,84 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
-        'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'Контакты', 'url' => ['/site/contact']],
-            ['label' => 'Справочная информация', 'items' => [
-				['label' => 'О системе', 'url'=>['/site/about']],
-				['label' => 'Справка', 'url'=>['/site/help']],
-            ]],
-            ['label' => 'Проектная работа', 'items' => [
-				['label' => 'Проекты', 'url'=>['/site/testsoup']],
-				['label' => 'Фазы проекта', 'url'=>['/br/index']],
-            ]],
-             
-            Yii::$app->user->isGuest ? ['label' => 'Регистрация', 'url' => ['/site/signup']] : ['label' => 'Личный кабинет', 'url' => ['/site/personalcabinet']],
-            Yii::$app->user->isGuest ? (
+    
+    $items = array(
+		['label' => 'Home', 'url' => ['/site/index']],
+		['label' => 'О системе', 'url' => ['/site/about']],
+		['label' => 'Справка', 'url'=>['/site/help']],
+	    //['label' => 'Контакты', 'url' => ['/site/contact']],
+	 	);
+    
+     
+    //if (Yii::$app->user->can('ManageUserRole')) 	$items[] = ['label' => 'Управление ролями', 'url' => ['/site/rbac']];
+	if (Yii::$app->user->can('BRJournalView')) 	$items[] = ['label' => 'Проекты', 'items' => [
+					//['label' => 'Перечень проектов', 'url'=>['/pmis/test1']],
+					['label' => 'Перечень проектов', 'url'=>['/br/index']],
+	            ]];
+     
+    if (Yii::$app->user->isGuest)	$items[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];
+	
+				
+     $items[] = Yii::$app->user->isGuest ? (
                   ['label' => 'Login', 'url' => ['/site/login']]
+                ) : (
+	                '<li>'
+	                . Html::beginForm(['/site/logout'], 'post')
+	                . Html::submitButton(
+	                    'Logout (' . Yii::$app->user->identity->username . ')',
+	                    ['class' => 'btn btn-link logout']
+	                )
+	                . Html::endForm()
+	                . '</li>'
+				) ;     
+    
+    
+    
+    
+    
+    //echo Nav::widget([
+        //'options' => ['class' => 'navbar-nav navbar-right'],
+        //'items' => [
+            //['label' => 'Home', 'url' => ['/site/index']],
+            //['label' => 'Контакты', 'url' => ['/site/contact']],
+            //['label' => 'Справочная информация', 'items' => [
+				//['label' => 'О системе', 'url'=>['/site/about']],
+				//['label' => 'Справка', 'url'=>['/site/help']],
+            //]],
+            //['label' => 'Проектная работа', 'items' => [
+				//['label' => 'Проекты', 'url'=>['/site/testsoup']],
+				//['label' => 'Фазы проекта', 'url'=>['/br/index']],
+            //]],
+             
+            //Yii::$app->user->isGuest ? ['label' => 'Регистрация', 'url' => ['/site/signup']] : ['label' => 'Личный кабинет', 'url' => ['/site/personalcabinet']],
+            //Yii::$app->user->isGuest ? (
+                  //['label' => 'Login', 'url' => ['/site/login']]
                 
-            ) : (
-                '<li>'
-                . Html::beginForm(['/site/logout'], 'post')
-                . Html::submitButton(
-                    'Logout (' . Yii::$app->user->identity->username . ')',
-                    ['class' => 'btn btn-link logout']
-                )
-                . Html::endForm()
-                . '</li>'
-            )
+            //) : (
+                //'<li>'
+                //. Html::beginForm(['/site/logout'], 'post')
+                //. Html::submitButton(
+                    //'Logout (' . Yii::$app->user->identity->username . ')',
+                    //['class' => 'btn btn-link logout']
+                //)
+                //. Html::endForm()
+                //. '</li>'
+            //)
             
             
-          //  ['label' => 'Регистрация', 'url' => ['/site/signup']]
+          ////  ['label' => 'Регистрация', 'url' => ['/site/signup']]
             
-        ],
-    ]);
+        //],
+    //]);
+ 
+     echo Nav::widget([
+        'options' => ['class' => 'navbar-nav navbar-right'],
+        'items' => $items,
+     ]);
  
     
     NavBar::end();
+
     ?>
 
     <div class="container">

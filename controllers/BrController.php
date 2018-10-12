@@ -21,6 +21,8 @@ use app\models\Wbs;
 use app\models\WbsSearch;
 use app\models\EstimateWorkPackages;
 use app\models\WorksOfEstimate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SoapClient;
 
 
@@ -79,8 +81,12 @@ class BrController extends Controller
      */
     public function actionCreate()
     {
+		if (!Yii::$app->user->can('BRCreate')) {   // проверка права на создание 
+			Yii::$app->session->addFlash('error',"Нет прав на регистрацию");
+			return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+		}
+        
         $model = new BusinessRequests();
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//создаем роли для BR
 			$roleModel = new RoleModel();
@@ -215,8 +221,9 @@ class BrController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
+       $BR = $this->findModel($id);
+       $BR->BRDeleted = 1;
+       $BR->save();
         return $this->redirect(['index']);
     }
 
@@ -558,6 +565,117 @@ class BrController extends Controller
 	  $Print_wbs_sum = Yii::$app->db->createCommand($sql1)->queryAll(); 
 	  $BR = BusinessRequests::findOne($idBR);
 	  $EWP= EstimateWorkPackages::findOne($idEWP); //оценка
+	  
+	  $a = Yii::$app->request->post();
+	  if(isset($a['btn'])) {   // анализируем нажатые кнопки
+		   if($a['btn'] == 'excel'){
+			    $ex_row = 2;
+				$spreadsheet = new Spreadsheet();
+				$sheet = $spreadsheet->getActiveSheet();
+				$sheet->getColumnDimension('C')->setWidth(60);
+				
+				
+						if(count($Print_wbs)>0){
+							$id = $Print_wbs[0]['id'];
+							$idWOf=$Print_wbs[0]['idWorksOfEstimate'];
+							$sheet->setCellValue('A'.$ex_row, 'Оценка трудозатрат по BR-'.$BR->BRNumber.'  "'.$BR->BRName.'"');
+							$ex_row = $ex_row+1;
+							$sheet->setCellValue('A'.$ex_row, 'Пакет оценок: "'.$EWP->EstimateName.'" от '. $EWP->dataEstimate);
+							$ex_row = $ex_row+4;
+							
+							$sheet->setCellValue('A'.$ex_row, 'Результат:'.$Print_wbs[0]['name']);
+							$sheet->getStyle('A'.$ex_row)->getFont()->setBold(true);
+							$sheet->mergeCells('A'.$ex_row.':C'.$ex_row);
+							$sheet->getStyle('A'.$ex_row)->getAlignment()->setWrapText(true);
+							$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+							
+							$ex_row = $ex_row+1;
+							$sheet->setCellValue('B'.$ex_row, 'Работа: '.$Print_wbs[0]['WorkName']);
+							$sheet->mergeCells('B'.$ex_row.':C'.$ex_row);
+							$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+							$ex_row = $ex_row+1;
+							foreach($Print_wbs as $pwbs){
+								
+								if($pwbs['id'] == $id  and $pwbs['idWorksOfEstimate']==$idWOf){
+									$sheet->setCellValue('C'.$ex_row, $pwbs['fio'].' (ч.д.)');
+									$sheet->getStyle('C'.$ex_row)->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+									$sheet->setCellValue('D'.$ex_row, $pwbs['workEffort']);
+									$ex_row=$ex_row+1;
+									//echo '<tr><td>  &nbsp&nbsp</td><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwbs['fio'].'</td><td>'.$pwbs['workEffort'].'</td></tr>';
+								} elseif($pwbs['id'] == $id  and $pwbs['idWorksOfEstimate']<>$idWOf){
+									$idWOf=$pwbs['idWorksOfEstimate'];
+									$sheet->setCellValue('B'.$ex_row, 'Работа: '.$pwbs['WorkName']);
+									$sheet->mergeCells('B'.$ex_row.':C'.$ex_row);
+									$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+									
+									$sheet->setCellValue('C'.($ex_row+1), $pwbs['fio'].' (ч.д.)');
+									$sheet->getStyle('C'.($ex_row+1))->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row+1)->setRowHeight(-1);
+									$sheet->setCellValue('D'.($ex_row+1), $pwbs['workEffort']);
+									$ex_row=$ex_row+2;
+									//echo '<tr><td>  &nbsp&nbsp</td><td colspan =3> <i> Работа: '.$pwbs['WorkName'].'</i></td></tr>';
+									//echo '<tr><td width = "5%" >  &nbsp&nbsp</td><td></td><td>'.$pwbs['fio'].'</td><td width = "5%">'.$pwbs['workEffort'].'</td></tr>';
+								} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']==$idWOf){
+									$id = $pwbs['id']; 
+									echo ('такого быть не может'); die;
+								} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']<>$idWOf){
+									$id = $pwbs['id'];
+									$idWOf=$pwbs['idWorksOfEstimate'];
+									$sheet->setCellValue('A'.$ex_row, 'Результат:'.$pwbs['name']);
+									$sheet->getStyle('A'.$ex_row)->getFont()->setBold(true);
+									$sheet->mergeCells('A'.$ex_row.':C'.$ex_row);
+									$sheet->getStyle('A'.$ex_row)->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+									
+									$sheet->setCellValue('B'.($ex_row+1), 'Работа: '.$pwbs['WorkName']);
+									$sheet->mergeCells('B'.($ex_row+1).':C'.($ex_row+1));
+									$sheet->getStyle('B'.($ex_row+1))->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row+1)->setRowHeight(-1);
+									
+									$sheet->setCellValue('C'.($ex_row+2), $pwbs['fio'].' (ч.д.)');
+									$sheet->getStyle('C'.($ex_row+2))->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row+2)->setRowHeight(-1);
+									$sheet->setCellValue('D'.($ex_row+2), $pwbs['workEffort']);
+									$ex_row=$ex_row+3;
+									//echo '<tr><td colspan =4> <b>Результат: '.$pwbs['name'].'</b></td></tr>';
+									//echo '<tr><td>  &nbsp&nbsp</td><td colspan =3><i>Работа: '.$pwbs['WorkName'].'</i> </td></tr>';
+									//echo '<tr><td width = "5%">  &nbsp&nbsp</td><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwbs['fio'].'</td><td>'.$pwbs['workEffort'].'</td></tr>';
+								}
+							}
+						}
+						$ex_row=$ex_row+5;
+						$total =0;
+						if(count($Print_wbs_sum)>0){
+						foreach($Print_wbs_sum as $pwbss){
+						  if($pwbss['idRole'] ==6 ){  //инженер по тестированию
+							    $test = $pwbss['summ'];
+							    $test10 = $test*0.1;
+							    $test10p=$test+$test10;
+								$total =$total + $test10p;
+							} else {
+								$total =$total +$pwbss['summ'];
+							}
+							    $sheet->setCellValue('C'.$ex_row, $pwbss['RoleName']);
+								$sheet->setCellValue('D'.$ex_row, $pwbss['summ']);
+								$ex_row=$ex_row+1;
+						}
+					}
+					$sheet->setCellValue('A'.$ex_row, 'Итого');
+					$sheet->setCellValue('B'.$ex_row, $total);
+					//echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
+							
+							
+				
+				$writer = new Xlsx($spreadsheet);
+				$writer->save('hwd1.xlsx');
+					
+		        return Yii::$app->response->sendFile('/var/www/html/pmis_app/web/hwd1.xlsx')->send();  
+		   }
+	  }	   
+	  
+	  
 	  return $this->render('PrintEstimateWorkPackages', [
 		        'Print_wbs' => $Print_wbs,
 		        'Print_wbs_sum'=>$Print_wbs_sum,

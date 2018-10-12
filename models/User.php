@@ -24,6 +24,13 @@ class User extends ActiveRecord implements IdentityInterface
 		];
 		}
 
+	public function afterSave($insert, $changedAttributes){
+	    parent::afterSave($insert, $changedAttributes);
+	      //echo($this->id);  die;
+	      $userRole = Yii::$app->authManager->getRole('analyst');
+		  Yii::$app->authManager->assign($userRole, $this->id);
+	    //... тут ваш код
+	}
 
     /**
      * {@inheritdoc}
