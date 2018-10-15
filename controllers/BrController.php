@@ -52,6 +52,7 @@ class BrController extends Controller
      */
     public function actionIndex()
     {
+        Yii::$app->getUser()->setReturnUrl( Yii::$app->getRequest()->getUrl()); ///Запомнили текущую страницу
         $searchModel = new VwListOfBRSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -221,6 +222,11 @@ class BrController extends Controller
      */
     public function actionDelete($id)
     {
+	   if (!Yii::$app->user->can('BRDelete')) {   // проверка права на создание 
+		   Yii::$app->session->addFlash('error',"Нет прав на удаление BR");
+		   return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+	   }
+		
        $BR = $this->findModel($id);
        $BR->BRDeleted = 1;
        $BR->save();

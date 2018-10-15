@@ -7,7 +7,8 @@ use yii\helpers\Html;
 
 $this->title = 'Корректировка Br-' . $model->BRNumber. ' '.$model->BRName ;
 $this->params['breadcrumbs'][] = ['label' => 'Список BR', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => 'BR-'.$model->BRNumber, 'url' => ['view', 'id' => $model->idBR]];
+//$this->params['breadcrumbs'][] = ['label' => 'BR-'.$model->BRNumber, 'url' => ['view', 'id' => $model->idBR]];
+$this->params['breadcrumbs'][] = 'BR-'.$model->BRNumber;
 $this->params['breadcrumbs'][] = 'Редактирование';
 ?>
 <div class="vw-list-of-br-update">
