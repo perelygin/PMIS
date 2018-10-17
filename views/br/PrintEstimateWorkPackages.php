@@ -36,22 +36,29 @@ use kartik\date\DatePicker;
 		  <?php 
 			if(count($Print_wbs)>0){
 				$id = $Print_wbs[0]['id'];
-				$idWOf=$Print_wbs[0]['idWorksOfEstimate'];
+				//$idWOf=$Print_wbs[0]['idWorksOfEstimate'];
+				$idWOf=(is_null($Print_wbs[0]['idWorksOfEstimate'])) ? 0 : $Print_wbs[0]['idWorksOfEstimate'];
 				echo '<tr><td colspan =4> <b>Результат: '.$Print_wbs[0]['name'].'</b></td></tr>';
 				echo '<tr><td>  &nbsp&nbsp</td><td colspan =3> <i> Работа: '.$Print_wbs[0]['WorkName'].'</i></td></tr>';
 				foreach($Print_wbs as $pwbs){
 					if($pwbs['id'] == $id  and $pwbs['idWorksOfEstimate']==$idWOf){
 						echo '<tr><td>  &nbsp&nbsp</td><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwbs['fio'].'</td><td>'.$pwbs['workEffort'].'</td></tr>';
 					} elseif($pwbs['id'] == $id  and $pwbs['idWorksOfEstimate']<>$idWOf){
-						$idWOf=$pwbs['idWorksOfEstimate'];
+						//$idWOf=$pwbs['idWorksOfEstimate'];
+						$idWOf=(is_null($pwbs['idWorksOfEstimate'])) ? 0 : $pwbs['idWorksOfEstimate'];
 						echo '<tr><td>  &nbsp&nbsp</td><td colspan =3> <i> Работа: '.$pwbs['WorkName'].'</i></td></tr>';
 						echo '<tr><td width = "5%" >  &nbsp&nbsp</td><td></td><td>'.$pwbs['fio'].'</td><td width = "5%">'.$pwbs['workEffort'].'</td></tr>';
 					} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']==$idWOf){
 						$id = $pwbs['id']; 
-						echo ('такого быть не может'); die;
+						$idWOf=(is_null($pwbs['idWorksOfEstimate'])) ? 0 : $pwbs['idWorksOfEstimate'];
+						echo '<tr><td colspan =4> <b>Результат: '.$pwbs['name'].'</b></td></tr>';
+						echo '<tr><td>  &nbsp&nbsp</td><td colspan =3><i>Работа: '.$pwbs['WorkName'].'</i> </td></tr>';
+						echo '<tr><td width = "5%">  &nbsp&nbsp</td><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwbs['fio'].'</td><td>'.$pwbs['workEffort'].'</td></tr>';
+						
 					} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']<>$idWOf){
 						$id = $pwbs['id'];
-						$idWOf=$pwbs['idWorksOfEstimate'];
+						//$idWOf=$pwbs['idWorksOfEstimate'];
+						$idWOf=(is_null($pwbs['idWorksOfEstimate'])) ? 0 : $pwbs['idWorksOfEstimate'];
 						echo '<tr><td colspan =4> <b>Результат: '.$pwbs['name'].'</b></td></tr>';
 						echo '<tr><td>  &nbsp&nbsp</td><td colspan =3><i>Работа: '.$pwbs['WorkName'].'</i> </td></tr>';
 						echo '<tr><td width = "5%">  &nbsp&nbsp</td><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwbs['fio'].'</td><td>'.$pwbs['workEffort'].'</td></tr>';

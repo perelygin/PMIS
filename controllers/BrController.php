@@ -158,6 +158,7 @@ class BrController extends Controller
      */
     public function actionUpdate($id,$page_number=1,$root_id = 0)   //id BR и номер активной вкладки
     {
+		 Yii::$app->getUser()->setReturnUrl( Yii::$app->getRequest()->getUrl()); ///Запомнили текущую страницу
 		$model = $this->findModel($id);
 		
 		if($root_id <> 0){
@@ -316,6 +317,11 @@ class BrController extends Controller
     public function actionAdd_wbs_child($idBR, $parent_node_id)   //
     {
 		$parent_node = Wbs::findOne(['id'=>$parent_node_id]);
+		if($parent_node->isWbsHasWork()){
+			Yii::$app->session->addFlash('error',"Для этого результата есть оценка трудозатрат. Создание подчиненного узла не возможно");
+			return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+		}
+		
 		$new_child = new Wbs(['name' => 'новый узел']);
 		$new_child->mantis = 'www.mantis.com';
 		$new_child->idBr = $idBR;
@@ -559,14 +565,15 @@ class BrController extends Controller
 						rst.ResultStatusName,
 						concat(rlm.RoleName,' ',ppl.Family,' ',ppl.Name) as fio
 						FROM Yii2pmis.wbs  
-						LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
+						LEFT OUTER JOIN (Select * from WorksOfEstimate where idEstimateWorkPackages=".$idEWP.") woe ON woe.idWbs=wbs.id
 						LEFT OUTER JOIN WorkEffort wef ON wef.idWorksOfEstimate=woe.idWorksOfEstimate
 						LEFT OUTER JOIN ProjectCommand prc ON prc.id = wef.idTeamMember
 						LEFT OUTER JOIN People ppl ON ppl.idHuman = prc.idHuman
 						LEFT OUTER JOIN RoleModel rlm ON rlm.idRole = prc.idRole
 						LEFT OUTER JOIN ResultStatus rst ON rst.idResultStatus = wbs.idResultStatus
-			  		    where wbs.idBr = ".$idBR." and woe.idEstimateWorkPackages =".$idEWP."
-						order by id,idWorksOfEstimate ";
+			  		    where wbs.idBr = ".$idBR." and (woe.idEstimateWorkPackages =".$idEWP." or isnull(woe.idEstimateWorkPackages)) 
+			  		       and (wbs.rgt - wbs.lft) <= 1
+						order by lft,idWorksOfEstimate,idLaborExpenditures  ";
 	  $Print_wbs = Yii::$app->db->createCommand($sql)->queryAll(); 
 	  $Print_wbs_sum = Yii::$app->db->createCommand($sql1)->queryAll(); 
 	  $BR = BusinessRequests::findOne($idBR);
@@ -583,7 +590,7 @@ class BrController extends Controller
 				
 						if(count($Print_wbs)>0){
 							$id = $Print_wbs[0]['id'];
-							$idWOf=$Print_wbs[0]['idWorksOfEstimate'];
+							$idWOf=(is_null($Print_wbs[0]['idWorksOfEstimate'])) ? 0 : $Print_wbs[0]['idWorksOfEstimate'];
 							$sheet->setCellValue('A'.$ex_row, 'Оценка трудозатрат по BR-'.$BR->BRNumber.'  "'.$BR->BRName.'"');
 							$ex_row = $ex_row+1;
 							$sheet->setCellValue('A'.$ex_row, 'Пакет оценок: "'.$EWP->EstimateName.'" от '. $EWP->dataEstimate);
@@ -610,7 +617,8 @@ class BrController extends Controller
 									$ex_row=$ex_row+1;
 									//echo '<tr><td>  &nbsp&nbsp</td><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwbs['fio'].'</td><td>'.$pwbs['workEffort'].'</td></tr>';
 								} elseif($pwbs['id'] == $id  and $pwbs['idWorksOfEstimate']<>$idWOf){
-									$idWOf=$pwbs['idWorksOfEstimate'];
+									//$idWOf=$pwbs['idWorksOfEstimate'];
+									$idWOf=(is_null($pwbs['idWorksOfEstimate'])) ? 0 : $pwbs['idWorksOfEstimate'];
 									$sheet->setCellValue('B'.$ex_row, 'Работа: '.$pwbs['WorkName']);
 									$sheet->mergeCells('B'.$ex_row.':C'.$ex_row);
 									$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
@@ -623,12 +631,29 @@ class BrController extends Controller
 									$ex_row=$ex_row+2;
 									//echo '<tr><td>  &nbsp&nbsp</td><td colspan =3> <i> Работа: '.$pwbs['WorkName'].'</i></td></tr>';
 									//echo '<tr><td width = "5%" >  &nbsp&nbsp</td><td></td><td>'.$pwbs['fio'].'</td><td width = "5%">'.$pwbs['workEffort'].'</td></tr>';
-								} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']==$idWOf){
+								} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']==$idWOf){   // выводим результат с незаполненными работами.  все работы = null
 									$id = $pwbs['id']; 
-									echo ('такого быть не может'); die;
+									$idWOf=(is_null($pwbs['idWorksOfEstimate'])) ? 0 : $pwbs['idWorksOfEstimate'];
+									$sheet->setCellValue('A'.$ex_row, 'Результат:'.$pwbs['name']);
+									$sheet->getStyle('A'.$ex_row)->getFont()->setBold(true);
+									$sheet->mergeCells('A'.$ex_row.':C'.$ex_row);
+									$sheet->getStyle('A'.$ex_row)->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+									
+									$sheet->setCellValue('B'.($ex_row+1), 'Работа: '.$pwbs['WorkName']);
+									$sheet->mergeCells('B'.($ex_row+1).':C'.($ex_row+1));
+									$sheet->getStyle('B'.($ex_row+1))->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row+1)->setRowHeight(-1);
+									
+									$sheet->setCellValue('C'.($ex_row+2), $pwbs['fio'].' (ч.д.)');
+									$sheet->getStyle('C'.($ex_row+2))->getAlignment()->setWrapText(true);
+									$sheet->getRowDimension($ex_row+2)->setRowHeight(-1);
+									$sheet->setCellValue('D'.($ex_row+2), $pwbs['workEffort']);
+									$ex_row=$ex_row+3;
 								} elseif($pwbs['id'] <> $id  and $pwbs['idWorksOfEstimate']<>$idWOf){
 									$id = $pwbs['id'];
-									$idWOf=$pwbs['idWorksOfEstimate'];
+									//$idWOf=$pwbs['idWorksOfEstimate'];
+									$idWOf=(is_null($pwbs['idWorksOfEstimate'])) ? 0 : $pwbs['idWorksOfEstimate'];
 									$sheet->setCellValue('A'.$ex_row, 'Результат:'.$pwbs['name']);
 									$sheet->getStyle('A'.$ex_row)->getFont()->setBold(true);
 									$sheet->mergeCells('A'.$ex_row.':C'.$ex_row);
@@ -668,8 +693,8 @@ class BrController extends Controller
 								$ex_row=$ex_row+1;
 						}
 					}
-					$sheet->setCellValue('A'.$ex_row, 'Итого');
-					$sheet->setCellValue('B'.$ex_row, $total);
+					$sheet->setCellValue('C'.$ex_row, 'Итого');
+					$sheet->setCellValue('D'.$ex_row, $total);
 					//echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
 							
 							

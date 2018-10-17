@@ -99,4 +99,17 @@ class Wbs extends \yii\db\ActiveRecord
 							'idBr'=>$this->idBr	);
         return $WBSInfo;
     }
+    public function isWbsHasWork()  //есть ли работы по данному узлу
+    {
+		$sql = "SELECT  count(*)
+				   FROM Yii2pmis.wbs  
+				   inner JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
+					where wbs.id = ".$this->id;
+		 $WbsWorkNumber = Yii::$app->db->createCommand($sql)->queryScalar(); 
+		 
+		 if ($WbsWorkNumber>0) { 
+			 return true;
+		  }
+		   else return false;
+    }
 }
