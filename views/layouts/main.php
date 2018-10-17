@@ -44,7 +44,7 @@ AppAsset::register($this);
 	 	);
     
      
-    //if (Yii::$app->user->can('ManageUserRole')) 	$items[] = ['label' => 'Управление ролями', 'url' => ['/site/rbac']];
+    $items[] = ['label' => 'Управление ролями', 'url' => ['/site/rbac']];
 	if (Yii::$app->user->can('BRJournalView')) 	$items[] = ['label' => 'Проекты', 'items' => [
 					//['label' => 'Перечень проектов', 'url'=>['/pmis/test1']],
 					['label' => 'Перечень проектов', 'url'=>['/br/index']],
