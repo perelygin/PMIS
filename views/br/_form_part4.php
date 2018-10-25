@@ -52,7 +52,7 @@
 					    [
 				            'class' => 'yii\grid\ActionColumn',
 				            'headerOptions' => ['width' => '120'],
-				            'template' => '{update_ewp} {delete_ewp} {print_ewp}',
+				            'template' => '{update_ewp} {delete_ewp} {print_ewp} {print_ewp1}',
 				            //Замыкание в анонимной функции PHP- я нихера не понял как это работает  -(((
 				            'buttons' => [
 				                'delete_ewp' => function ($url,$model){  
@@ -72,6 +72,12 @@
 				                    return Html::a(
 				                    '<span class="glyphicon glyphicon-th"></span>', 
 				                    $url,['title' => 'Показать всю оценку','target' => '_blank']);
+				                },
+				                'print_ewp1' => function ($url,$model){  
+									$url = Url::to(['br/print_estimate_work_packages_grouped', 'idEWP' =>$model->idEstimateWorkPackages ,'idBR'=>$model->idBR]);
+				                    return Html::a(
+				                    '<span class="glyphicon glyphicon-th"></span>', 
+				                    $url,['title' => 'Показать всю оценку с группировкой по ролям','target' => '_blank']);
 				                },
 				            ],
 				            

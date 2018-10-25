@@ -69,4 +69,9 @@ class BusinessRequests extends \yii\db\ActiveRecord
 		throw new \yii\web\NotFoundHttpException('Запись не найдена');
        // throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+    public function get_BRRoleModelType(){
+		return $this->BRRoleModelType;
+	}
+    
 }

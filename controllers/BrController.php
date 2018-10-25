@@ -529,6 +529,142 @@ class BrController extends Controller
 	   
 	  
    }
+        /*
+    * вывод  оценки трудозатрат для BR в таблицу. группировка по ролям
+    */
+   public function actionPrint_estimate_work_packages_grouped($idEWP,$idBR){
+	   $BR = BusinessRequests::findOne($idBR);
+	   $RoleModelType = $BR->get_BRRoleModelType();
+	   $sql=   "SELECT 
+					rlm.idRole,  
+				    rlm.RoleName,
+					tmp_tbl2.idWbs,
+				    tmp_tbl2.idWorksOfEstimate,
+				    tmp_tbl2.WorkName,
+				    tmp_tbl2.sumWE
+				FROM RoleModel as rlm
+				LEFT OUTER JOIN 
+				(Select idWbs,idWorksOfEstimate,WorkName,idRole, SUM(workEffort) as sumWE FROM
+					(Select 
+						wos.idWorksOfEstimate,  
+						wos.WorkName,
+						wos.idWbs,
+						wef.workEffort,
+						pc.idRole
+					from WorksOfEstimate as wos
+					LEFT OUTER JOIN WorkEffort wef ON wos.idWorksOfEstimate = wef.idWorksOfEstimate
+					LEFT OUTER JOIN ProjectCommand pc ON wef.idTeamMember = pc.id
+					where wos.idWorksOfEstimate =:idwoe) as tmp_tbl
+				GROUP BY idRole) tmp_tbl2 ON rlm.idRole = tmp_tbl2.idRole
+				where idRoleModelType = ".$RoleModelType
+				." order by idRole";
+				
+		$sql1 = "SELECT 
+						wbs.id,
+						wbs.tree, 
+						wbs.lft,
+						wbs.rgt,
+						wbs.depth,
+						wbs.name,
+						wbs.idBr,
+						woe.idEstimateWorkPackages,
+						woe.idWorksOfEstimate,
+						woe.WorkName
+						FROM wbs  
+						LEFT OUTER JOIN (Select * from WorksOfEstimate where idEstimateWorkPackages= ".$idEWP." ) woe ON woe.idWbs=wbs.id
+						where wbs.idBr = ".$idBR." and (woe.idEstimateWorkPackages = ".$idEWP." or isnull(woe.idEstimateWorkPackages)) 
+			  		       and (wbs.rgt - wbs.lft) <= 1
+						order by id,idWorksOfEstimate";
+		$RM = new RoleModel();
+		$RoleHeader = $RM->get_RoleModel($RoleModelType);
+		$print_WOEs = Yii::$app->db->createCommand($sql1)->queryAll(); 				// выбрали все работы по BR
+		$BR  = BusinessRequests::findOne($idBR);
+	    $EWP = EstimateWorkPackages::findOne($idEWP); //оценка
+		
+		
+	  $a = Yii::$app->request->post();
+	  if(isset($a['btn'])) {   // анализируем нажатые кнопки
+		   if($a['btn'] == 'excel'){
+			   
+		$strhead = '<tr><td></td><td></td>';
+	    $strEnd ='';
+	    $arraySum =array(); //для подсчета итогов
+	    $Alfabet = 'ABCDEFGHIJKLMNOPQR';
+	    
+			   
+			 $ex_row = 2;
+			 $spreadsheet = new Spreadsheet();
+			 $sheet = $spreadsheet->getActiveSheet();
+			 $sheet->getColumnDimension('B')->setWidth(60);   
+			  $sheet->getColumnDimension('C')->setWidth(12);  
+			  $sheet->getColumnDimension('D')->setWidth(12);  
+			  $sheet->getColumnDimension('E')->setWidth(12);  
+			  $sheet->getColumnDimension('F')->setWidth(12);  
+			  $sheet->getColumnDimension('G')->setWidth(12);  
+			  $sheet->getColumnDimension('H')->setWidth(15);  
+			  $sheet->getColumnDimension('I')->setWidth(12);  
+			 
+			 $sheet->setCellValue('A'.$ex_row, 'Оценка трудозатрат по BR-'.$BR->BRNumber.'  "'.$BR->BRName.'"');
+			 $ex_row = $ex_row+1;
+			 $sheet->setCellValue('A'.$ex_row, 'Пакет оценок: "'.$EWP->EstimateName.'" от '. $EWP->dataEstimate);
+			 $ex_row = $ex_row+4;
+			 $j=2;
+			 $sheet->getRowDimension($ex_row)->setRowHeight(40);
+			 foreach($RoleHeader as $rh){
+				 $sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$rh['RoleName']);
+				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setWrapText(true);
+				 $arraySum[$rh['RoleName']] = 0;
+				 $j=$j+1;
+			 }
+			  $ex_row = $ex_row+1;
+			 if(count($print_WOEs)>0){
+				 $id = -1;
+				 foreach($print_WOEs as $pwoe){
+					$print_wef = Yii::$app->db->createCommand($sql)->bindValue(':idwoe',$pwoe['idWorksOfEstimate'])->queryAll(); //выбрали трудозатраты по ролям  для работы
+					if($pwoe['id'] == $id){
+						$sheet->setCellValue('B'.$ex_row,$pwoe['WorkName']);
+						$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+						$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+						$j=2;
+						foreach($print_wef as $pwef){
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']);
+							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
+							$j=$j+1;
+						}
+						$ex_row = $ex_row+1;	
+					} else{
+						$sheet->setCellValue('A'.$ex_row, 'Результат:'.$pwoe['name']);
+						$sheet->mergeCells('A'.$ex_row.':B'.$ex_row);
+						$sheet->getStyle('A'.$ex_row)->getFont()->setBold(true);
+						$ex_row = $ex_row+1;
+						$sheet->setCellValue('B'.$ex_row,$pwoe['WorkName']);
+						$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+						$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+						$j=2;
+						foreach($print_wef as $pwef){
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']);
+							$j=$j+1;
+						}
+						$ex_row = $ex_row+1;
+						$id = $pwoe['id'];
+					}	
+				}
+			 }
+			$writer = new Xlsx($spreadsheet);
+			$writer->save('hwd2.xlsx');
+	        return Yii::$app->response->sendFile('/var/www/html/pmis_app/web/hwd2.xlsx')->send();  
+		   }
+	  }  
+  	  return $this->render('PrintEstimateWorkPackagesGroup', [
+	        'print_WOEs' => $print_WOEs ,
+	        //'Print_wbs_sum'=>$Print_wbs_sum,
+	        'BR'=>$BR,
+	        'EWP'=>$EWP,
+	        'sql'=>$sql,
+	        'RoleHeader'=>$RoleHeader
+	    ]); 
+			
+   }
       /*
     * вывод  оценки трудозатрат для BR в таблицу
     */
