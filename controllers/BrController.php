@@ -23,6 +23,8 @@ use app\models\EstimateWorkPackages;
 use app\models\WorksOfEstimate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use SoapClient;
 
 
@@ -613,6 +615,9 @@ class BrController extends Controller
 			 foreach($RoleHeader as $rh){
 				 $sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$rh['RoleName']);
 				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setWrapText(true);
+				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
 				 $arraySum[$rh['RoleName']] = 0;
 				 $j=$j+1;
 			 }
@@ -628,6 +633,8 @@ class BrController extends Controller
 						$j=2;
 						foreach($print_wef as $pwef){
 							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
 							$j=$j+1;
 						}
@@ -643,12 +650,89 @@ class BrController extends Controller
 						$j=2;
 						foreach($print_wef as $pwef){
 							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
 							$j=$j+1;
 						}
 						$ex_row = $ex_row+1;
 						$id = $pwoe['id'];
 					}	
 				}
+				
+				//итоги
+				$totalsumm =0;
+				$ex_row = $ex_row+1;
+				$j=2;
+				$sheet->setCellValue('B'.$ex_row,'Итого');
+				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
+				
+				foreach($arraySum as $as => $v){
+					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+					$j=$j+1;
+					$totalsumm = $totalsumm + $v;
+				}
+				$ex_row = $ex_row+1;
+				$sheet->setCellValue('B'.$ex_row,'Дополнительное тестирование (10% от общих трудозатрат)');
+				$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+				$j=2;
+				foreach($arraySum as $as => $v){
+					if($as == 'Инженер по тестированию'){
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10);
+						}
+					$j=$j+1;
+				}
+				$ex_row = $ex_row+1;
+				$j=2;
+				
+				$sheet->setCellValue('B'.$ex_row,'Итого с учетом доп. затрат');
+				$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
+				
+				foreach($arraySum as $as => $v){
+					if($as == 'Инженер по тестированию'){
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10+$v);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+					} else{
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+					}
+					$j=$j+1;
+					
+				}
+				$ex_row = $ex_row+3;
+				foreach($arraySum as $ars => $v){
+					  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
+						  
+						   	$sheet->setCellValue('B'.$ex_row,$ars);
+							$sheet->setCellValue('C'.$ex_row,$totalsumm/10+$v);
+							$ex_row = $ex_row+1; 
+					  } else {
+							$sheet->setCellValue('B'.$ex_row,$ars);
+							$sheet->setCellValue('C'.$ex_row,$v);
+							$ex_row = $ex_row+1;
+						
+					  }
+				}
+				$ex_row = $ex_row+2;
+				$sheet->setCellValue('B'.$ex_row,'Итого');
+				$sheet->setCellValue('C'.$ex_row,$totalsumm+$totalsumm/10);
+				$sheet->getStyle('B'.$ex_row.':C'.$ex_row)->getFont()->setBold(true);
+				
+				$styleThinBlackBorderOutline = [
+				    'borders' => [
+					    'allBorders' => [
+		                    'borderStyle' => Border::BORDER_THIN,
+		                ],
+				        //'outline' => [
+				            //'borderStyle' => Border::BORDER_THIN,
+				            //'color' => ['argb' => 'FF000000'],
+				        //],
+				    ],
+				];
+				$sheet->getStyle('A4:E10')->applyFromArray($styleThinBlackBorderOutline);
 			 }
 			$writer = new Xlsx($spreadsheet);
 			$writer->save('hwd2.xlsx');
@@ -812,25 +896,26 @@ class BrController extends Controller
 								}
 							}
 						}
-						$ex_row=$ex_row+5;
-						$total =0;
-						if(count($Print_wbs_sum)>0){
-						foreach($Print_wbs_sum as $pwbss){
-						  if($pwbss['idRole'] ==6 ){  //инженер по тестированию
-							    $test = $pwbss['summ'];
-							    $test10 = $test*0.1;
-							    $test10p=$test+$test10;
-								$total =$total + $test10p;
-							} else {
-								$total =$total +$pwbss['summ'];
-							}
-							    $sheet->setCellValue('C'.$ex_row, $pwbss['RoleName']);
-								$sheet->setCellValue('D'.$ex_row, $pwbss['summ']);
-								$ex_row=$ex_row+1;
-						}
-					}
-					$sheet->setCellValue('C'.$ex_row, 'Итого');
-					$sheet->setCellValue('D'.$ex_row, $total);
+						//$ex_row=$ex_row+5;
+						//$total =0;
+						//if(count($Print_wbs_sum)>0){
+							
+						//foreach($Print_wbs_sum as $pwbss){
+						  //if($pwbss['idRole'] ==6 ){  //инженер по тестированию
+							    //$test = $pwbss['summ'];
+							    //$test10 = $test*0.1;
+							    //$test10p=$test+$test10;
+								//$total =$total + $test10p;
+							//} else {
+								//$total =$total +$pwbss['summ'];
+							//}
+							    //$sheet->setCellValue('C'.$ex_row, $pwbss['RoleName']);
+								//$sheet->setCellValue('D'.$ex_row, $pwbss['summ']);
+								//$ex_row=$ex_row+1;
+						//}
+					//}
+					//$sheet->setCellValue('C'.$ex_row, 'Итого');
+					//$sheet->setCellValue('D'.$ex_row, $total);
 					//echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
 							
 							

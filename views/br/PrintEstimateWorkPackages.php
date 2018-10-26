@@ -74,21 +74,24 @@ use kartik\date\DatePicker;
 		<?php
 		$total =0;
 		if(count($Print_wbs_sum)>0){
+			foreach($Print_wbs_sum as $ars){
+			   $total =$total + $ars['summ'];
+			}
+			$total10 = $total/10;
 			foreach($Print_wbs_sum as $pwbss){
 			  if($pwbss['idRole'] ==6 ){  //инженер по тестированию
-				    $test = $pwbss['summ'];
-				    $test10 = $test*0.1;
-				    $test10p=$test+$test10;
-					echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].' + 10%('.$test10.')='.$test10p.'</td></tr>');  
-					$total =$total + $test10p;
+				    $a = $pwbss['summ']+$total10;
+					echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].' + 10%('.$total10.')='.$a.'</td></tr>');  
+					
 				} else {
 					echo('<tr><td>'.$pwbss['RoleName'].'</td><td>'.$pwbss['summ'].'</td></tr>');
-					$total =$total +$pwbss['summ'];
+					
 				}
 				
 			}
 		}
-		echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
+		$a = $total10 + $total;
+		echo('<tr><td><b>Итого</b></td><td><b>'.$a.'</b></td></tr>');
 		?>	
 	</table>
 	 	

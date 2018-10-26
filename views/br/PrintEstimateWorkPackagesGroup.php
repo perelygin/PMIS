@@ -65,6 +65,39 @@ use kartik\date\DatePicker;
 				}	
 			}
 		}
+		
+		//итоги
+		$total =0;
+		$strbottom0 = '<tr><td></td><td>Итого</td>';
+		foreach($arraySum as $ars => $v){
+		  $strbottom0 =$strbottom0.'<td align="center"> &nbsp'.$v.'&nbsp </td>';
+		  $total =$total + $v;
+		}
+		$total10 = $total/10;
+		echo $strbottom0;
+		
+		$strbottom1 = '<tr><td></td><td>Дополнительное тестирование (10% от общих трудозатрат</td>';
+		foreach($arraySum as $ars => $v){
+		  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
+			  $strbottom1 =$strbottom1.'<td align="center"> &nbsp'.$total10.'&nbsp </td>';
+		 
+		  } else {
+			  $strbottom1 =$strbottom1.'<td> </td>';
+		  }
+			}
+		echo $strbottom1;
+		$strbottom2 = '<tr><td></td><td><b>Итого с учетом доп. затрат</b></td>';
+		foreach($arraySum as $ars => $v){
+		  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
+			  
+			  $a = $v+$total10;
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$a.'&nbsp </b></td>';
+		 
+		  } else {
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$v.'&nbsp </b></td>';
+		  }
+		}
+		echo $strbottom2;
 	  ?>
 		  
 		 
@@ -73,25 +106,19 @@ use kartik\date\DatePicker;
     <br>
     <table border = "1" cellpadding="4" cellspacing="2">
 		<?php
-		 //print_r($arraySum);die;
-		$total =0;
-		//if(count($Print_wbs_sum)>0){
 			foreach($arraySum as $ars => $v){
 				
 			  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
-				    $test = $v;
-				    $test10 = $test*0.1;
-				    $test10p=$test+$test10;
-					echo('<tr><td>'.$v.'</td><td>'.$v.' + 10%('.$test10.')='.$test10p.'</td></tr>');  
-					$total =$total + $test10p;
-				} else {
+				  $a = $v+$total10;
+				   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+			  } else {
 					echo('<tr><td>'.$ars.'</td><td>'.$v.'</td></tr>');
-					$total =$total +$v;
-				}
+				
+			  }
 				
 			}
 		//}
-		echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
+		echo('<tr><td><b>Итого</b></td><td><b>'.($total+$total10).'</b></td></tr>');
 		?>	
 	</table>
 	 	
