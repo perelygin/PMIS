@@ -662,6 +662,7 @@ class BrController extends Controller
 				
 				//итоги
 				$totalsumm =0;
+				$totalSymbol ='A';
 				$ex_row = $ex_row+1;
 				$j=2;
 				$sheet->setCellValue('B'.$ex_row,'Итого');
@@ -671,6 +672,7 @@ class BrController extends Controller
 					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
 					$j=$j+1;
 					$totalsumm = $totalsumm + $v;
+					$totalSymbol = substr($Alfabet,$j,1);
 				}
 				$ex_row = $ex_row+1;
 				$sheet->setCellValue('B'.$ex_row,'Дополнительное тестирование (10% от общих трудозатрат)');
@@ -702,7 +704,18 @@ class BrController extends Controller
 					$j=$j+1;
 					
 				}
+				//ставим границы
+				$styleThinBlackBorderOutline = [
+				    'borders' => [
+					    'allBorders' => [
+		                    'borderStyle' => Border::BORDER_THIN,
+		                ],
+				    ],
+				];
+				$sheet->getStyle('A7:'.$totalSymbol.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
+				
 				$ex_row = $ex_row+3;
+				$totalrow = $ex_row;  //начало рамки
 				foreach($arraySum as $ars => $v){
 					  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 						  
@@ -721,18 +734,9 @@ class BrController extends Controller
 				$sheet->setCellValue('C'.$ex_row,$totalsumm+$totalsumm/10);
 				$sheet->getStyle('B'.$ex_row.':C'.$ex_row)->getFont()->setBold(true);
 				
-				$styleThinBlackBorderOutline = [
-				    'borders' => [
-					    'allBorders' => [
-		                    'borderStyle' => Border::BORDER_THIN,
-		                ],
-				        //'outline' => [
-				            //'borderStyle' => Border::BORDER_THIN,
-				            //'color' => ['argb' => 'FF000000'],
-				        //],
-				    ],
-				];
-				$sheet->getStyle('A4:E10')->applyFromArray($styleThinBlackBorderOutline);
+				//ставим рамки
+				$sheet->getStyle('B'.$totalrow.':C'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
+				
 			 }
 			$writer = new Xlsx($spreadsheet);
 			$writer->save('hwd2.xlsx');
