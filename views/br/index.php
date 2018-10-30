@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\VwListOfBRSearch */
@@ -35,7 +36,27 @@ $this->params['breadcrumbs'][] = $this->title;
             //'Family',
             //'CustomerName',
 
-            ['class' => 'yii\grid\ActionColumn'],
+			[
+		'class' => 'yii\grid\ActionColumn',
+		'headerOptions' => ['width' => '120'],
+		'template' => '{update} {delete}',
+		//Замыкание в анонимной функции PHP- я нихера не понял как это работает  -(((
+		'buttons' => [
+			'delete' => function ($url,$model){  
+				$url = Url::to(['br/delete', 'id' =>$model->idBR]);
+				return Html::a(
+				'<span class="glyphicon glyphicon-trash"></span>', 
+				$url,['title' => 'Удалить BR']);
+			},
+			'update' => function ($url,$model){  
+				$url = Url::to(['br/update', 'id' =>$model->idBR]);
+				return Html::a(
+				'<span class="glyphicon glyphicon-pencil"></span>', 
+				$url,['title' => 'Изменить BR']);
+			},
+		  ],
+		
+	],
         ],
     ]); ?>
 </div>
