@@ -5,7 +5,7 @@ use yii\helpers\ArrayHelper;
 use yii\widgets\ActiveForm;
 use vova07\imperavi\Widget;
 use app\models\ResultType;
-
+use app\models\ResultStatus;
 /* @var $this yii\web\View */
 /* @var $model app\models\Wbs */
 /* @var $form ActiveForm */
@@ -16,6 +16,15 @@ use app\models\ResultType;
 		$ResultType = ResultType::find()->where(['deleted'=>0])->all();
 		$items1 = ArrayHelper::map($ResultType,'idResultType','ResultTypeName');
 		$params1 = [
+		
+		];
+		
+		//готовим массив для dropdownist cо статусом результата
+		
+		
+		$ResultStatus = ResultStatus::find()->where(['deleted'=>0])->all();
+		$items2 = ArrayHelper::map($ResultStatus,'idResultStatus','ResultStatusName');
+		$params2 = [
 		
 		];
 ?>
@@ -38,32 +47,20 @@ use app\models\ResultType;
 								'title'=>'Создать инцидент  в mantis',
 								'name'=>'btn',
 								'value' => 'crtm_'])
-			.'    '
-			.Html::submitButton('', [
-								'span class' => 'glyphicon glyphicon-th',
-								'title'=>'табличная форма',
-								'name'=>'btn',
-								'value' => 'tblf_'])
-			.'     '
-			.Html::submitButton('', [
-								'span class' => 'glyphicon glyphicon-save-file',
-								'title'=>'выгрузить в excel',
-								'name'=>'btn',
-								'value' => 'excl_'])
 			.'     '
 			.Html::a($model->mantis, $url4,['title' => '',])
 		  ?>
 	    </div>  
    </div> 	
    <div class="row">
-		<div class="col-sm-6">
+		<div class="col-sm-4">
 			<?= $form->field($model, 'name') ?>   
 	    </div>
-	    <div class="col-sm-6">
+	    <div class="col-sm-4">
 			<?= $form->field($model, 'idResultType')->dropDownList($items1,$params1) ?>   
 	    </div>
 	    <div class="col-sm-4">
-			
+			<?= $form->field($model, 'idResultStatus')->dropDownList($items2,$params2) ?>   
 	    </div>
    </div> 	    
    <div class="row">

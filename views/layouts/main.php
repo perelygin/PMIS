@@ -46,8 +46,9 @@ AppAsset::register($this);
      
     //$items[] = ['label' => 'Управление ролями', 'url' => ['/site/rbac']];
 	if (Yii::$app->user->can('BRJournalView')) 	$items[] = ['label' => 'Проекты', 'items' => [
-					//['label' => 'Перечень проектов', 'url'=>['/pmis/test1']],
 					['label' => 'Перечень проектов', 'url'=>['/br/index']],
+					//['label' => 'Перечень проектов', 'url'=>['/pmis/test1']],
+					['label' => 'Сводный отчет на дату', 'url'=>['/pmis/test1']],
 	            ]];
      
     if (Yii::$app->user->isGuest)	$items[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];

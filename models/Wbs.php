@@ -79,7 +79,8 @@ class Wbs extends \yii\db\ActiveRecord
             'mantis' => 'Mantis',
             'description' => 'Описание',
             'idBr' => 'Id Br',
-            'idResultType'=>'Тип результата'
+            'idResultType'=>'Тип результата',
+            'idResultStatus'=>'Текущий статус'
         ];
     }
     //public function getChildren()
