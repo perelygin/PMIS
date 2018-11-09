@@ -60,7 +60,7 @@ class Wbs extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 255],
             [['mantis'], 'string', 'max' => 150],
             [['description'], 'string', 'max' => 1000],
-            [['lft', 'rgt', 'depth','tree','idResultType'],'safe']
+            [['lft', 'rgt', 'depth','tree','idResultType','idResultStatus'],'safe']
         ];
     }
 

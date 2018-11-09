@@ -32,7 +32,8 @@ class ResultEvents extends \yii\db\ActiveRecord
 		$sql = 'select 
 		  rsl.ResultEventsDate,
 		  rsl.ResultEventResponsible,
-		  ppl.idOrganization
+		  ppl.idOrganization,
+		  ppl.idHuman
 		from ResultEvents rsl
 		 LEFT OUTER JOIN ProjectCommand prc ON prc.id = rsl.ResultEventResponsible
 		 LEFT OUTER JOIN People ppl ON prc.idHuman = ppl.idHuman
@@ -43,6 +44,7 @@ class ResultEvents extends \yii\db\ActiveRecord
 		if (!empty($Respons)){
 			$wbs = Wbs::findOne(['id'=>$this->idwbs]);
 			$wbs->idOrgResponsible = $Respons[0]['idOrganization'];
+			$wbs->idPeopleResponsible = $Respons[0]['idHuman'];
 			$wbs->save();
 		}
 		
