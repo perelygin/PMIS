@@ -1,7 +1,9 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
+//use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\VwReport1Search */
@@ -43,11 +45,11 @@ $this->params['breadcrumbs'][] = $this->title;
     
       <table border = "1" cellpadding="4" cellspacing="2">
 		  <?php 
-		  
+		    echo '<tr><th>Проект</th><th>Результат проекта</th><th>Статус результата</th><th>Ответственный</th><th>Организация отв.</th></tr>';
 		    foreach($dataProvider as $dp_str){
 			  echo '<tr>
 			  <td> BR-'.$dp_str->BRNumber.' '.$dp_str->BRName.'</td>
-			  <td>'. $dp_str->name. '</td>
+			  <td>'.Html::a($dp_str->name, Url::toRoute(['br/update_wbs_node', 'id_node'=>$dp_str->id,'idBR'=>$dp_str->idBr]),['title' => '','target' => '_blank']). '</td>
 			  <td>'. $dp_str->ResultStatusName. '</td>
 			  <td>'. $dp_str->fio.'</td>
 			  <td>'. $dp_str->CustomerName.'<td>

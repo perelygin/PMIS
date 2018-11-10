@@ -7,6 +7,6 @@
 
 <p>
     <?php
-       echo Html::a('Сводный отчет', Url::toRoute(['report/report1']),['title' => '',]);
+       echo Html::a('Сводный отчет по статусу результатов', Url::toRoute(['report/report1']),['title' => '',]);
     ?>
 </p>

@@ -2,10 +2,22 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use app\models\ResultStatus;
+use app\models\VwProjectCommand;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\VwReport1Search */
 /* @var $form yii\widgets\ActiveForm */
+
+$ResultStatus = ResultStatus::find()->where(['deleted'=>0])->all();
+$items1 = ArrayHelper::map($ResultStatus,'idResultStatus','ResultStatusName');
+$params1 = [
+
+];
+
+
 ?>
 
 <div class="vw-report1-search">
@@ -23,21 +35,20 @@ use yii\widgets\ActiveForm;
 			  <?php  echo $form->field($model, 'BRName') ?>
 		  </div>
 		  <div class="col-sm-3">
-			  <?php  echo $form->field($model, 'name') ?>
-		  </div>
-		  <div class="col-sm-3">
-			   <?php echo $form->field($model, 'ResultStatusName') ?>
-		  </div>
-		</div>
-    <div class="row">
-		  <div class="col-sm-3">
-			<?php  echo $form->field($model, 'mantis') ?>
-		  </div>
-		  <div class="col-sm-3">
 			  <?php  echo $form->field($model, 'fio') ?>
 		  </div>
 		  <div class="col-sm-3">
-			  <?php echo $form->field($model, 'CustomerName') ?>
+			  <?php echo $form->field($model, 'CustomerName') ?> 
+		  </div>
+		</div>
+    <div class="row">
+		  <div class="col-sm-6">
+			 <?php  echo $form->field($model, 'name') ?>
+		  </div>
+		  
+		  <div class="col-sm-3">
+			  <?php  echo	$form->field($model, 'idResultStatus')->dropDownList($items1,$params1);	?>
+			  
 		  </div>
 		  <div class="col-sm-3">
 			  

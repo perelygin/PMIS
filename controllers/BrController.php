@@ -358,6 +358,7 @@ class BrController extends Controller
    }
     public function actionUpdate_wbs_node($id_node,$idBR)
     {
+		
 		//if ($model = Wbs::findOne(['id'=>$id_node]) !== null) {
 		    $a = Yii::$app->request->post();
 		    //$request = Yii::$app->getRequest();
@@ -371,6 +372,10 @@ class BrController extends Controller
 		            
 		            if(isset($a['btn'])) {   // анализируем нажатые кнопки
 						$btn_info = explode("_", $a['btn']);
+						if($btn_info[0] == 'estm') {  //оценки и работы
+							
+							return  $this->redirect(['works_of_estimate/index','idBR' => $idBR, 'id_node'=>$id_node]);
+						}
 						if($btn_info[0] == 'crtm') {   // создание инцидента mantis
 							//$WSDL_POINT = 'http://192.168.1.147/mantis/api/soap/mantisconnect.php?wsdl';
 							//$client = new nusoap_client($WSDL_POINT, false);

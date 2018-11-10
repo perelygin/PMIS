@@ -46,7 +46,12 @@ use app\models\ResultStatus;
 								'span class' => 'glyphicon glyphicon-knight',
 								'title'=>'Создать инцидент  в mantis',
 								'name'=>'btn',
-								'value' => 'crtm_'])
+								'value' => 'crtm_']).'    '.
+			Html::submitButton('', [
+								'span class' => 'glyphicon glyphicon-usd',
+								'title'=>'Работы и трудозатраты по реализации  результата',
+								'name'=>'btn',
+								'value' => 'estm_'])
 			.'     '
 			.Html::a($model->mantis, $url4,['title' => '',])
 		  ?>

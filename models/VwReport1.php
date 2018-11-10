@@ -39,7 +39,7 @@ class VwReport1 extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus'], 'integer'],
+            [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus','idHuman'], 'integer'],
             [['idBr', 'name'], 'required'],
             [['BRName', 'mantis'], 'string', 'max' => 150],
             [['name'], 'string', 'max' => 255],
@@ -55,17 +55,17 @@ class VwReport1 extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'BRNumber' => 'Brnumber',
-            'BRName' => 'Brname',
+            'BRNumber' => 'Номер Br',
+            'BRName' => 'Название Br',
             'id' => 'ID',
             'idBr' => 'Id Br',
-            'idOrgResponsible' => 'Id Org Responsible',
-            'name' => 'Name',
-            'idResultStatus' => 'Id Result Status',
+            'idOrgResponsible' => 'Отв.  организация',
+            'name' => 'Результат',
+            'idResultStatus' => 'Статус',
             'mantis' => 'Mantis',
-            'ResultStatusName' => 'Result Status Name',
-            'fio' => 'Fio',
-            'CustomerName' => 'Customer Name',
+            'ResultStatusName' => 'Статус',
+            'fio' => 'Ответственный',
+            'CustomerName' => 'Отв.  организация',
         ];
     }
 }
