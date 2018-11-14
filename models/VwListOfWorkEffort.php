@@ -46,6 +46,7 @@ class VwListOfWorkEffort extends \yii\db\ActiveRecord
             [['WorkName'], 'string', 'max' => 250],
             [['RoleName'], 'string', 'max' => 45],
             [['fio'], 'string', 'max' => 302],
+            [['mantisNumber'], 'safe'],
         ];
     }
 

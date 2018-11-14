@@ -62,11 +62,14 @@ $params1 = [
     
 <div class="container">
    <div class="row">
-		<div class="col-sm">
+		<div class="col-sm-9">
 		    <?= $form->field($model, 'WorkName')->textInput(['maxlength' => true]) ?>
 	    </div>
-	    
+	    <div class="col-sm-3">
+		    <?= $form->field($model, 'mantisNumber') ?>
+	    </div>
    </div> 
+   
    <div class="row">
 	   <div class="col-sm-6">
 			<?php echo $form->field($model, 'WorkDescription')->widget(Widget::className(), [

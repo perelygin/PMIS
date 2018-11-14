@@ -6,6 +6,7 @@ use yii\widgets\ActiveForm;
 use vova07\imperavi\Widget;
 use app\models\ResultType;
 use app\models\ResultStatus;
+use app\models\SystemVersions;
 /* @var $this yii\web\View */
 /* @var $model app\models\Wbs */
 /* @var $form ActiveForm */
@@ -27,6 +28,14 @@ use app\models\ResultStatus;
 		$params2 = [
 		
 		];
+		//готовим массив для dropdownist c версиями
+		
+		
+		$SystemVersions = SystemVersions::find()->where(['deleted'=>0,'released'=>0])->all();
+		$items3 = ArrayHelper::map($SystemVersions,'idsystem_versions','version_number');
+		$params3 = [
+		
+		];
 ?>
 
 
@@ -43,30 +52,34 @@ use app\models\ResultStatus;
 		  <?php
 		   $url4='';
 		    echo Html::submitButton('', [
-								'span class' => 'glyphicon glyphicon-knight',
-								'title'=>'Создать инцидент  в mantis',
-								'name'=>'btn',
-								'value' => 'crtm_']).'    '.
-			Html::submitButton('', [
 								'span class' => 'glyphicon glyphicon-usd',
 								'title'=>'Работы и трудозатраты по реализации  результата',
 								'name'=>'btn',
 								'value' => 'estm_'])
-			.'     '
-			.Html::a($model->mantis, $url4,['title' => '',])
+			//Html::submitButton('', [
+								//'span class' => 'glyphicon glyphicon-knight',
+								//'title'=>'Создать инцидент  в mantis',
+								//'name'=>'btn',
+								//'value' => 'crtm_']).'    '.
+			//.'     '
+			//.Html::a($model->mantis, $url4,['title' => '',])
 		  ?>
 	    </div>  
    </div> 	
    <div class="row">
-		<div class="col-sm-4">
+		<div class="col-sm-3">
 			<?= $form->field($model, 'name') ?>   
 	    </div>
-	    <div class="col-sm-4">
+	    <div class="col-sm-3">
 			<?= $form->field($model, 'idResultType')->dropDownList($items1,$params1) ?>   
 	    </div>
-	    <div class="col-sm-4">
+	    <div class="col-sm-3">
 			<?= $form->field($model, 'idResultStatus')->dropDownList($items2,$params2) ?>   
 	    </div>
+	    <div class="col-sm-3">
+			<?= $form->field($model, 'idsystem_versions')->dropDownList($items3,$params3) ?>   
+	    </div>
+	    
    </div> 	    
    <div class="row">
 	    

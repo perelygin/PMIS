@@ -7,8 +7,7 @@ use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 use yii\widgets\ActiveForm;
 
-
-    
+use app\models\vw_settings; 
 use app\models\Wbs;
 use app\models\VwProjectCommand;
 
@@ -16,10 +15,7 @@ use app\models\VwProjectCommand;
 /* @var $searchModel app\models\SearchWorksOfEstimate */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-
-    
 		//ищем родителей для rootid
-		  
 			$wbs_current_node = Wbs::findOne(['id'=>$id_node]);
 			if(!is_null($wbs_current_node)){
 				$parents = $wbs_current_node->parents()->all();	
@@ -32,18 +28,18 @@ use app\models\VwProjectCommand;
 				}
 				$this->params['breadcrumbs_wbs'][]=	['label' => $wbs_current_node->name];
 			}
-		
 		//готовим массив для dropdownist c членами команды
 		
 		$ProjectCommand = VwProjectCommand::find()->where(['idBR'=>$idBR])->all();
 		$items1 = ArrayHelper::map($ProjectCommand,'id','team_member');
 		$params1 = [
-		
 		];
 		
-		
-		
-		$this->title = 'Перечень работ,  которые необходимо выполнить для достижения результата:  "' . $wbs_current_node->name . '"';
+		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
+		if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе
+		  else $url_mantis = '';
+	
+	$this->title = 'Перечень работ,  которые необходимо выполнить для достижения результата:  "' . $wbs_current_node->name . '"';
 
 ?>
 <!-- <pre> <?= var_dump($ProjectCommand) ?></pre>  -->
@@ -108,9 +104,12 @@ use app\models\VwProjectCommand;
 		        //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
 		        .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',])
 				.Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
+				.Html::a($VwListOfWorkEffort[$i]['mantisNumber'], $url_mantis.$VwListOfWorkEffort[$i]['mantisNumber'],['target' => '_blank'])
+				.' '
 		        .$VwListOfWorkEffort[$i]['WorkName'].'</td></tr>');
         
 		foreach($VwListOfWorkEffort as $vlwe){
+			//print_r($vlwe);die;
 			$url4 = Url::to(['works_of_estimate/delete_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id, 'idLaborExpenditures'=>$vlwe['idLaborExpenditures']]);   //удаление трудозарат из работы			
 			if($vlwe['idWorksOfEstimate'] == $id){
 				if(isset($vlwe['workEffort'])){
@@ -133,6 +132,8 @@ use app\models\VwProjectCommand;
 				 //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
 				 .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',])
 				 .Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
+				 .Html::a($vlwe['mantisNumber'], $url_mantis.$vlwe['mantisNumber'],['target' => '_blank'])
+	 			 .' '
 				 .$vlwe['WorkName'].'</td></tr>');
 				 if(isset($vlwe['workEffort'])){
 					 echo('<tr><td>'
