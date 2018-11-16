@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			  <td>'.Html::a($dp_str->name, Url::toRoute(['br/update_wbs_node', 'id_node'=>$dp_str->id,'idBR'=>$dp_str->idBr]),['title' => '','target' => '_blank']). '</td>
 			  <td>'. $dp_str->ResultStatusName. '</td>
 			  <td>'. $dp_str->fio.'</td>
-			  <td>'. $dp_str->CustomerName.'<td>
+			  <td>'. $dp_str->CustomerName.'</td>
 			  </tr>';	
 			  $idEstPckg = BusinessRequests::findOne(['idBR'=>$dp_str->idBr])->getLastEstimateId(); 
 			  if(!is_null($idEstPckg)){  //если есть пакет оценок по BR
@@ -68,10 +68,8 @@ $this->params['breadcrumbs'][] = $this->title;
 					foreach($WorksList as $wl){
 					  echo '<tr>
 					  <td></td>
-					  <td>'.Html::a($wl['mantisNumber'], $url_mantis.$wl['mantisNumber'],['target' => '_blank']).' '.$wl['WorkName']. '</td>
-					  <td>'. '</td>
-					  <td>'. '</td>
-					  <td>'. '<td>
+					  <td colspan="4">'.Html::a($wl['mantisNumber'], $url_mantis.$wl['mantisNumber'],['target' => '_blank']).' '.$wl['WorkName']. '</td>
+				
 					  </tr>';	
 				    }
 				  }
