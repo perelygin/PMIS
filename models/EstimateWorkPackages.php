@@ -59,4 +59,16 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 		$BrInfo = array('BRName' => $BR->BRName,'BRNumber'=>$BR->BRNumber,'EstimateName'=>$this->EstimateName,'dataEstimate'=>$this->dataEstimate);
         return $BrInfo;
     }
+    /*
+     * возвращает список работ по пакету работ и результату
+     */
+    public function getWorksList($idWbs)
+    {
+	     $sql = "SELECT * FROM Yii2pmis.WorksOfEstimate
+					where idEstimateWorkPackages =".$this->idEstimateWorkPackages." and idWbs = ".$idWbs ;
+		$WorksList = Yii::$app->db->createCommand($sql)->queryAll();		
+		
+		return $WorksList;	
+		
+    }
 }

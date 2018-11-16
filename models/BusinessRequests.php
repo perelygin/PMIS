@@ -73,5 +73,24 @@ class BusinessRequests extends \yii\db\ActiveRecord
     public function get_BRRoleModelType(){
 		return $this->BRRoleModelType;
 	}
+	    /*
+     * возвращает id последней  оценки по экспертизе
+     */
+    public function getLastEstimateId()
+    {
+	    $sql = "SELECT * FROM Yii2pmis.EstimateWorkPackages 
+				where idBR = "
+				.$this->idBR
+				." order by dataEstimate desc limit 1";
+		$EstPckg = Yii::$app->db->createCommand($sql)->queryOne();		
+		if($EstPckg){
+			
+			return $EstPckg['idEstimateWorkPackages'];	
+		} else {
+			return null;
+				}
+			
+        
+    }
     
 }
