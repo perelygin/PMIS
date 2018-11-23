@@ -76,7 +76,48 @@ class BrController extends Controller
             'model' => $this->findModel($id),
         ]);
     }
-
+    /**
+     * копирует оценку трудозатрат
+     
+     */
+    public function actionCopy_ewp($idEWP)
+    {
+       $EstimateWorkPackages =  EstimateWorkPackages::findOne($idEWP);
+	   if(!is_null($EstimateWorkPackages)){  //копируем пакет
+		   $NewEstimateWorkPackages = new EstimateWorkPackages();
+		   $NewEstimateWorkPackages->dataEstimate = $EstimateWorkPackages->dataEstimate;
+		   $NewEstimateWorkPackages->EstimateName = $EstimateWorkPackages->EstimateName.' копия ';
+		   $NewEstimateWorkPackages->idBR = $EstimateWorkPackages->idBR;
+		   $NewEstimateWorkPackages->save();
+  	       if($EstimateWorkPackages->hasErrors()){
+					Yii::$app->session->addFlash('error',"Ошибка копирования пакета оценок ");
+		   }else{ //копируем работы
+			   $WorksOfEstimate = WorksOfEstimate::find()->where(['idEstimateWorkPackages' => $EstimateWorkPackages->idEstimateWorkPackages])->all();
+			   //print_r($WorksOfEstimate); die;
+			   if(!empty($WorksOfEstimate)){
+				   foreach($WorksOfEstimate as $woe){
+					     $NewWorksOfEstimate = new WorksOfEstimate();
+					     $NewWorksOfEstimate->WorkName = $woe['WorkName'];
+					     $NewWorksOfEstimate->idWbs = $woe['idWbs'];
+					     $NewWorksOfEstimate->WorkDescription = $woe['WorkDescription'];
+					     $NewWorksOfEstimate->mantisNumber = $woe['mantisNumber'];
+					     $NewWorksOfEstimate->idEstimateWorkPackages = $NewEstimateWorkPackages['idEstimateWorkPackages'];
+					     $NewWorksOfEstimate->save();
+					     if($NewWorksOfEstimate->hasErrors()){
+						   Yii::$app->session->addFlash('error',"Ошибка копирования работ из пакета оценок ");
+						  }else{	     //копируем трудозатраты
+						    $sql= "insert into WorkEffort (idWorksOfEstimate, idTeamMember,WorkEffort) 
+									select '".$NewWorksOfEstimate->idWorksOfEstimate."',idTeamMember,WorkEffort from WorkEffort
+									 where idWorksOfEstimate = ".$woe['idWorksOfEstimate'];
+						    $a = Yii::$app->db->createCommand($sql)->execute(); 
+						    
+						 }     
+					   }
+				}	   
+			}
+		}
+	   return 	$this->redirect(['update','id' => $EstimateWorkPackages->idBR, 'page_number'=>4]);   
+    }
     /**
      * Creates a new VwListOfBR model.
      * If creation is successful, the browser will be redirected to the 'update' page.
