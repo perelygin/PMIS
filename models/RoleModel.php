@@ -56,4 +56,20 @@ class RoleModel extends \yii\db\ActiveRecord
 		 $RoleModel = $this::find()->asArray()->where(['idRoleModelType' => $RoleModelType])->orderBy('idRole')->all(); 
 		 return $RoleModel;
 	 }
+	  /*
+     * возвращает массив из перечня тарифов ролевой модели заданного типа
+     */
+     
+     public function get_RoleTarifModel($RoleModelType)
+     {
+		 $sql = "SELECT trf.idTariff,trf.TariffName
+					FROM Yii2pmis.RoleModel as rlm 
+					LEFT OUTER JOIN Tariff trf ON rlm.idTariff = trf.idTariff
+					where rlm.idRoleModelType = ".$RoleModelType
+					." group by trf.idTariff
+					order by trf.idTariff";
+		 $RoleTarifModel = Yii::$app->db->createCommand($sql)->queryAll(); 				// выбрали тарифы для ролевой модели					 
+		
+		 return $RoleTarifModel;
+	 }
 }

@@ -264,7 +264,7 @@ class SiteController extends Controller
          $auth->addChild($pm, $BRDelete);
         
          // Назначаем роль admin пользователю с ID 1
-        //$auth->assign($admin, 4); 
+        $auth->assign($pm, 2); 
         
         // Назначаем роль editor пользователю с ID 2
         //$auth->assign($editor, 2);

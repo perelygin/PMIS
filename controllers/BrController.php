@@ -583,14 +583,18 @@ class BrController extends Controller
    public function actionPrint_estimate_work_packages_grouped($idEWP,$idBR){
 	   $BR = BusinessRequests::findOne($idBR);
 	   $RoleModelType = $BR->get_BRRoleModelType();
+	   
 	   $sql=   "SELECT 
 					rlm.idRole,  
 				    rlm.RoleName,
 					tmp_tbl2.idWbs,
 				    tmp_tbl2.idWorksOfEstimate,
 				    tmp_tbl2.WorkName,
-				    tmp_tbl2.sumWE
+				    tmp_tbl2.sumWE,
+				    trf.idTariff,
+					trf.TariffName
 				FROM RoleModel as rlm
+				LEFT OUTER JOIN Tariff trf ON rlm.idTariff = trf.idTariff
 				LEFT OUTER JOIN 
 				(Select idWbs,idWorksOfEstimate,WorkName,idRole, SUM(workEffort) as sumWE FROM
 					(Select 
@@ -606,7 +610,33 @@ class BrController extends Controller
 				GROUP BY idRole) tmp_tbl2 ON rlm.idRole = tmp_tbl2.idRole
 				where idRoleModelType = ".$RoleModelType
 				." order by idRole";
-				
+		 ////для итогов с приведением к стоимостям 
+		 //$sql_2=   "SELECT  
+							//rlm.idRole,  
+						    //rlm.RoleName,
+						    //trf.idTariff,
+						    //trf.TariffName,
+							//tmp_tbl2.idWbs,
+						    //tmp_tbl2.idWorksOfEstimate,
+						    //tmp_tbl2.WorkName,
+						    //tmp_tbl2.sumWE
+						//FROM RoleModel as rlm
+						//LEFT OUTER JOIN Tariff trf ON rlm.idTariff = trf.idTariff
+						//LEFT OUTER JOIN 
+						//(Select idWbs,idWorksOfEstimate,WorkName,idRole, SUM(workEffort) as sumWE FROM
+							//(Select 
+								//wos.idWorksOfEstimate,  
+								//wos.WorkName,
+								//wos.idWbs,
+								//wef.workEffort,
+								//pc.idRole
+							//from WorksOfEstimate as wos
+							//LEFT OUTER JOIN WorkEffort wef ON wos.idWorksOfEstimate = wef.idWorksOfEstimate
+							//LEFT OUTER JOIN ProjectCommand pc ON wef.idTeamMember = pc.id
+							//where wos.idWorksOfEstimate =:idwoe) as tmp_tbl
+						//GROUP BY idRole) tmp_tbl2 ON rlm.idRole = tmp_tbl2.idRole
+						//where idRoleModelType = ".$RoleModelType
+						//." order by idTariff";				
 		$sql1 = "SELECT 
 						wbs.id,
 						wbs.tree, 
@@ -625,6 +655,8 @@ class BrController extends Controller
 						order by id,idWorksOfEstimate";
 		$RM = new RoleModel();
 		$RoleHeader = $RM->get_RoleModel($RoleModelType);
+		$RoleTarifHeader = $RM->get_RoleTarifModel($RoleModelType);
+		
 		$print_WOEs = Yii::$app->db->createCommand($sql1)->queryAll(); 				// выбрали все работы по BR
 		$BR  = BusinessRequests::findOne($idBR);
 	    $EWP = EstimateWorkPackages::findOne($idEWP); //оценка
@@ -795,7 +827,8 @@ class BrController extends Controller
 	        'BR'=>$BR,
 	        'EWP'=>$EWP,
 	        'sql'=>$sql,
-	        'RoleHeader'=>$RoleHeader
+	        'RoleHeader'=>$RoleHeader,
+	        'RoleTarifHeader'=>$RoleTarifHeader
 	    ]); 
 			
    }

@@ -37,12 +37,17 @@ use kartik\date\DatePicker;
 	    $strhead = '<tr><td></td><td></td>';
 	    $strEnd ='';
 	    $arraySum =array(); //для подсчета итогов
+	    $arraySum1 =array(); //для подсчета итогов с приведеним к ролям из договора
 	    
 	    foreach($RoleHeader as $rh){
 			$strhead =$strhead.'<td> &nbsp'.$rh['RoleName'].'&nbsp </td>';
 			$strEnd = $strEnd.'<td></td>';
 			$arraySum[$rh['RoleName']] = 0;
 		}
+	    foreach($RoleTarifHeader as $rth){
+			$arraySum1[$rth['TariffName']] = 0;
+		}
+		
 		
 		echo($strhead.'</tr>');
 	    if(count($print_WOEs)>0){
@@ -53,6 +58,7 @@ use kartik\date\DatePicker;
 				foreach($print_wef as $pwef){
 					$str = $str.'<td align="center">'.$pwef['sumWE'].'</td>'; //.' '.$pwef['RoleName']
 					$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
+					$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']; //подсчет итогов
 				}
 				$str = $str.'</tr>';
 					
@@ -104,23 +110,53 @@ use kartik\date\DatePicker;
 	  </table>
 	  
     <br>
-    <table border = "1" cellpadding="4" cellspacing="2">
-		<?php
-			foreach($arraySum as $ars => $v){
-				
-			  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
-				  $a = $v+$total10;
-				   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
-			  } else {
-					echo('<tr><td>'.$ars.'</td><td>'.$v.'</td></tr>');
-				
-			  }
-				
-			}
-		//}
-		echo('<tr><td><b>Итого</b></td><td><b>'.($total+$total10).'</b></td></tr>');
-		?>	
-	</table>
+    
+    <div class="container">
+	   <div class="row">
+		  <div class="col-sm-3">
+		    <table border = "1" cellpadding="4" cellspacing="2">
+				<?php
+					foreach($arraySum as $ars => $v){
+						
+					  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
+						  $a = $v+$total10;
+						   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+					  } else {
+							echo('<tr><td>'.$ars.'</td><td>'.$v.'</td></tr>');
+						
+					  }
+						
+					}
+				//}
+				echo('<tr><td><b>Итого</b></td><td><b>'.($total+$total10).'</b></td></tr>');
+				?>	
+			</table>
+		</div>
+		 <div class="col-sm-3">
+			  <table border = "1" cellpadding="4" cellspacing="2">
+			  <?php
+		 	    //Итоги с приведеним к ролям из договора
+		 	          $total = 0 ;
+		 	    	  foreach($arraySum1 as $ars => $v){
+					  $total =$total + $v;	
+					  if($ars=='Инженер по тестированию ПО' ){  //инженер по тестированию
+						  $a = $v+$total10;
+						   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+					  } else {
+							echo('<tr><td>'.$ars.'</td><td>'.$v.'</td></tr>');
+						
+					  }
+						
+					}
+					$total10 = $total/10;
+					echo('<tr><td><b>Итого</b></td><td><b>'.($total+$total10).'</b></td></tr>');
+		 	  ?>
+			  </table>
+		 </div>
+		</div>
+	 	
+	 	
+	 	
 	 	
       <div class="form-group">
            <?php
