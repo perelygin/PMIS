@@ -138,18 +138,19 @@ use kartik\date\DatePicker;
 		 	    //Итоги с приведеним к ролям из договора
 		 	          $total = 0 ;
 		 	    	  foreach($arraySum1 as $ars => $v){
-					  $total =$total + $v;	
-					  if($ars=='Инженер по тестированию ПО' ){  //инженер по тестированию
-						  $a = $v+$total10;
-						   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
-					  } else {
-							echo('<tr><td>'.$ars.'</td><td>'.$v.'</td></tr>');
-						
-					  }
+						  if($ars == 'Инженер по тестированию ПО' ){  //инженер по тестированию
+							  $a = round($v+$total10);
+							  $total =$total + $a;
+							   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+						  } else {
+							    $v_r = round($v);
+							    $total =$total + $v_r;
+								echo('<tr><td>'.$ars.'</td><td>'.$v_r.'</td></tr>');
+							
+						  }
 						
 					}
-					$total10 = $total/10;
-					echo('<tr><td><b>Итого</b></td><td><b>'.($total+$total10).'</b></td></tr>');
+					echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
 		 	  ?>
 			  </table>
 		 </div>
