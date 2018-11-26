@@ -669,6 +669,7 @@ class BrController extends Controller
 		$strhead = '<tr><td></td><td></td>';
 	    $strEnd ='';
 	    $arraySum =array(); //для подсчета итогов
+	    $arraySum1 =array(); //для подсчета итогов с приведеним к ролям из договора
 	    $Alfabet = 'ABCDEFGHIJKLMNOPQR';
 	    
 			   
@@ -699,6 +700,9 @@ class BrController extends Controller
 				 $arraySum[$rh['RoleName']] = 0;
 				 $j=$j+1;
 			 }
+			 foreach($RoleTarifHeader as $rth){
+				 $arraySum1[$rth['TariffName']] = 0;
+			 }
 			  $ex_row = $ex_row+1;
 			 if(count($print_WOEs)>0){
 				 $id = -1;
@@ -714,6 +718,7 @@ class BrController extends Controller
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
+							$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']; //подсчет итогов для группировки по тарифу
 							$j=$j+1;
 						}
 						$ex_row = $ex_row+1;	
@@ -731,6 +736,7 @@ class BrController extends Controller
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
+							$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']; //подсчет итогов для группировки по тарифу
 							$j=$j+1;
 						}
 						$ex_row = $ex_row+1;
@@ -740,6 +746,7 @@ class BrController extends Controller
 				
 				//итоги
 				$totalsumm =0;
+				
 				$totalSymbol ='A';
 				$ex_row = $ex_row+1;
 				$j=2;
@@ -752,6 +759,7 @@ class BrController extends Controller
 					$totalsumm = $totalsumm + $v;
 					$totalSymbol = substr($Alfabet,$j,1);
 				}
+				$total10 = $totalsumm/10;
 				$ex_row = $ex_row+1;
 				$sheet->setCellValue('B'.$ex_row,'Дополнительное тестирование (10% от общих трудозатрат)');
 				$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
@@ -794,6 +802,8 @@ class BrController extends Controller
 				
 				$ex_row = $ex_row+3;
 				$totalrow = $ex_row;  //начало рамки
+				
+				
 				foreach($arraySum as $ars => $v){
 					  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 						  
@@ -811,14 +821,46 @@ class BrController extends Controller
 				$sheet->setCellValue('B'.$ex_row,'Итого');
 				$sheet->setCellValue('C'.$ex_row,$totalsumm+$totalsumm/10);
 				$sheet->getStyle('B'.$ex_row.':C'.$ex_row)->getFont()->setBold(true);
-				
 				//ставим рамки
 				$sheet->getStyle('B'.$totalrow.':C'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
 				
+				//
+				//Итоги с приведеним к ролям из договора
+				     $ex_row = $ex_row+2;
+				     $totalrow = $ex_row;  //начало рамки
+		 	          $total = 0 ;
+		 	    	  foreach($arraySum1 as $ars => $v){
+						  if($ars == 'Инженер по тестированию ПО' ){  //инженер по тестированию
+							  $a = round($v+$total10);
+							  $total =$total + $a;
+							  $sheet->setCellValue('B'.$ex_row,$ars);
+							  $sheet->setCellValue('C'.$ex_row,$a);
+							  $ex_row = $ex_row+1; 
+							   	//echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+						  } else {
+							    $v_r = round($v);
+							    $total =$total + $v_r;
+							    $sheet->setCellValue('B'.$ex_row,$ars);
+								$sheet->setCellValue('C'.$ex_row,$v_r);
+								$ex_row = $ex_row+1;
+								//echo('<tr><td>'.$ars.'</td><td>'.$v_r.'</td></tr>');
+						  }
+						
+					}
+					//echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
+					$ex_row = $ex_row+2;
+					$sheet->setCellValue('B'.$ex_row,'Итого');
+					$sheet->setCellValue('C'.$ex_row,$total);
+					$sheet->getStyle('B'.$ex_row.':C'.$ex_row)->getFont()->setBold(true);
+					//ставим рамки
+					$sheet->getStyle('B'.$totalrow.':C'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
+				
+				
 			 }
 			$writer = new Xlsx($spreadsheet);
-			$writer->save('hwd2.xlsx');
-	        return Yii::$app->response->sendFile('/var/www/html/pmis_app/web/hwd2.xlsx')->send();  
+			$file_name = 'work_estimate_BR_'.$BR->BRNumber.'.xlsx';
+			$writer->save($file_name);
+	        return Yii::$app->response->sendFile('/var/www/html/pmis_app/web/'.$file_name)->send();  
 		   }
 	  }  
   	  return $this->render('PrintEstimateWorkPackagesGroup', [
