@@ -15,12 +15,12 @@ use yii\helpers\Url;
 $ResultStatus = ResultStatus::find()->where(['deleted'=>0])->all();
 $items1 = ArrayHelper::map($ResultStatus,'idResultStatus','ResultStatusName');
 $params1 = [
-
+	'prompt' => 'Выберите статус',
 ];
 $SystemVersions = SystemVersions::find()->where(['deleted'=>0])->all();
 $items2 = ArrayHelper::map($SystemVersions,'idsystem_versions','version_number');
 $params2 = [
-
+ 'prompt' => 'Выберите версию',
 ];
 
 ?>
@@ -56,8 +56,8 @@ $params2 = [
 			  
 		  </div>
 		  <div class="col-sm-3">
-			  <?php  echo	$form->field($model, 'idsystem_versions')->dropDownList($items2,$params2);	?>
-			  
+			  <?php echo	$form->field($model, 'idsystem_versions')->dropDownList($items2,$params2);	?>
+			   <?php // echo $form->field($model, 'idsystem_versions') ?>
 		  </div>
 	</div>
 </div>
