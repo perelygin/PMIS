@@ -18,7 +18,7 @@ class VwReport1Search extends VwReport1
     public function rules()
     {
         return [
-            [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus'], 'integer'],
+            [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus','version_number','idsystem_versions'], 'integer'],
             [['BRName', 'name', 'mantis', 'ResultStatusName', 'fio', 'CustomerName'], 'safe'],
         ];
     }
@@ -51,10 +51,12 @@ class VwReport1Search extends VwReport1
 		
 
         $this->load($params);
-
+        
+         
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
+           
             return $query->all();
         }
 
@@ -65,7 +67,10 @@ class VwReport1Search extends VwReport1
             'idBr' => $this->idBr,
             'idOrgResponsible' => $this->idOrgResponsible,
             'idResultStatus' => $this->idResultStatus,
+            'idsystem_versions' => $this->idsystem_versions
         ]);
+
+//Yii::$app->session->addFlash('error',$this->idResultStatus);
 
         $query->andFilterWhere(['like', 'BRName', $this->BRName])
             ->andFilterWhere(['like', 'name', $this->name])

@@ -3,10 +3,14 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
+use app\models\vw_settings; 
 
 /* @var $this yii\web\View */
 /* @var $model app\models\EstimateWorkPackages */
 /* @var $form ActiveForm */
+$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
+		if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе
+		  else $url_mantis = '';
 ?>
 <div class="PrintEstimateWorkPackages">
     <h3><?= 'Оценка трудозатрат по BR-'.Html::encode($BR->BRNumber.'  "'.$BR->BRName.'"') ?></h3>
@@ -54,7 +58,9 @@ use kartik\date\DatePicker;
 			$id = -1; //$print_WOEs[0]['id'];
 			 foreach($print_WOEs as $pwoe){
 				$print_wef = Yii::$app->db->createCommand($sql)->bindValue(':idwoe',$pwoe['idWorksOfEstimate'])->queryAll(); //выбрали трудозатраты по ролям  для работы
-				$str = '<tr><td>&nbsp&nbsp&nbsp&nbsp</td><td>'.$pwoe['WorkName'].'</td>';
+				$str = '<tr><td>&nbsp&nbsp'
+				  .Html::a($pwoe['mantisNumber'], $url_mantis.$pwoe['mantisNumber'],['target' => '_blank'])
+				  .'</td><td>'.$pwoe['WorkName'].'</td>';
 				foreach($print_wef as $pwef){
 					$str = $str.'<td align="center">'.$pwef['sumWE'].'</td>'; //.' '.$pwef['RoleName']
 					$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов

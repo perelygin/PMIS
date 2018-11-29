@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use app\models\ResultStatus;
 use app\models\VwProjectCommand;
+use app\models\SystemVersions;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
@@ -16,7 +17,11 @@ $items1 = ArrayHelper::map($ResultStatus,'idResultStatus','ResultStatusName');
 $params1 = [
 
 ];
+$SystemVersions = SystemVersions::find()->where(['deleted'=>0])->all();
+$items2 = ArrayHelper::map($SystemVersions,'idsystem_versions','version_number');
+$params2 = [
 
+];
 
 ?>
 
@@ -51,6 +56,7 @@ $params1 = [
 			  
 		  </div>
 		  <div class="col-sm-3">
+			  <?php  echo	$form->field($model, 'idsystem_versions')->dropDownList($items2,$params2);	?>
 			  
 		  </div>
 	</div>

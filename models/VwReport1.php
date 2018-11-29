@@ -39,7 +39,7 @@ class VwReport1 extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus','idHuman'], 'integer'],
+            [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus','idHuman','version_number','idsystem_versions'], 'integer'],
             [['idBr', 'name'], 'required'],
             [['BRName', 'mantis'], 'string', 'max' => 150],
             [['name'], 'string', 'max' => 255],
@@ -66,6 +66,7 @@ class VwReport1 extends \yii\db\ActiveRecord
             'ResultStatusName' => 'Статус',
             'fio' => 'Ответственный',
             'CustomerName' => 'Отв.  организация',
+            'idsystem_versions' => 'Плановая версия'
         ];
     }
 }

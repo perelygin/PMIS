@@ -67,16 +67,18 @@ use app\models\SystemVersions;
 	    </div>  
    </div> 	
    <div class="row">
-		<div class="col-sm-3">
+		<div class="col-sm-12">
 			<?= $form->field($model, 'name') ?>   
 	    </div>
-	    <div class="col-sm-3">
+   </div>	    
+   <div class="row">
+	    <div class="col-sm-4">
 			<?= $form->field($model, 'idResultType')->dropDownList($items1,$params1) ?>   
 	    </div>
-	    <div class="col-sm-3">
+	    <div class="col-sm-4">
 			<?= $form->field($model, 'idResultStatus')->dropDownList($items2,$params2) ?>   
 	    </div>
-	    <div class="col-sm-3">
+	    <div class="col-sm-4">
 			<?= $form->field($model, 'idsystem_versions')->dropDownList($items3,$params3) ?>   
 	    </div>
 	    

@@ -601,6 +601,7 @@ class BrController extends Controller
 						wos.idWorksOfEstimate,  
 						wos.WorkName,
 						wos.idWbs,
+						wos.mantisNumber,
 						wef.workEffort,
 						pc.idRole
 					from WorksOfEstimate as wos
@@ -647,7 +648,8 @@ class BrController extends Controller
 						wbs.idBr,
 						woe.idEstimateWorkPackages,
 						woe.idWorksOfEstimate,
-						woe.WorkName
+						woe.WorkName,
+						woe.mantisNumber
 						FROM wbs  
 						LEFT OUTER JOIN (Select * from WorksOfEstimate where idEstimateWorkPackages= ".$idEWP." ) woe ON woe.idWbs=wbs.id
 						where wbs.idBr = ".$idBR." and (woe.idEstimateWorkPackages = ".$idEWP." or isnull(woe.idEstimateWorkPackages)) 
