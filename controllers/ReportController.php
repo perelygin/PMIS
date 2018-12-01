@@ -27,5 +27,16 @@ class ReportController extends \yii\web\Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-  
+    //сводный сетевой график
+    public function actionReport2()
+    {
+		
+        $searchModel = new VwReport1Search();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('index_report2', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }  
 }
