@@ -73,8 +73,8 @@ use app\models\VwProjectCommand;
 					 $url2 = Url::to(['works_of_estimate/create', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-plus-sign"></span>', $url2,['title' => 'Добавить работу',]);
 					 echo "   ";
-					  $url2 = Url::to(['works_of_estimate/works_template', 'idBR'=>$idBR]);;
-					 echo  Html::a('<span class="glyphicon glyphicon-save-file"></span>', $url2,['title' => 'Добавить работы по шаблону',]);
+					 //$url2 = Url::to(['works_of_estimate/works_template', 'idBR'=>$idBR]);;
+					 //echo  Html::a('<span class="glyphicon glyphicon-save-file"></span>', $url2,['title' => 'Добавить работы по шаблону',]);
 				   ?>
 
 			    </div>

@@ -80,9 +80,9 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		
 		//итоги
 		$total =0;
-		$strbottom0 = '<tr><td></td><td>Итого</td>';
+		$strbottom0 = '<tr><td></td><td><b>Итого</td>';
 		foreach($arraySum as $ars => $v){
-		  $strbottom0 =$strbottom0.'<td align="center"> &nbsp'.$v.'&nbsp </td>';
+		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$v.'&nbsp </td>';
 		  $total =$total + $v;
 		}
 		$total10 = $total/10;

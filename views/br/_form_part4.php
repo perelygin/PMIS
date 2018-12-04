@@ -43,7 +43,7 @@
 					    'value' => function($data){
 							return Html::a(
 									           '  '.$data->EstimateName,
-									           Url::toRoute(['br/show_br_estimates', 'id' =>$data->idBR]),
+									           Url::toRoute(['br/update_estimate_work_packages', 'idEWP' =>$data->idEstimateWorkPackages,'idBR'=>$data->idBR]),
 									           ['title' => 'показать трудозатраты по BR', 'align' => 'right']
 									          );
 								

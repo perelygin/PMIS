@@ -24,15 +24,20 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php echo $this->render('_search_report1', ['model' => $searchModel]); ?>
 
+
+ <table border = "1" cellpadding="4" cellspacing="2">
    <?php
-      $i = imageCreate(200, 300);
-	  $color = imageColorAllocate($i, 255, 255, 0);
-	  imageFilledRectangle($i, 0, 0, imageSX($i), imageSY($i), $color);
-	  Header("Content-type: image/jpeg");
-	  imageJpeg($i);
-	  imageDestroy($i);
+     $st = '<tr>';
+     for($i = 1; $i <= 100; $i++){
+		 if ($i>50 and $i<60)
+			$st	 = $st.'<td bgcolor="#ffcc00" >_</td>'; 
+		 else
+			$st	 = $st.'<td bgcolor="#FFFFFF" >_</td>'; 
+		 }
+	 $st	 = $st.'</tr>';
+	 echo $st;
    ?>
-  
+ </table>  
     
       <table border = "1" cellpadding="4" cellspacing="2">
 		  <?php 

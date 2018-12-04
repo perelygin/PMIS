@@ -81,7 +81,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
 	    $sql = "SELECT * FROM Yii2pmis.EstimateWorkPackages 
 				where idBR = "
 				.$this->idBR
-				." order by dataEstimate desc limit 1";
+				." and deleted = 0 order by dataEstimate desc limit 1";
 		$EstPckg = Yii::$app->db->createCommand($sql)->queryOne();		
 		if($EstPckg){
 			

@@ -860,7 +860,7 @@ class BrController extends Controller
 				
 			 }
 			$writer = new Xlsx($spreadsheet);
-			$file_name = 'work_estimate_BR_'.$BR->BRNumber.'.xlsx';
+			$file_name = 'BR_'.$BR->BRNumber.'_work_estimate_'.$EWP->dataEstimate.'.xlsx';
 			$writer->save($file_name);
 	        return Yii::$app->response->sendFile('/var/www/html/pmis_app/web/'.$file_name)->send();  
 		   }

@@ -24,31 +24,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php echo $this->render('_search_report1', ['model' => $searchModel]); ?>
 
-  
-    <?php
-     //GridView::widget([
-        //'dataProvider' => $dataProvider,
-        //'filterModel' => $searchModel,
-        //'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            //'BRNumber',
-            //'BRName',
-            //'id',
-            //'idBr',
-            //'idOrgResponsible',
-            ////'name',
-            ////'idResultStatus',
-            ////'mantis',
-            ////'ResultStatusName',
-            ////'fio',
-            ////'CustomerName',
-
-        //],
-    //]); 
-    
-     
-    ?>
     
       <table border = "1" cellpadding="4" cellspacing="2">
 		  <?php 
