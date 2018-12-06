@@ -10,6 +10,7 @@ use yii\widgets\ActiveForm;
 use app\models\vw_settings; 
 use app\models\Wbs;
 use app\models\VwProjectCommand;
+use app\models\BusinessRequests;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\SearchWorksOfEstimate */
@@ -59,10 +60,18 @@ use app\models\VwProjectCommand;
 		   </div> 
 		  	   	
 		   <div class="row">
-				<div class="col-sm">
+				<div class="col-sm-10">
 					<?php  echo $this->render('_search', ['model' => $searchModel, 'idBR'=>$idBR, 'id_node'=>$id_node, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]); ?>				   
 			    </div>
+			    <div class="col-sm-2">
+					<?php  
+					   $BR = BusinessRequests::findOne($idBR);
+					   $idLastEWP = $BR->getLastEstimateId();
+					if($idEstimateWorkPackages != $idLastEWP){echo 'Внимание! Выбрана не актуальна оценка трудозатрат';};
+					 ?>				   
+			    </div>
 		   </div> 
+		   
 		    <div class="row">
 				<div class="col-sm-4">
 				 	
