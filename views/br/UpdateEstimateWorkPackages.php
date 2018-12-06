@@ -7,6 +7,13 @@ use kartik\date\DatePicker;
 /* @var $this yii\web\View */
 /* @var $model app\models\EstimateWorkPackages */
 /* @var $form ActiveForm */
+
+		//$items = ArrayHelper::map($Organization,'idProject','ProjectName');
+		$items = array('0'=>'Активна','1'=>'Закрыта');
+		
+		$params = [
+			//'prompt' => 'Выберите проект'
+		];
 ?>
 <div class="UpdateEstimateWorkPackages">
 
@@ -42,6 +49,9 @@ use kartik\date\DatePicker;
 			</div>
 		<div class="col-sm-4">
 			<?= $form->field($model, 'EstimateName') ?>
+		</div>
+		<div class="col-sm-3">
+			<?= $form->field($model, 'finished')->dropDownList($items,$params) ?>
 		</div>
 	  </div>	
       <div class="form-group">

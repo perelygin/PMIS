@@ -96,7 +96,7 @@ class Works_of_estimateController extends Controller
 		}	
 		 
 		if($idEstimateWorkPackages == -1){ //если все еще -1, то ищем любой по этой BR
-			   $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->one();
+			   $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->orderBy('dataEstimate DESC')->one();
 			   if(is_null($BREstimateList)){
 				 Yii::$app->session->addFlash('error',"Для данной BR нет ни одной оценки трудозатрат. Создайте ее пожалуйста");
 				 return $this->redirect(['br/update','id' => $idBR, 'page_number'=>4]);

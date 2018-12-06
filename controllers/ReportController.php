@@ -4,6 +4,7 @@ namespace app\controllers;
 use Yii;
 use app\models\VwReport1;
 use app\models\VwReport1Search;
+use app\components\myHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -31,6 +32,8 @@ class ReportController extends \yii\web\Controller
     public function actionReport2()
     {
 		
+//		echo MyHelper::Round_05(3.56); die;
+
         $searchModel = new VwReport1Search();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -38,5 +41,6 @@ class ReportController extends \yii\web\Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+        
     }  
 }

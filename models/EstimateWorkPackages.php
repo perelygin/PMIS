@@ -33,7 +33,7 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
     {
         return [
             [['dataEstimate'], 'safe'],
-            [['idBR','deleted'], 'integer'],
+            [['idBR','deleted','finished'], 'integer'],
             [['EstimateName'], 'string', 'max' => 250],
         ];
     }
@@ -48,6 +48,7 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
             'dataEstimate' => 'Дата оценки',
             'EstimateName' => 'Наименование оценки',
             'idBR' => 'Id Br',
+            'finished' =>'Статус'
         ];
     }
     /*

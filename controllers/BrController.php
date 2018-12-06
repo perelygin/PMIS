@@ -25,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use app\components\myHelper;
 use SoapClient;
 
 
@@ -85,7 +86,7 @@ class BrController extends Controller
        $EstimateWorkPackages =  EstimateWorkPackages::findOne($idEWP);
 	   if(!is_null($EstimateWorkPackages)){  //копируем пакет
 		   $NewEstimateWorkPackages = new EstimateWorkPackages();
-		   $NewEstimateWorkPackages->dataEstimate = $EstimateWorkPackages->dataEstimate;
+		   $NewEstimateWorkPackages->dataEstimate = date("Y-m-d"); 
 		   $NewEstimateWorkPackages->EstimateName = $EstimateWorkPackages->EstimateName.' копия ';
 		   $NewEstimateWorkPackages->idBR = $EstimateWorkPackages->idBR;
 		   $NewEstimateWorkPackages->save();
@@ -227,7 +228,7 @@ class BrController extends Controller
 		$prj_comm_model = $prjComm->get_RoleModel($id); //массив с описанием комманды BR
 		
 		
-		$QueryEstimateList = EstimateWorkPackages::find()->where(['deleted' => 0,'idBR' => $id]);
+		$QueryEstimateList = EstimateWorkPackages::find()->where(['deleted' => 0,'idBR' => $id])->orderBy('dataEstimate');
         $EstimateListdataProvider = new ActiveDataProvider([
             'query' => $QueryEstimateList,
    
@@ -833,14 +834,16 @@ class BrController extends Controller
 		 	          $total = 0 ;
 		 	    	  foreach($arraySum1 as $ars => $v){
 						  if($ars == 'Инженер по тестированию ПО' ){  //инженер по тестированию
-							  $a = round($v+$total10);
+							  $a = MyHelper::Round_05($v+$total10);
+							  //$a = round($v+$total10);
 							  $total =$total + $a;
 							  $sheet->setCellValue('B'.$ex_row,$ars);
 							  $sheet->setCellValue('C'.$ex_row,$a);
 							  $ex_row = $ex_row+1; 
 							   	//echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
 						  } else {
-							    $v_r = round($v);
+							    $v_r= MyHelper::Round_05($v);
+							    //$v_r = round($v);
 							    $total =$total + $v_r;
 							    $sheet->setCellValue('B'.$ex_row,$ars);
 								$sheet->setCellValue('C'.$ex_row,$v_r);

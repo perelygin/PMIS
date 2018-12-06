@@ -49,6 +49,23 @@
 								
 					     }
 					    ],
+					    //'finished',
+					    [
+					      'attribute' => 'finished',
+                          'format' => 'raw',
+                          'value' => function ($model, $key, $index, $column) {
+			                    $active = $model->{$column->attribute} === 1;
+			                    return \yii\helpers\Html::tag(
+			                        'span',
+			                        $active ? 'Закрыта' : 'Активна',
+			                        [
+			                            'class' => 'label label-' . ($active ? 'danger' : 'success'),
+			                        ]
+			                    );
+			                },
+					    ],
+							
+					    
 					    [
 				            'class' => 'yii\grid\ActionColumn',
 				            'headerOptions' => ['width' => '120'],

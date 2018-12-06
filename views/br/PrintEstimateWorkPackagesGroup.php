@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use app\models\vw_settings; 
+use app\components\myHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\EstimateWorkPackages */
@@ -145,11 +146,13 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		 	          $total = 0 ;
 		 	    	  foreach($arraySum1 as $ars => $v){
 						  if($ars == 'Инженер по тестированию ПО' ){  //инженер по тестированию
-							  $a = round($v+$total10);
+							  $a = MyHelper::Round_05($v+$total10);
+							  //$a = round($v+$total10);
 							  $total =$total + $a;
 							   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
 						  } else {
-							    $v_r = round($v);
+							  $v_r = MyHelper::Round_05($v);
+							  //  $v_r = round($v);
 							    $total =$total + $v_r;
 								echo('<tr><td>'.$ars.'</td><td>'.$v_r.'</td></tr>');
 							
