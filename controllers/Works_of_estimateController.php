@@ -139,6 +139,11 @@ class Works_of_estimateController extends Controller
      */
     public function actionCreate($idEstimateWorkPackages,$idWbs,$idBR)
     {
+		$ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); // Wbs::findOne(['id'=>$parent_node_id]);
+		if($ewp->isFinished()){
+			Yii::$app->session->addFlash('error',"Оценка трудозатрат закрыта(отправлена в банк). Для корректировки необходимо связаться с менеджером проекта");
+				return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
+			}
        $modelWOS = new WorksOfEstimate();
 	   $modelWOS->idEstimateWorkPackages = $idEstimateWorkPackages;
 	   $modelWOS->idWbs = $idWbs;
@@ -203,8 +208,13 @@ class Works_of_estimateController extends Controller
      */
     public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
     {
+        $ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
+		if($ewp->isFinished()){
+			Yii::$app->session->addFlash('error',"Оценка трудозатрат закрыта(отправлена в банк). Для корректировки необходимо связаться с менеджером проекта");
+				return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
+			}
+			
         $model = $this->findModel($idWorksOfEstimate);
-		
 		$a = Yii::$app->request->post();
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//////
@@ -291,7 +301,11 @@ class Works_of_estimateController extends Controller
      */
     public function actionDeletework($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
     {
-        
+        $ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
+		if($ewp->isFinished()){
+			Yii::$app->session->addFlash('error',"Оценка трудозатрат закрыта(отправлена в банк). Для корректировки необходимо связаться с менеджером проекта");
+				return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
+			}
         $this->findModel($idWorksOfEstimate)->delete();
         return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
     }

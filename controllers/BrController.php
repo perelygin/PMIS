@@ -384,6 +384,11 @@ class BrController extends Controller
      */
     public function actionDelete_wbs_node($id_node,$idBR)
     {
+		if (!Yii::$app->user->can('WBSDeleteNode')) {   // проверка права на удаление узла 
+			Yii::$app->session->addFlash('error',"Нет прав на удаление узла.  Обратитесь к менеджеру проекта");
+			return $this->redirect(['update','id' => $idBR, 'page_number'=>3, 'root_id'=>$id_node]);
+		}
+		
 		$Node = Wbs::findOne(['id'=>$id_node]);
         $children = $Node->children()->all();
        // var_dump($children);die;

@@ -67,7 +67,11 @@ use app\models\BusinessRequests;
 					<?php  
 					   $BR = BusinessRequests::findOne($idBR);
 					   $idLastEWP = $BR->getLastEstimateId();
-					if($idEstimateWorkPackages != $idLastEWP){echo 'Внимание! Выбрана не актуальна оценка трудозатрат';};
+					if($idEstimateWorkPackages != $idLastEWP){
+						echo Html::img('@web/picture/vos11.gif', ['alt' => '']);
+						echo 'Внимание! Выбрана не актуальная оценка трудозатрат';
+						
+					};
 					 ?>				   
 			    </div>
 		   </div> 

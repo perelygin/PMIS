@@ -72,4 +72,14 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 		return $WorksList;	
 		
     }
+    /*
+     * возвращает true пакет оценок закрыт
+     * 
+     */ 
+    public function isFinished()
+    {
+		 if($this->finished == 1){
+			 return true;
+			 } else return false;
+	}
 }
