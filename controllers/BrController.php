@@ -164,6 +164,7 @@ class BrController extends Controller
 				$stage_l1 = new Wbs(['name' => $wbst['StageName'],'tree'=>$model->idBR]);
 				$stage_l1->mantis = 'www.mantis.com';
 				$stage_l1->idBr = $model->idBR;
+				$stage_l1->idResultType = $wbst['idResultType'];
 				$stage_l1->appendTo($root);
 				$stage_l1->save();
 				if($stage_l1->hasErrors()){
@@ -174,6 +175,7 @@ class BrController extends Controller
 						$stage_l2 = new Wbs(['name' => $lvl2['StageName']]);
 						$stage_l2->mantis = 'www.mantis.com';
 						$stage_l2->idBr = $model->idBR;
+						$stage_l2->idResultType = $lvl2['idResultType'];
 						$stage_l2->appendTo($stage_l1);
 						$stage_l2->save();
 						if($stage_l2->hasErrors()){
@@ -369,6 +371,7 @@ class BrController extends Controller
 		$new_child = new Wbs(['name' => 'новый узел']);
 		$new_child->mantis = 'www.mantis.com';
 		$new_child->idBr = $idBR;
+		$new_child->idResultType = $parent_node->idResultType;
 		$new_child->appendTo($parent_node);
 		$new_child->save();
 		if($new_child->hasErrors()){

@@ -26,6 +26,7 @@ use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\bootstrap\Collapse;
 use vova07\imperavi\Widget;
 //use app\models\Wbs;
 
@@ -137,6 +138,22 @@ $params1 = [
 		   </table>
 		   
 	    </div>
+    <div class="row">
+		<div class="col-sm-12">
+			<?php
+			echo Collapse::widget([
+			    'items' => [
+			        [
+			            'label' => 'История изменений',
+			            'content' => $this->render('_history', ['model' => $model, 'form' => $form,'LogDataProvider' => $LogDataProvider]),
+			            'contentOptions' => [],
+			            'options' => []
+			        ],
+			    ]
+			]);
+			?>
+		</div> 
+	</div> 
    </div> 
 </div> 	
     

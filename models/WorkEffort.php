@@ -45,4 +45,16 @@ class WorkEffort extends \yii\db\ActiveRecord
             'workEffort' => 'Work Effort',
         ];
     }
+    //public function afterSave($insert, $changedAttributes){
+	    //parent::afterSave($insert, $changedAttributes);
+	    //$sql='SELECT Sum(workEffort) as summ FROM WorkEffort  where idWorksOfEstimate = '.$this->idWorksOfEstimate;
+	    //$sumWef = Yii::$app->db->createCommand($sql)->queryScalar();
+	    //$SysLog = new Systemlog();
+	    //$SysLog->IdTypeObject = 4; 
+	    //$SysLog->IdUser = Yii::$app->user->getId();;
+	    //$SysLog->DataChange = date("Y-m-d H:i:s");
+	    //$SysLog->idObject = $this->idWorksOfEstimate;
+	    //$SysLog->SystemLogString = Yii::$app->user->identity->username.' => Трудозатраты по работе '.$this->idWorksOfEstimate.' изменены: '.$sumWef;
+		//$SysLog->save();
+	//}
 }

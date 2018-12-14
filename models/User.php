@@ -54,10 +54,10 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $username
      * @return static|null
      */
-    public static function findByUsername($username)
-    {
-        return static::findOne(['username' => $username]);
-    }
+    //public static function findByUsername($username)
+    //{
+        //return static::findOne(['username' => $username]);
+    //}
 
     /**
      * {@inheritdoc}
@@ -66,7 +66,10 @@ class User extends ActiveRecord implements IdentityInterface
     {
        return $this->getPrimaryKey();
     }
-
+    public function getUserName()
+    {
+       return $this->username();
+    }
     /**
      * {@inheritdoc}
      */

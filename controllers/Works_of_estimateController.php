@@ -9,9 +9,11 @@ use app\models\EstimateWorkPackages;
 use app\models\VwListOfWorkEffort;
 use app\models\WorkEffort;
 use app\models\ProjectCommand;
+use app\models\Systemlog;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\data\ActiveDataProvider;
 
 /**
  * Works_of_estimateController implements the CRUD actions for WorksOfEstimate model.
@@ -230,21 +232,32 @@ class Works_of_estimateController extends Controller
 					$WorkEffort->idTeamMember = $value;
 					if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния членов команды WorkEffort' );
 				}
+				$sql='SELECT Sum(workEffort) as summ FROM WorkEffort  where idWorksOfEstimate = '.$idWorksOfEstimate;
+			    $sumWef = Yii::$app->db->createCommand($sql)->queryScalar();
+			    $SysLog = new Systemlog();
+			    $SysLog->IdTypeObject = 4; 
+			    $SysLog->IdUser = Yii::$app->user->getId();;
+			    $SysLog->DataChange = date("Y-m-d H:i:s");
+			    $SysLog->idObject = $idWorksOfEstimate;
+			    $SysLog->SystemLogString = Yii::$app->user->identity->username.' => Трудозатраты по работе '.$idWorksOfEstimate.' изменены: '.$sumWef;
+				$SysLog->save();
 			} 
 	    if(isset($a['btn'])) {   // анализируем нажатые кнопки
 				$btn_info = explode("_", $a['btn']);
 				if($btn_info[0] == 'add') {   // добавление трудозатрат в работу
+					
 					   $modelWE = new WorkEffort();
 				       $modelWE->idWorksOfEstimate = $idWorksOfEstimate;
 				       $modelWE->workEffort = 0;
 				       $idAnyTeamMember = ProjectCommand::getAnyTeamMember($idBR);
-				       if($idAnyTeamMember != -1){
+				       if(!is_null($idAnyTeamMember)){
 						   $modelWE->idTeamMember = $idAnyTeamMember;
 					   } else {
 						   Yii::$app->session->addFlash('error',"для данной BR нет ни одного члена команды. Регистрация трудозатрат невозможна ");
 						   return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]);
 					   }
 					   $modelWE->save();
+					   
 					   if($modelWE->hasErrors()){
 							Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
 					   }
@@ -269,10 +282,17 @@ class Works_of_estimateController extends Controller
 			'idEstimateWorkPackages'=>$idEstimateWorkPackages, 
 			'idWbs'=>$idWbs,
 			'idWorksOfEstimate'=>$idWorksOfEstimate])->orderBy('idLaborExpenditures')->all();
+		
+		$QueryLogDataProvider = Systemlog::find()->where(['IdTypeObject' => 4,'idObject' => $idWorksOfEstimate])->orderBy('DataChange'); //лог для работ
+        $LogDataProvider = new ActiveDataProvider([
+            'query' => $QueryLogDataProvider,
+   
+        ]);	
 			
          return $this->render('update', [
             'model' => $model,
             'VwListOfWorkEffort'=>$VwListOfWorkEffort,
+            'LogDataProvider'=>$LogDataProvider,
             'idBR'=>$idBR
         ]);
     }

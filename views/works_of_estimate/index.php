@@ -81,7 +81,7 @@ use app\models\BusinessRequests;
 				 	
 				   <?php
 				     $url1 = Url::to(['site/help']);
-					 echo  Html::a('<span class="glyphicon glyphicon-question-sign"></span>', $url1.'#WorkBreakdownStructure',['title' => 'Помощь по разделу',]);
+					 echo  Html::a('<span class="glyphicon glyphicon-question-sign"></span>', $url1.'#SystemDesc23',['title' => 'Помощь по разделу',]);
 					 echo "   ";
 					 $url2 = Url::to(['works_of_estimate/create', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-plus-sign"></span>', $url2,['title' => 'Добавить работу',]);

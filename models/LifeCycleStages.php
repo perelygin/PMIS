@@ -31,7 +31,7 @@ class LifeCycleStages extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['StageOrder', 'idlifeCycleType', 'LCS_parent_id'], 'integer'],
+            [['StageOrder', 'idlifeCycleType', 'LCS_parent_id','idResultType'], 'integer'],
             [['LCS_parent_id'], 'required'],
             [['StageName'], 'string', 'max' => 145],
             [['LCS_comment'], 'string', 'max' => 250],
@@ -63,10 +63,10 @@ class LifeCycleStages extends \yii\db\ActiveRecord
 			$LifeCycleStages_level_2 = $this::find()->asArray()->where(['idlifeCycleType' => $BRLifeCycleType,'LCS_parent_id'=>$lcs['idStage']])->orderBy('StageOrder')->all(); 
 			$lcs_level2_full = array();
 			foreach($LifeCycleStages_level_2 as $lcs_l2){
-				$lcs_level2 =  array('StageOrder'=>$lcs_l2['StageOrder'],'StageName' => $lcs_l2['StageName']);	
+				$lcs_level2 =  array('StageOrder'=>$lcs_l2['StageOrder'],'StageName' => $lcs_l2['StageName'],'idResultType'=>$lcs_l2['idResultType']);	
 				$lcs_level2_full[] =  $lcs_level2;
 			}
-			$wbs_template[] = array('StageOrder' => $lcs['StageOrder'], 'StageName' => $lcs['StageName'], 'lvl2'=>$lcs_level2_full);
+			$wbs_template[] = array('StageOrder' => $lcs['StageOrder'], 'StageName' => $lcs['StageName'],'idResultType'=>$lcs['idResultType'], 'lvl2'=>$lcs_level2_full);
 			
 		}
 		//echo('<pre> '.print_r($wbs_template).'</pre>');  die;

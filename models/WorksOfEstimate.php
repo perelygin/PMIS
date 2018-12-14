@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use app\models\WorkEffort;
+use app\models\Systemlog;
 
 /**
  * Перечень работ, которые входят в оценку на дату
@@ -54,8 +55,30 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
         ];
     }
    
+	public function afterSave($insert, $changedAttributes){
+	    parent::afterSave($insert, $changedAttributes);
+	    $SysLog = new Systemlog();
+	    $SysLog->IdTypeObject = 4; 
+	    $SysLog->IdUser = Yii::$app->user->getId();;
+	    $SysLog->DataChange = date("Y-m-d H:i:s");
+	    $SysLog->idObject = $this->idWorksOfEstimate;
+	    if($insert){
+			$SysLog->SystemLogString = Yii::$app->user->identity->username.' => Работа добавлена: '.$this->idWorksOfEstimate.' '.$this->WorkName
+			.' id Br:'.$this->idWbs
+			.' id оценки: '.$this->idEstimateWorkPackages
+			.' mantisNumber '.$this->mantisNumber;
+			} else{
+				$SysLog->SystemLogString = Yii::$app->user->identity->username.' => Работа изменена: '.$this->idWorksOfEstimate.' '.$this->WorkName
+				.' id Br:'.$this->idWbs
+				.' id оценки: '.$this->idEstimateWorkPackages
+				.' mantisNumber '.$this->mantisNumber;
+				}
+			$SysLog->save();
+	}
+	
     public function beforeDelete(){
         if (parent::beforeDelete()){
+			
 			//смотрим наличие  записей в подчиненной таблице с трудозатратами	
             $WorkEffort = WorkEffort::find()->where(['idWorksOfEstimate' => $this->idWorksOfEstimate])->all();
             if(count($WorkEffort)>0){
@@ -65,6 +88,17 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 					$model->delete();
 				}	
 			}
+			$SysLog = new Systemlog();
+		    $SysLog->IdTypeObject = 4; 
+		    $SysLog->IdUser = Yii::$app->user->getId();;
+		    $SysLog->DataChange = date("Y-m-d H:i:s");
+		    $SysLog->idObject = $this->idWorksOfEstimate;
+		    $SysLog->SystemLogString = Yii::$app->user->identity->username.' =>  Работа удалена: '.$this->idWorksOfEstimate.' '.$this->WorkName
+			.' id Br:'.$this->idWbs
+			.' id оценки: '.$this->idEstimateWorkPackages
+			.' mantisNumber '.$this->mantisNumber;
+			 $SysLog->save();
+			 
             return true;
         }
         return false;
