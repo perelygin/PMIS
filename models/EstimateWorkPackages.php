@@ -65,7 +65,7 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
      */
     public function getWorksList($idWbs)
     {
-	     $sql = "SELECT * FROM Yii2pmis.WorksOfEstimate
+	     $sql = "SELECT * FROM WorksOfEstimate
 					where idEstimateWorkPackages =".$this->idEstimateWorkPackages." and idWbs = ".$idWbs ;
 		$WorksList = Yii::$app->db->createCommand($sql)->queryAll();		
 		

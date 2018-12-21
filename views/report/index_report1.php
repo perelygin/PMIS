@@ -39,7 +39,10 @@ $this->params['breadcrumbs'][] = $this->title;
 			  </tr>';	
 			  $idEstPckg = BusinessRequests::findOne(['idBR'=>$dp_str->idBr])->getLastEstimateId(); 
 			  if(!is_null($idEstPckg)){  //если есть пакет оценок по BR
-				  $WorksList = EstimateWorkPackages::findOne($idEstPckg)->getWorksList($dp_str->id);
+				  $a = EstimateWorkPackages::findOne($idEstPckg);
+				  if(is_null($a)) {echo($idEstPckg." ".$dp_str->idBr);  die;}
+				  $WorksList = $a->getWorksList($dp_str->id);
+				  
 				  if(count($WorksList)>0){
 					foreach($WorksList as $wl){
 					  echo '<tr>

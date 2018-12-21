@@ -895,7 +895,7 @@ class BrController extends Controller
 		sum(wef.workEffort) as summ,
 		rlm.RoleName,
 		rlm.idRole
-		FROM Yii2pmis.wbs  
+		FROM wbs  
 		LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
 		LEFT OUTER JOIN WorkEffort wef ON wef.idWorksOfEstimate=woe.idWorksOfEstimate
 		LEFT OUTER JOIN ProjectCommand prc ON prc.id = wef.idTeamMember
@@ -922,7 +922,7 @@ class BrController extends Controller
 						wef.idLaborExpenditures,
 						rst.ResultStatusName,
 						concat(rlm.RoleName,' ',ppl.Family,' ',ppl.Name) as fio
-						FROM Yii2pmis.wbs  
+						FROM wbs  
 						LEFT OUTER JOIN (Select * from WorksOfEstimate where idEstimateWorkPackages=".$idEWP.") woe ON woe.idWbs=wbs.id
 						LEFT OUTER JOIN WorkEffort wef ON wef.idWorksOfEstimate=woe.idWorksOfEstimate
 						LEFT OUTER JOIN ProjectCommand prc ON prc.id = wef.idTeamMember

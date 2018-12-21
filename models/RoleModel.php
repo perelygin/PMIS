@@ -63,7 +63,7 @@ class RoleModel extends \yii\db\ActiveRecord
      public function get_RoleTarifModel($RoleModelType)
      {
 		 $sql = "SELECT trf.idTariff,trf.TariffName
-					FROM Yii2pmis.RoleModel as rlm 
+					FROM RoleModel as rlm 
 					LEFT OUTER JOIN Tariff trf ON rlm.idTariff = trf.idTariff
 					where rlm.idRoleModelType = ".$RoleModelType
 					." group by trf.idTariff

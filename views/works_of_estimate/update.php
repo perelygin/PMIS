@@ -62,13 +62,34 @@ $params1 = [
     
     
 <div class="container">
+	<div class="row">
+	    <div class="col-sm-12">
+					<?php 
+					
+					echo  //Html::a('<span class="glyphicon glyphicon-question-sign"></span>', $url1.'#SystemDesc23',['title' => 'Помощь по разделу',]).
+					Html::submitButton('', [
+										'span class' => 'glyphicon glyphicon-question-sign',
+										'title'=>'Помощь по разделу',
+										'name'=>'btn',
+										'value' => 'help_'])
+					.'   '
+					.Html::submitButton('', [
+										'span class' => 'glyphicon glyphicon-knight',
+										'title'=>'Синхронизация с mantis',
+										'name'=>'btn',
+										'value' => 'mant_']); ?>		
+		</div>
+	</div>
    <div class="row">
 		<div class="col-sm-9">
 		    <?= $form->field($model, 'WorkName')->textInput(['maxlength' => true]) ?>
 	    </div>
 	    <div class="col-sm-3">
-		    <?= $form->field($model, 'mantisNumber') ?>
-	    </div>
+			<?= $form->field($model, 'mantisNumber') ?>
+		</div>
+			
+			
+
    </div> 
    
    <div class="row">
@@ -160,9 +181,11 @@ $params1 = [
   
    
     <div class="form-group">
-        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success',
+        <?php echo  Html::submitButton('Сохранить', ['class' => 'btn btn-success',
 											'name'=>'btn',
-											'value' => 'save_']) ?>
+											'value' => 'save_']);
+					
+		?>
     </div>
 
     <?php ActiveForm::end(); ?>

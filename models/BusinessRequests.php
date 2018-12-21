@@ -78,7 +78,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
      */
     public function getLastEstimateId()
     {
-	    $sql = "SELECT * FROM Yii2pmis.EstimateWorkPackages 
+	    $sql = "SELECT * FROM EstimateWorkPackages 
 				where idBR = "
 				.$this->idBR
 				." and deleted = 0 order by dataEstimate desc limit 1";

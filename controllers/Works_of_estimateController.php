@@ -10,10 +10,14 @@ use app\models\VwListOfWorkEffort;
 use app\models\WorkEffort;
 use app\models\ProjectCommand;
 use app\models\Systemlog;
+use app\models\Wbs;
+
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
+use SoapClient;
 
 /**
  * Works_of_estimateController implements the CRUD actions for WorksOfEstimate model.
@@ -210,6 +214,7 @@ class Works_of_estimateController extends Controller
      */
     public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
     {
+        //проверка на то, что оценка трудозатрат не закрыта
         $ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
 		if($ewp->isFinished()){
 			Yii::$app->session->addFlash('error',"Оценка трудозатрат закрыта(отправлена в банк). Для корректировки необходимо связаться с менеджером проекта");
@@ -262,15 +267,115 @@ class Works_of_estimateController extends Controller
 							Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
 					   }
 			
-				} elseif($btn_info[0] == 'del'){ //удаление трудозатрат из работы
+				} 
+				elseif($btn_info[0] == 'del'){ //удаление трудозатрат из работы
 					   $modelWE = new WorkEffort();
 				       $modelWE->findOne($btn_info[1])->delete();    //$idLaborExpenditures  =$btn_info[1] 
 				       if($modelWE->hasErrors()){
 								Yii::$app->session->addFlash('error',"Ошибка удаления трудозатрат по работе " );
 					   }
-					}elseif($btn_info[0] == 'save'){  //сохранение формы
+				  }
+				elseif($btn_info[0] == 'save'){  //сохранение формы
 						return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
 						}
+				elseif($btn_info[0] == 'help'){  //помощь
+					    $url1 = Url::to(['site/help']).'#SystemDesc24';
+						return $this->redirect($url1);			//
+						}
+				elseif($btn_info[0] == 'mant'){  //синхронизация с mantis
+					if(empty($model->GetMantisNumber())){ //если номер не заполнен, но создаем новый инц в мантисе
+						Yii::$app->session->addFlash('error',"Номер инцидента не указан. Создаем инцидент в mantis");
+						////определяем тип результата
+						$mantis_project = '';
+						$wbs = Wbs::findOne(['id'=>$idWbs]); 
+						$wbs_info = $wbs->getWbsInfo();
+						//$BR = BusinessRequests::findOne(['idBR'=>$idBR]);
+						$custom_fields = array ('ExtRefPart' => array (
+																	'field' => array (
+																		'id' => 1 
+																				),
+																		'value' => 'BR' 
+																              ),
+																   'ExtRefNum' => array (
+																	'field' => array (
+																		'id' => 2 
+																				),
+																		'value' => $wbs_info['BRNumber']
+																              ));
+																
+						if($wbs_info['idResultType'] == 1){  //тип результата - экспертиза
+							$mantis_project = 'VTB24 Согласование экспертиз';
+							$category = 'Оценка Экспертного заключения';
+							
+						}
+						 elseif($wbs_info['idResultType'] == 2 ){ //тип результата - БФТЗ
+							 $mantis_project = 'VTB24 SpectrumFront';
+							 $category ='Разработка';
+							 $custom_fields = array ('ExtRefPart' => array (
+																	'field' => array (
+																		'id' => 1 
+																				),
+																		'value' => 'BR' 
+																              ),
+																   'ExtRefNum' => array (
+																	'field' => array (
+																		'id' => 2 
+																				),
+																		'value' => $wbs_info['BRNumber']
+																              ),
+																    'CR' => array (
+																	'field' => array (
+																		'id' => 7 
+																				),
+																		'value' => 'CR'
+																              ));
+							 }
+						 elseif($wbs_info['idResultType'] == 3 ){ //тип результата - ПО
+							  $mantis_project = 'VTB24 SpectrumFront';
+							  $category ='Разработка';
+							 }
+							 
+							  $username = 'pmis';
+							  $password = '141186ptv';
+							   //$issue_id = 1;
+							
+							  $client = new SoapClient('http://192.168.20.55/mantisbt-2.3.1/api/soap/mantisconnect.php?wsdl', 
+							  array('trace'=>1,'exceptions' => 0));
+							  if(!empty($mantis_project)){
+								
+								  //$result =  $client->mc_issue_get($username, $password, $issue_id);
+								  //if (is_soap_fault($result)){
+									  //Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
+								   //}
+							   
+								   $issue = array(
+										'project' => array( 'name' => $mantis_project ),
+										'category' => $category,
+										'severity' => array('id'=>10),//нововведение
+										'reproducibility' => array('id'=>100),  //неприменимо
+										'summary' => $model->WorkName . time(), 
+										'description' => $model->WorkDescription. ' Sample Description ' . time(),
+										'custom_fields' => $custom_fields,
+										'version' => $wbs_info['version_number_s'],
+									);
+									 $result =  $client->mc_issue_add($username, $password, $issue);
+									 if (is_soap_fault($result)){
+									    Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode.
+									    " faultstring: ".$result->faultstring);
+									    //"detail".$result->detail);
+									
+								   }  
+								} else{
+									Yii::$app->session->addFlash('error',"Для типа результата не определен проект mantis" );
+									}
+							  
+							   
+					}else{ //Иначе - синхронизируем. т.е. читаем состояние инцидента в мантиссе и вносим измеения в pmis
+						Yii::$app->session->addFlash('error',"Указан номер инцидента. Считываем его состояние из mantis ".$model->GetMantisNumber());
+						}
+					
+				}
+						
 			}
 			
 		

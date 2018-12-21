@@ -103,5 +103,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
         }
         return false;
     }
-   
+   public function GetMantisNumber(){
+	   return $this->mantisNumber;
+	   }
 }

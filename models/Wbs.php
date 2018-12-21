@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use creocoder\nestedsets\NestedSetsBehavior;
+//use app\models\BusinessRequests;
 /**
  * This is the model class for table "wbs".
  *
@@ -97,14 +98,31 @@ class Wbs extends \yii\db\ActiveRecord
      */
     public function getWbsInfo()
     {
+		$sql = "SELECT 
+				wbs.id, 
+				wbs.name,
+				br.BRName,
+				br.BRNumber,
+				sv.version_number,
+				sv.version_number_s,
+				sv.idsystem_versions
+				FROM wbs
+				LEFT OUTER JOIN SystemVersions sv ON wbs.idsystem_versions = sv.idsystem_versions
+				LEFT OUTER JOIN BusinessRequests br ON wbs.idBr = br.idBR
+				Where wbs.id = ".$this->id;
+		$WBS = Yii::$app->db->createCommand($sql)->queryOne(); 
+		
 		$WBSInfo = array('name' => $this->name,
-							'idBr'=>$this->idBr	);
+					     'idBr'=>$this->idBr,
+					     'BRNumber'	=> $WBS['BRNumber'], 
+					     'version_number_s' => $WBS['version_number_s'],
+						 'idResultType'=>$this->idResultType);
         return $WBSInfo;
     }
     public function isWbsHasWork()  //есть ли работы по данному узлу
     {
 		$sql = "SELECT  count(*)
-				   FROM Yii2pmis.wbs  
+				   FROM wbs  
 				   inner JOIN WorksOfEstimate woe ON woe.idWbs=wbs.id
 					where wbs.id = ".$this->id;
 		 $WbsWorkNumber = Yii::$app->db->createCommand($sql)->queryScalar(); 
