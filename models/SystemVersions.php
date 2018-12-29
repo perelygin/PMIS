@@ -47,4 +47,19 @@ class SystemVersions extends \yii\db\ActiveRecord
             'deleted' => 'Deleted',
         ];
     }
+      /**
+     * возвращает номер актуальной версии
+     */
+    public function getCurrentVersionId()
+    {
+		 $sql = 'SELECT idsystem_versions FROM SystemVersions where deleted<>1 and released<>1 order by version_number Limit 1';
+		 $CurrentVersion = Yii::$app->db->createCommand($sql)->queryOne();		
+		if($CurrentVersion){
+			$CurrentVersionId = $CurrentVersion['idsystem_versions'];	
+			return	$CurrentVersionId;
+		} else {
+			return false;
+			}	
+		
+	}
 }

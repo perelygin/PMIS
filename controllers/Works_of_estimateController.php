@@ -295,7 +295,7 @@ class Works_of_estimateController extends Controller
 						  else $url_mantis_cr = '';
 						  
 					if(empty($model->GetMantisNumber())){ //если номер не заполнен, но создаем новый инц в мантисе
-						Yii::$app->session->addFlash('success',"Номер инцидента не указан. Создаем инцидент в mantis");
+						//Yii::$app->session->addFlash('success',"Номер инцидента не указан. Создаем инцидент в mantis");
 						//ищем менеджера проекта по Br
 						$BR = BusinessRequests::findOne(['idBR'=>$idBR]);
 						$pm_login = $BR->get_pm_login();
@@ -383,6 +383,20 @@ class Works_of_estimateController extends Controller
 									Yii::$app->session->addFlash('success',"В трудозаратах  по работе нет аналитика или  не указан его логин для mantis. Инцидент будет назначен на pmis");
 									$handler = array('name'=>'pmis');
 									}
+							  //настраиваемые поля
+							  $custom_fields = array ();
+							  //$custom_fields = array ('ExtRefPart' => array (
+													//'field' => array (
+														//'id' => 1 
+																//),
+														//'value' => 'BR' 
+												              //),
+												   //'ExtRefNum' => array (
+													//'field' => array (
+														//'id' => 2 
+																//),
+														//'value' => $wbs_info['BRNumber']
+												              //));		
 							  }
 							  
 	
@@ -423,7 +437,7 @@ class Works_of_estimateController extends Controller
 										'summary' =>  $summary, 
 										'description' => $model->WorkDescription,
 										'custom_fields' => $custom_fields,
-										'version' => $version,
+										'target_version' => $version,
 										'handler' =>$handler,
 										'relationships'=>$relationships,
 										'sponsorship_total'=>$LastEstimateSumm, 

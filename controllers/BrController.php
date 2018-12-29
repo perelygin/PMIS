@@ -12,6 +12,7 @@ use app\models\ProjectCommand;
 use app\models\LifeCycleStages;
 use app\models\vw_ResultEvents;
 use app\models\ResultEvents;
+use app\models\SystemVersions;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -130,7 +131,7 @@ class BrController extends Controller
 			Yii::$app->session->addFlash('error',"Нет прав на регистрацию");
 			return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
 		}
-        
+        $sysver =  new SystemVersions(); //актуальная версия
         $model = new BusinessRequests();
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//создаем роли для BR
@@ -165,6 +166,7 @@ class BrController extends Controller
 				$stage_l1->mantis = 'www.mantis.com';
 				$stage_l1->idBr = $model->idBR;
 				$stage_l1->idResultType = $wbst['idResultType'];
+				$stage_l1->idsystem_versions = $sysver->getCurrentVersionId();
 				$stage_l1->appendTo($root);
 				$stage_l1->save();
 				if($stage_l1->hasErrors()){
@@ -176,6 +178,7 @@ class BrController extends Controller
 						$stage_l2->mantis = 'www.mantis.com';
 						$stage_l2->idBr = $model->idBR;
 						$stage_l2->idResultType = $lvl2['idResultType'];
+						$stage_l2->idsystem_versions = $sysver->getCurrentVersionId();
 						$stage_l2->appendTo($stage_l1);
 						$stage_l2->save();
 						if($stage_l2->hasErrors()){
@@ -362,6 +365,8 @@ class BrController extends Controller
      
     public function actionAdd_wbs_child($idBR, $parent_node_id)   //
     {
+		$sysver =  new SystemVersions(); //актуальная версия
+		
 		$parent_node = Wbs::findOne(['id'=>$parent_node_id]);
 		if($parent_node->isWbsHasWork()){
 			Yii::$app->session->addFlash('error',"Для этого результата есть оценка трудозатрат. Создание подчиненного узла не возможно");
@@ -372,6 +377,7 @@ class BrController extends Controller
 		$new_child->mantis = 'www.mantis.com';
 		$new_child->idBr = $idBR;
 		$new_child->idResultType = $parent_node->idResultType;
+		$new_child->idsystem_versions = $sysver->getCurrentVersionId();
 		$new_child->appendTo($parent_node);
 		$new_child->save();
 		if($new_child->hasErrors()){
