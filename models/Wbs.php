@@ -114,7 +114,8 @@ class Wbs extends \yii\db\ActiveRecord
 		
 		$WBSInfo = array('name' => $this->name,
 					     'idBr'=>$this->idBr,
-					     'BRNumber'	=> $WBS['BRNumber'], 
+					     'BRNumber'	=> $WBS['BRNumber'],
+					     'BRName' => $WBS['BRName'],
 					     'version_number_s' => $WBS['version_number_s'],
 						 'idResultType'=>$this->idResultType);
         return $WBSInfo;
@@ -132,4 +133,5 @@ class Wbs extends \yii\db\ActiveRecord
 		  }
 		   else return false;
     }
+    
 }

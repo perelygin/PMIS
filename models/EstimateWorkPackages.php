@@ -32,7 +32,9 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['dataEstimate'], 'safe'],
+           // [['dataEstimate'], 'safe'],
+            [['dataEstimate'], 'required','message' => 'Пожалуйста, укажите дату оценки'],
+            [['EstimateName'], 'required','message' => 'Пожалуйста, укажите название оценки'],
             [['idBR','deleted','finished'], 'integer'],
             [['EstimateName'], 'string', 'max' => 250],
         ];

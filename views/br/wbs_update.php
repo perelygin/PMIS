@@ -7,6 +7,7 @@ use vova07\imperavi\Widget;
 use app\models\ResultType;
 use app\models\ResultStatus;
 use app\models\SystemVersions;
+use app\models\Wbs;
 /* @var $this yii\web\View */
 /* @var $model app\models\Wbs */
 /* @var $form ActiveForm */
@@ -36,6 +37,8 @@ use app\models\SystemVersions;
 		$params3 = [
 		
 		];
+		$WBSInfo = Wbs::findOne(['id'=>$model->id])->getWbsInfo();
+		$this->title = "BR-". $WBSInfo['BRNumber']." ".$WBSInfo['BRName'].". Параметры узла WBS(результат)";
 ?>
 
 
@@ -44,7 +47,7 @@ use app\models\SystemVersions;
 <div class="wbs_update">
 
 <?php $form = ActiveForm::begin(); ?>
-
+<h3><?= Html::encode($this->title) ?></h3>
 
 <div class="container">
    <div class="row">

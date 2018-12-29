@@ -432,32 +432,32 @@ class BrController extends Controller
 							
 							
 							
-							  $username = 'perelygin';
-							  $password = '141186ptv';
-							  $issue_id = 1;
-							  $client = new SoapClient('http://172.16.2.135/mantis/api/soap/mantisconnect.php?wsdl', array('trace'=>1,'exceptions' => 0));
-							  $result =  $client->mc_issue_get($username, $password, $issue_id);
-							  if (is_soap_fault($result)){
-								  Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
-								//trigger_error("Ошибка SOAP: (faultcode: {$result->faultcode}, faultstring: {$result->faultstring})", E_USER_ERROR);
-							   }
-							   //echo($result->project->id.'  '.$result->project->name );
-							   //echo('<br>');
+							  //$username = 'perelygin';
+							  //$password = '141186ptv';
+							  //$issue_id = 1;
+							  //$client = new SoapClient('http://172.16.2.135/mantis/api/soap/mantisconnect.php?wsdl', array('trace'=>1,'exceptions' => 0));
+							  //$result =  $client->mc_issue_get($username, $password, $issue_id);
+							  //if (is_soap_fault($result)){
+								  //Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
+								////trigger_error("Ошибка SOAP: (faultcode: {$result->faultcode}, faultstring: {$result->faultstring})", E_USER_ERROR);
+							   //}
+							   ////echo($result->project->id.'  '.$result->project->name );
+							   ////echo('<br>');
 							   
-							   //echo "<pre>".print_r($result)."</pre>"; die;
+							   ////echo "<pre>".print_r($result)."</pre>"; die;
 							   
-							   $issue = array(
-									'project' => array( 'name' => 'ВТБ' ),
-									'category' => 'General',
-									'summary' => 'Sample Summary ' . time(),
-									'description' => 'Sample Description ' . time(),
-								);
-								 $result =  $client->mc_issue_add($username, $password, $issue);
-								 if (is_soap_fault($result)){
-								  Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
+							   //$issue = array(
+									//'project' => array( 'name' => 'ВТБ' ),
+									//'category' => 'General',
+									//'summary' => 'Sample Summary ' . time(),
+									//'description' => 'Sample Description ' . time(),
+								//);
+								 //$result =  $client->mc_issue_add($username, $password, $issue);
+								 //if (is_soap_fault($result)){
+								  //Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode." faultstring: ".$result->faultstring);
 								
-							   }
-							   print_r($result); die;
+							   //}
+							   //print_r($result); die;
 							//try{
 								 //$client = new SoapClient('http://172.16.2.135/mantis/api/soap/mantisconnect.php?wsdl');
 								 ////if (is_soap_fault($result)){
@@ -528,7 +528,7 @@ class BrController extends Controller
 	   $EstimateWorkPackages =  new EstimateWorkPackages();
 	   $EstimateWorkPackages->EstimateName = 'Предварительная оценка';
 	   $EstimateWorkPackages->idBR = $idBR;
-	   $EstimateWorkPackages->dataEstimate = date("Y-m-d");   //'2018-09-10'
+	   $EstimateWorkPackages->dataEstimate = date("Y-m-d H:i:s");   //'2018-09-10'
 	   $EstimateWorkPackages->save();
 	   if($EstimateWorkPackages->hasErrors()){
 			Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");

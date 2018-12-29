@@ -50,7 +50,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
             'idEstimateWorkPackages' => 'Выбери оценку трудозатрат:',
             'WorkName' => 'Наименование работы',
             'idWbs' => 'Id Wbs',
-            'WorkDescription' => 'Work Description',
+            'WorkDescription' => 'Описание работы',
             'mantisNumber' => 'Номер инцидента в мантиссе'
         ];
     }
@@ -106,4 +106,35 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
    public function GetMantisNumber(){
 	   return $this->mantisNumber;
 	   }
+	public function get_analit_login()
+    {
+	    $sql = "SELECT 
+					woe.idWorksOfEstimate,
+				    rlm.RoleName,
+					ppl.mantis_login,
+					concat(ppl.Family,' ',ppl.Name) as fio
+				FROM WorksOfEstimate as woe
+				LEFT OUTER JOIN WorkEffort wef ON woe.idWorksOfEstimate = wef.idWorksOfEstimate
+				LEFT OUTER JOIN ProjectCommand prc ON wef.idTeamMember=prc.id
+				LEFT OUTER JOIN People ppl ON prc.idHuman = ppl.idHuman
+				LEFT OUTER JOIN RoleModel rlm ON prc.idRole = rlm.idRole
+				where woe.idWorksOfEstimate = ".$this->idWorksOfEstimate." and rlm.RoleName like 'Аналитик'
+				order by fio limit 1";
+	    
+		$mantis_login_str = Yii::$app->db->createCommand($sql)->queryOne();		
+		
+		if($mantis_login_str){
+			if(!empty($mantis_login_str['mantis_login'])){
+				
+				return $mantis_login_str['mantis_login'];	
+			} else {
+				return '';
+					}	
+			} else {
+				return '';
+					}	
+		
+			
+        
+    }
 }

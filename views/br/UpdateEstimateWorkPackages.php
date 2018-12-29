@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use kartik\date\DatePicker;
+//use kartik\date\DatePicker;
+use kartik\datetime\DateTimePicker;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\EstimateWorkPackages */
@@ -29,10 +30,20 @@ use kartik\date\DatePicker;
 	  </div>	  
 	  <div class="row">
 		<div class="col-sm-4">
-			<?= $form->field($model, 'dataEstimate')->widget(DatePicker::className(),[
+
+			<?php
+			 //$form->field($model, 'dataEstimate')->widget(DatePicker::className(),[
+			    //'pluginOptions' => [
+			        //'autoclose'=>true,
+			        //'format' => 'yyyy-mm-dd'
+			    //]
+			//]) 
+			?>
+			<?= $form->field($model, 'dataEstimate')->widget(DateTimePicker::className(),[
 			    'pluginOptions' => [
 			        'autoclose'=>true,
-			        'format' => 'yyyy-mm-dd'
+			        'format' => 'yyyy-mm-dd hh:ii:ss',
+			         'todayHighlight' => true
 			    ]
 			]) ?>
 			<?php 

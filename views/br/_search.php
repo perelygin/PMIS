@@ -23,9 +23,16 @@ use yii\helpers\ArrayHelper;
         'method' => 'get',
     ]); ?>
 
-  
-    <?= $form->field($model, 'ProjectName')->dropDownList($items,$params);  ?>
-    
+  <div class="container">
+	   <div class="row">
+		  <div class="col-sm-10">
+  			<?= $form->field($model, 'ProjectName')->dropDownList($items,$params);  ?>
+		  </div>  
+		  <div class="col-sm-2">
+  			<?= $form->field($model, 'mantis_filter');  ?>
+		  </div>  
+	   </div>    
+  </div>  
 
     <?php // echo $form->field($model, 'StageName') ?>
 

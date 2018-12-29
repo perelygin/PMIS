@@ -22,12 +22,14 @@
 use app\models\EstimateWorkPackages;
 use app\models\Wbs;
 use app\models\VwProjectCommand;
+use app\models\BusinessRequests;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Collapse;
 use vova07\imperavi\Widget;
+use app\models\vw_settings; 
 //use app\models\Wbs;
 
 
@@ -35,21 +37,40 @@ use vova07\imperavi\Widget;
 /* @var $this yii\web\View */
 /* @var $model app\models\WorksOfEstimate */
 
-$this->title = ' ';
 $EWP_BrInfo = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$model->idEstimateWorkPackages])->getBrInfo();
-$WBSInfo = Wbs::findOne(['id'=>$model->idWbs])->getWbsInfo();
+$WBS = Wbs::findOne(['id'=>$model->idWbs]);
+$WBSInfo = $WBS->getWbsInfo();
+$BR = BusinessRequests::findOne(['idBR'=>$idBR]);
+$mantis_links = array();
+ if($WBS->idResultType == 2)  //БФТЗ
+  {
+	  $mantis_links = $BR->getMantisNumbers(1);
+  }
+ if($WBS->idResultType == 3 or $WBS->idResultType == 4)  //ПО
+  {
+	  $mantis_links = $BR->getMantisNumbers(2);
+  }
 
+
+$this->title = "BR-". $WBSInfo['BRNumber']." ".$WBSInfo['BRName'];
 $ProjectCommand = VwProjectCommand::find()->where(['idBR'=>$idBR])->all();
 $items1 = ArrayHelper::map($ProjectCommand,'id','team_member');
 $params1 = [
 
 ];
+
+$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
+	if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе
+	  else $url_mantis = '';
 ?>
 <div class="works-of-estimate-update">
-
-    <h3>Работа, необходимая для достижения результата: "<?= $WBSInfo['name'].'"'  ?></h3>
+    <h3><?= Html::encode($this->title) ?></h3>
+    <h4>Работа, необходимая для достижения результата: "<?= $WBSInfo['name'].'"'  ?>
+        <br>
+        Пакет оценок: "<?= Html::encode($EWP_BrInfo['EstimateName']).'" от '. $EWP_BrInfo['dataEstimate']?>
+    </h4>
     
-    <h4>Пакет оценок: "<?= Html::encode($EWP_BrInfo['EstimateName']).'" от '. $EWP_BrInfo['dataEstimate']?></h4>
+    
 	
     <?php ///$form = ActiveForm::begin(); ?>
     
@@ -72,12 +93,7 @@ $params1 = [
 										'title'=>'Помощь по разделу',
 										'name'=>'btn',
 										'value' => 'help_'])
-					.'   '
-					.Html::submitButton('', [
-										'span class' => 'glyphicon glyphicon-knight',
-										'title'=>'Синхронизация с mantis',
-										'name'=>'btn',
-										'value' => 'mant_']); ?>		
+					 ?>		
 		</div>
 	</div>
    <div class="row">
@@ -85,7 +101,7 @@ $params1 = [
 		    <?= $form->field($model, 'WorkName')->textInput(['maxlength' => true]) ?>
 	    </div>
 	    <div class="col-sm-3">
-			<?= $form->field($model, 'mantisNumber') ?>
+			
 		</div>
 			
 			
@@ -159,6 +175,48 @@ $params1 = [
 		   </table>
 		   
 	    </div>
+	    </div>
+	<div class="row">    
+		<div class="col-sm-2">
+			<?php 
+			if(empty($model->mantisNumber)){
+				echo  Html::submitButton('', [
+						'span class' => 'glyphicon glyphicon-knight',
+						'title'=>'Генерация инцидента в mantis',
+						'name'=>'btn',
+						'value' => 'mant_'])
+						 .$form->field($model, 'mantisNumber');
+			} else{
+				echo $form->field($model, 'mantisNumber').
+				Html::a($model->mantisNumber, $url_mantis.$model->mantisNumber,['target' => '_blank']);
+				}							 
+			?>
+		</div>
+		
+		<div class="col-sm-8">
+			
+			<?php 
+			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4)){
+			 echo('
+			 <p><b>Перед созданием инцидента в mantis выбери инцидент,  к котрому он будет привязан: </b></p>
+			    <table border = "1" cellpadding="4" cellspacing="2">
+				 <tr><th>Результат</th><th>Работа</th><th>Номер инцидента</th><th></th></tr>
+			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>');
+			
+			  if(!empty($mantis_links)){
+				  foreach($mantis_links as $mtl){
+					echo('<tr><td>'.$mtl['name'].'</td><td>'.$mtl['WorkName'].'</td><td>'.$mtl['mantisNumber']
+					.'</td><td> <input name="mantis_link" type="radio" value='.$mtl['mantisNumber'].'></td></tr>');  
+				  }
+			  }	  
+			  
+			 echo('</table>');
+		    } else{ 
+				
+				}
+			?>
+		</div>
+	</div>	
     <div class="row">
 		<div class="col-sm-12">
 			<?php
@@ -176,17 +234,20 @@ $params1 = [
 		</div> 
 	</div> 
    </div> 
-</div> 	
-    
-  
    
-    <div class="form-group">
+       <div class="form-group">
         <?php echo  Html::submitButton('Сохранить', ['class' => 'btn btn-success',
 											'name'=>'btn',
 											'value' => 'save_']);
 					
 		?>
     </div>
+    
+</div> 	
+    
+  
+   
+
 
     <?php ActiveForm::end(); ?>
 </div>
