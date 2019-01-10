@@ -293,8 +293,11 @@ class Works_of_estimateController extends Controller
 					$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
 						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
 						  else $url_mantis_cr = '';
+					$settingsDefaultUser = vw_settings::findOne(['Prm_name'=>'Mantis_default_user']);   //пользователь mantis  по умолчанию
+						if (!is_null($settingsDefaultUser)) $mntDefaultUser = $settingsDefaultUser->enm_str_value; //имя пользователя
+						  else $mntDefaultUser = 'pmis';	  
 						  
-					if(empty($model->GetMantisNumber())){ //если номер не заполнен, но создаем новый инц в мантисе
+					if(empty($model->GetMantisNumber())){ //если номер не заполнен, то создаем новый инц в мантисе
 						//Yii::$app->session->addFlash('success',"Номер инцидента не указан. Создаем инцидент в mantis");
 						//ищем менеджера проекта по Br
 						$BR = BusinessRequests::findOne(['idBR'=>$idBR]);
@@ -318,8 +321,8 @@ class Works_of_estimateController extends Controller
 								$handler = array('name'=>$pm_login);
 							}else
 								{
-									Yii::$app->session->addFlash('success',"В команде нет менеджера проекта или  не указан его логин в mantis. Инцидент назначен на pmis");
-									$handler = array('name'=>'pmis');
+									Yii::$app->session->addFlash('success',"В команде нет менеджера проекта или  не указан его логин в mantis. Инцидент назначен на ".$mntDefaultUser);
+									$handler = array('name'=>$mntDefaultUser);
 									}
 								
 							//настраиваемые поля
@@ -367,8 +370,8 @@ class Works_of_estimateController extends Controller
 								$handler = array('name'=>$pm_login);
 							}else
 								{
-									Yii::$app->session->addFlash('success',"В команде нет менеджера проекта или  не указан его логин в mantis. Инцидент будет назначен на pmis");
-									$handler = array('name'=>'pmis');
+									Yii::$app->session->addFlash('success',"В команде нет менеджера проекта или  не указан его логин в mantis. Инцидент будет назначен на ".$mntDefaultUser);
+									$handler = array('name'=>$mntDefaultUser);
 									}
 							 }
 						 elseif($wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4){ //тип результата - ПО или прочее
@@ -380,8 +383,10 @@ class Works_of_estimateController extends Controller
 								$handler = array('name'=>$analit_login);
 							  }else
 								{
-									Yii::$app->session->addFlash('success',"В трудозаратах  по работе нет аналитика или  не указан его логин для mantis. Инцидент будет назначен на pmis");
-									$handler = array('name'=>'pmis');
+									//Yii::$app->session->addFlash('error',"В трудозаратах  по работе нет аналитика или  не указан его логин для mantis. Создание инцидента не возможно");
+									//$handler = array('name'=>'pmis');
+									$error_code = 3;
+									$error_str = 'В трудозаратах  по работе нет аналитика или  не указан его логин для mantis. Создание инцидента не возможно';
 									}
 							  //настраиваемые поля
 							  $custom_fields = array ();
@@ -422,8 +427,10 @@ class Works_of_estimateController extends Controller
 						$error_code = 3;
 						$error_str = 'Для типа результата не определен проект mantis';
 						}
-							  $username = 'pmis';
-							  $password = '141186ptv';
+							  //$username = 'pmis';
+							  //$password = '141186ptv';
+							  $username = 'perelygin';
+							  $password = 'gthtksuby';
 							  $client = new SoapClient($url_mantis_cr,    //'http://192.168.20.55/mantisbt-2.3.1/api/soap/mantisconnect.php?wsdl'
 							  array('trace'=>1,'exceptions' => 0));
 							  
