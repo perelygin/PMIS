@@ -155,8 +155,9 @@ class BusinessRequests extends \yii\db\ActiveRecord
      * Возвращает перечень работ с номерами инцидентов мантис для текущей BR с указанным типом результата
      * $ResType - 1 экспертиза
      * $ResType - 2 БФТЗ
+     * $ResType - 3 Все инциденты по результату idwbs
      */
-    public function getMantisNumbers($ResType = 1)
+    public function getMantisNumbers($ResType = 1, $idwbs = 0)
     {
 	    $sql1 = "SELECT idEstimateWorkPackages FROM EstimateWorkPackages 
 				where idBR = "
@@ -165,7 +166,8 @@ class BusinessRequests extends \yii\db\ActiveRecord
 		$EstLastPckg = Yii::$app->db->createCommand($sql1)->queryOne();		
 		if($EstLastPckg){
 			$idLastEWP = $EstLastPckg['idEstimateWorkPackages'];	
-			 $sql ="SELECT 
+			if($ResType == 1 or $ResType == 2){
+				$sql ="SELECT 
 				 wbs.id,
 				 wbs.name,
 				 wef.idWorksOfEstimate,
@@ -174,6 +176,20 @@ class BusinessRequests extends \yii\db\ActiveRecord
 				FROM wbs
 				LEFT OUTER JOIN WorksOfEstimate wef ON wbs.id = wef.idWbs
 				where wbs.idBr =" .$this->idBR. " and wbs.idResultType = ".$ResType." and wef.idEstimateWorkPackages = ".$idLastEWP ;
+				}
+			if($ResType == 3 ){
+				$sql ="SELECT 
+				 wbs.id,
+				 wbs.name,
+				 wef.idWorksOfEstimate,
+				 wef.WorkName,
+				 wef.mantisNumber
+				FROM wbs
+				LEFT OUTER JOIN WorksOfEstimate wef ON wbs.id = wef.idWbs
+				where wbs.idBr =" .$this->idBR. " and wbs.id = ".$idwbs." and wef.idEstimateWorkPackages = ".$idLastEWP ;
+			}	
+			
+			 
 				
 		$mantis_numbers = Yii::$app->db->createCommand($sql)->queryAll();	
 		
