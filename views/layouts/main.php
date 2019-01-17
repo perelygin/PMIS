@@ -51,8 +51,13 @@ AppAsset::register($this);
 					['label' => 'Отчеты', 'url'=>['/report/index']],
 	            ]];
      
-    if (Yii::$app->user->isGuest)	$items[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];
+    if (Yii::$app->user->isGuest){
+			$items[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];
+	} else{
+			$items[] = ['label' => 'Личный кабинет', 'url' => ['/site/personalcabinet']];
+		}		
 	
+		
 				
      $items[] = Yii::$app->user->isGuest ? (
                   ['label' => 'Login', 'url' => ['/site/login']]

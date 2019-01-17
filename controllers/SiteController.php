@@ -157,9 +157,76 @@ class SiteController extends Controller
     }
     //личный кабинет
 	public function actionPersonalcabinet(){
-		//$model = new PersonalCabinetForm();
-		return $this->render('personalcabinet');
-	}
+		$model = new PersonalCabinetForm();
+		
+		if($model->load(\Yii::$app->request->post()) && $model->validate()){
+			if (($modelUser = User::findOne(Yii::$app->user->id)) !== null) {
+				$modelUser->username = $model->username;
+				$modelUser->email = $model->email ;
+				$modelUser->mantisname = $model->mantisname;
+				
+				if(!empty($model->password) or !empty($model->retypepassword)) 
+				{
+				   if ($model->password == $model->retypepassword){
+						$modelUser->setPassword($model->password);	
+						$modelUser->generateAuthKey();
+					}else{
+						//echo "=".$model->password."=".$model->retypepassword; die;
+						//вот такая кривая валидация.  потому что compare в модели не работает.
+						$model->addError('retypepassword', 'введенные значение не совпадают11');
+						return $this->render('personalcabinet', ['model' => $model]);
+					}
+				} 
+				if(!empty($model->mantispwd)){
+					//шифруемся
+					$secret_string = $model->username.$model->email;
+					if(strlen($secret_string) < SODIUM_CRYPTO_SECRETBOX_KEYBYTES){
+						$secret_key = str_pad($secret_string,SODIUM_CRYPTO_SECRETBOX_KEYBYTES,$model->mantisname);
+						} else{
+							$secret_key = substr($secret_string,0,SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+							}
+					
+					
+					$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+					$modelUser->mantispwd  = base64_encode(sodium_crypto_secretbox($model->mantispwd, $nonce, $secret_key));
+					$modelUser->mantisnonce = base64_encode($nonce);	
+				}
+					
+				
+				if($modelUser->save()){
+
+					return $this->goHome();
+				 } 
+				 else{
+					 if($modelUser->hasErrors()){
+						$ErrorsArray = $modelUser->getErrors(); 	 
+						foreach ($ErrorsArray as $key => $value1){
+							foreach($value1 as $value2){
+								if($key == 'username'){
+									$model->addError($key, $value2);
+								} else {
+									Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+								}
+							}
+						}	
+						//echo '<pre>'; print_r($ErrorsArray); die;
+					 }
+				 }
+			} 
+		} else{
+			//Yii::$app->session->addFlash('error',"=".$model->password."=".$model->retypepassword."=");
+		}
+		if (($modelUser = User::findOne(Yii::$app->user->id)) !== null) {
+				$model->username = $modelUser->username;
+				$model->email = $modelUser->email ;
+				$model->mantisname = $modelUser->mantisname;
+				
+				
+				return $this->render('personalcabinet', ['model' => $model]);
+        }  
+		
+		throw new NotFoundHttpException('The requested page does not exist.');
+}
 	
  //регистрация пользователя
     public function actionSignup(){
@@ -171,11 +238,34 @@ class SiteController extends Controller
 		 $user = new User();
 		 $user->username = $model->username;
 		 $user->email = $model->email;
+		 $user->mantisname = $model->mantisname;
 		 $user->setPassword($model->password);
 		 $user->generateAuthKey();
-		 
-		 
+		 //шифруемся
+			//$secret_key = sodium_crypto_secretbox_keygen();
+			$secret_string = $model->username.$model->email;
+			if(strlen($secret_string) < SODIUM_CRYPTO_SECRETBOX_KEYBYTES){
+				$secret_key = str_pad($secret_string,SODIUM_CRYPTO_SECRETBOX_KEYBYTES,$model->mantisname);
+				} else{
+					$secret_key = substr($secret_string,0,SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+					}
+			
+			
+			$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+			$user->mantispwd  = base64_encode(sodium_crypto_secretbox($model->mantispwd, $nonce, $secret_key));
+			$user->mantisnonce = base64_encode($nonce);
+			
+			// echo base64_encode($encrypted_message).'<br>';
+		    //$decrypted_message = sodium_crypto_secretbox_open($encrypted_message, $nonce, $secret_key);
+		    //echo $decrypted_message.'<br>';
+		    //echo $secret_key.'<br>';
+			//die;
+			
 		 if($user->save()){
+		 
+			
+			
+			
 					
 			return $this->goHome();
 		 } 

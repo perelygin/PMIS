@@ -13,6 +13,7 @@ use app\models\Systemlog;
 use app\models\Wbs;
 use app\models\vw_settings; 
 use app\models\BusinessRequests;
+use app\models\User;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -290,6 +291,8 @@ class Works_of_estimateController extends Controller
 					$LastEstimateSumm = 0;
 					$error_code = 0;
 					$error_str = '';
+					$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+					
 					$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
 						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
 						  else $url_mantis_cr = '';
@@ -429,8 +432,12 @@ class Works_of_estimateController extends Controller
 						}
 							  //$username = 'pmis';
 							  //$password = '141186ptv';
-							  $username = 'perelygin';
-							  $password = 'gthtksuby';
+							  
+							 // $username = 'perelygin';
+							 // $password = 'gthtksuby';
+							  $username = $User->getUserMantisName();
+							  $password = $User->getMantisPwd();
+							  
 							  $client = new SoapClient($url_mantis_cr,    //'http://192.168.20.55/mantisbt-2.3.1/api/soap/mantisconnect.php?wsdl'
 							  array('trace'=>1,'exceptions' => 0));
 							  

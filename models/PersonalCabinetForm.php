@@ -10,32 +10,38 @@ use yii\base\Model;
  */
 class PersonalCabinetForm extends Model
 {
-    public $name;
-    public $email;
+     public $username;
+	 public $password;
+	 public $retypepassword;
+	 public $email;
+	 public $mantisname;
+	 public $mantispwd;
    
     /**
      * @return array the validation rules.
      */
-    public function rules()
-    {
-        return [
-            // name, email, subject and body are required
-            [['name', 'email'], 'required'],
-            // email has to be a valid email address
-            ['email', 'email'],
-            
-        ];
-    }
-
-    /**
-     * @return array customized attribute labels
-     */
-    public function attributeLabels()
-    {
-        return [
-            'name' => 'Имя',
-        ];
-    }
+    public function rules() {
+	return [
+		 [['username','mantisname','email'], 'required',  'message' => 'Заполните поле'],
+		 [['mantisname','mantispwd','password','retypepassword'],'safe'],
+		 ['username', 'string', 'min' => 3, 'message' =>'не меньше 3х символов'],
+		// ['retypepassword','compare', 'compareAttribute' => 'password','message' =>'Введенные значения не совпадают'],  //не работает без 'password'  required
+		 ['email', 'email', 'message' =>'Email  не корректный'],
+		 ['username', 'match', 'pattern' => '~^[A-Za-z][A-Za-z0-9]+$~','message'=>'Должно состоять только из букв и цифр'],
+		 
+	];
+ }
+ 
+ public function attributeLabels() {
+	 return [
+		 'username' => 'Логин',
+		 'password' => 'Пароль',
+		 'retypepassword' => 'Пароль еще раз',
+		 'email'=>'Email пользователя',
+		 'mantisname'=>'Логин в mantis',
+		 'mantispwd' =>'Пароль в mantis'
+	 ];
+ }
 
     /**
      * Sends an email to the specified email address using the information collected by this model.
@@ -56,4 +62,4 @@ class PersonalCabinetForm extends Model
         //}
         //return false;
     }
-}
+

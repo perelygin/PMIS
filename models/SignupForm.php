@@ -8,10 +8,12 @@ class SignupForm extends Model{
  public $password;
  public $retypepassword;
  public $email;
+ public $mantisname;
+ public $mantispwd;
  
  public function rules() {
 	return [
-		 [['username', 'password','retypepassword', 'email'], 'required',  'message' => 'Заполните поле'],
+		 [['username', 'password','retypepassword','mantisname','mantispwd', 'email'], 'required',  'message' => 'Заполните поле'],
 		 ['username', 'string', 'min' => 3, 'message' =>'не меньше 3хс имволов'],
 		 ['retypepassword','compare', 'compareAttribute' => 'password', 'message' =>'Введенные значения не совпадают'],
 		 ['email', 'email', 'message' =>'Email  не корректный'],
@@ -24,7 +26,9 @@ class SignupForm extends Model{
 		 'username' => 'Логин',
 		 'password' => 'Пароль',
 		 'retypepassword' => 'Пароль еще раз',
-		 'email'=>'Email пользователя'
+		 'email'=>'Email пользователя',
+		 'mantisname'=>'Логин в mantis',
+		 'mantispwd' =>'Пароль в mantis'
 	 ];
  }
  

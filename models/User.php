@@ -25,12 +25,10 @@ class User extends ActiveRecord implements IdentityInterface
 			['auth_key', 'string', 'max' => 32],
 			['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+            [['mantisname','mantispwd','mantisnonce'],'string'],
 			//['email','string','max'=>7],
 		];
 		}
-
-
-
 
 	public function afterSave($insert, $changedAttributes){
 	    parent::afterSave($insert, $changedAttributes);
@@ -95,6 +93,28 @@ class User extends ActiveRecord implements IdentityInterface
     public function getUserName()
     {
        return $this->username();
+    }
+    public function getUserMantisName()
+    {
+       return $this->mantisname;
+    }
+    public function getMantisPwd()
+    {
+		 if(!empty($this->mantisname) and !empty($this->mantispwd)){
+		  $mntpwd = base64_decode($this->mantispwd);
+	      $secret_string = $this->username.$this->email;
+			if(strlen($secret_string) < SODIUM_CRYPTO_SECRETBOX_KEYBYTES){
+				$secret_key = str_pad($secret_string,SODIUM_CRYPTO_SECRETBOX_KEYBYTES,$this->mantisname);
+				} else{
+					$secret_key = substr($secret_string,0,SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+					}
+		   $decrypted_mntpwd = sodium_crypto_secretbox_open($mntpwd, base64_decode($this->mantisnonce), $secret_key);
+	       return $decrypted_mntpwd; 
+		   } else{
+			   return false;
+			   }
+		   
+       
     }
     /**
      * {@inheritdoc}
@@ -192,5 +212,13 @@ class User extends ActiveRecord implements IdentityInterface
 	{
 	    $this->password_reset_token = null;
 	}
+	
+	public function encrypt($decrypted, $key)
+	{
+	  $a = sodium_crypto_secretbox_keygen();
+	  return $a;
+	}
+
+	
 }
 //}
