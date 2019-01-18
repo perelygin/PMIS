@@ -193,7 +193,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 			?>
 		</div>
 		
-		<div class="col-sm-8">
+		<div class="col-sm-4">
 			
 			<?php 
 			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4)){
@@ -204,9 +204,14 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>');
 			
 			  if(!empty($mantis_links)){
+				  $i=0;
+				  
 				  foreach($mantis_links as $mtl){
+					$checked='';
+					if($i == 0)  $checked = 'checked'; 
 					echo('<tr><td>'.$mtl['name'].'</td><td>'.$mtl['WorkName'].'</td><td>'.$mtl['mantisNumber']
-					.'</td><td> <input name="mantis_link" type="radio" value='.$mtl['mantisNumber'].'></td></tr>');  
+					.'</td><td> <input name="mantis_link" type="radio" value='.$mtl['mantisNumber'].' '.$checked.' ></td></tr>');  
+					$i=$i+1;
 				  }
 			  }	  
 			  
@@ -216,6 +221,31 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				}
 			?>
 		</div>
+		<div class="col-sm-4">
+			<?php 
+			//print_r($MantisPrjLstArray);die;
+			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4)){
+			 echo('
+			 <p><b>Можно изменить проект mantis, в котором будет создан инцидент: </b></p>
+			    <table border = "1" cellpadding="4" cellspacing="2">
+				 <tr><th>Название проекта mantis</th><th></th></tr>
+			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=2>&nbsp;</td></tr>');
+			
+			  if(!empty($MantisPrjLstArray)){
+				  foreach($MantisPrjLstArray as $key=>$mpl){
+					
+					echo('<tr><td>'.$mpl['name'].'</td><td> <input name="mantis_prj" type="radio" value='.$key.' '.$mpl['Checked'].'></td></tr>');  
+				  }
+			  }	  
+			  
+			 echo('</table>');
+		    } else{ 
+				
+				}
+			?>	
+		</div>			
+		
+		
 	</div>	
     <div class="row">
 		<div class="col-sm-12">
