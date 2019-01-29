@@ -246,9 +246,10 @@ class Works_of_estimateController extends Controller
 		//список проектов мантис
 		$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
 									 if (is_soap_fault($result_1)){   //Ошибка
-									    Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result_1->faultcode.
+									    Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
 									    " faultstring: ".$result_1->faultstring);
-									    //"detail".$result->detail);
+									  // и вываливаемся
+									  return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
 									
 								     }else{
 										 foreach($result_1 as $rs){

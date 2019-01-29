@@ -13,15 +13,17 @@ use app\models\LifeCycleStages;
 use app\models\vw_ResultEvents;
 use app\models\ResultEvents;
 use app\models\SystemVersions;
+use app\models\vw_settings; 
+use app\models\Wbs;
+use app\models\WbsSearch;
+use app\models\EstimateWorkPackages;
+use app\models\WorksOfEstimate;
+use app\models\User;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\data\ArrayDataProvider;
 use yii\data\ActiveDataProvider;
-use app\models\Wbs;
-use app\models\WbsSearch;
-use app\models\EstimateWorkPackages;
-use app\models\WorksOfEstimate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -1082,11 +1084,73 @@ class BrController extends Controller
    }
    
    public function actionUpdate_result_event($idResultEvents){
+	   
+	   $a = Yii::$app->request->post();
 	   $model = ResultEvents::findOne($idResultEvents);
 	   
 	   if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 		   $model->save();
-		   return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+		   if(isset($a['btn'])) {   // анализируем нажатые кнопки
+						$btn_info = explode("_", $a['btn']);
+						if($btn_info[0] == 'mant') {
+							//Yii::$app->session->addFlash('error',"комментарий в мантиссу");
+							//Считывание настроек
+							$error_code = 0;
+							$error_str = '';
+							$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
+							if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
+							  else $url_mantis_cr = '';
+							
+							//wsdl клиент
+							$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+							$username = $User->getUserMantisName();
+							$password = $User->getMantisPwd();
+							$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));	
+							//комментарий
+							$note = array(
+								'text'=>$model->ResultEventsDescription	
+									);
+						
+							//инцидент для комментария
+							
+							if(isset($a['mantis_link'])) {
+								 if(empty($a['mantis_link'])){
+									 $error_code = 1;
+									 $error_str = 'Не указан инцидент mantis. Создание комментария не возможно';
+				  
+									} else{
+										$issue_id = (int)$a['mantis_link'];
+									}	
+								 	 
+								} else{   //головной инцидент не выбран
+									
+									   $error_code = 2;
+									   $error_str = 'Не выбран  инцидент mantis. Создание комментария не возможно';
+									
+								}
+							
+							if($error_code == 0){		
+							  $result =  $client->mc_issue_note_add($username, $password, $issue_id,$note);
+									 if (is_soap_fault($result)){   //Ошибка
+									    Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode.
+									    " faultstring: ".$result->faultstring);
+									    //"detail".$result->detail);
+									
+								     }else{  //Сохраняем номер созданного комментария
+										 //$result =  идентификатор комментария
+										 $comment_id = $issue_id.'#c'.$result;
+										 $model->ResultEventsMantis = $comment_id;
+										 $model->save();
+									 }	
+							}else{ //выводим ошибку
+								Yii::$app->session->addFlash('error',$error_str);
+							}
+						}			 
+						if($btn_info[0] == 'save') {   //сохранить событие по результату
+							return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+						}
+		   }			
+		   
 		           
 		}            
 	   return $this->render('Edit_result_event', [
