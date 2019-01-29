@@ -8,6 +8,7 @@ use app\models\ResultType;
 use app\models\ResultStatus;
 use app\models\SystemVersions;
 use app\models\Wbs;
+use app\models\vw_settings;
 /* @var $this yii\web\View */
 /* @var $model app\models\Wbs */
 /* @var $form ActiveForm */
@@ -38,6 +39,12 @@ use app\models\Wbs;
 		
 		];
 		$WBSInfo = Wbs::findOne(['id'=>$model->id])->getWbsInfo();
+		
+		
+		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
+		if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе
+		  else $url_mantis = '';
+	  
 		$this->title = "BR-". $WBSInfo['BRNumber']." ".$WBSInfo['BRName'].". Параметры узла WBS(результат)";
 ?>
 
@@ -138,7 +145,8 @@ use app\models\Wbs;
 					  .'</td><td width=75>'.$evn['ResultEventsDate'].'</td><td>'
 								  .$evn['ResultEventsName'].'</td><td>'
 								  .$evn['responsible'].'</td><td>'
-								  .$evn['ResultEventsMantis'].'</td></tr>');
+								  .Html::a($evn['ResultEventsMantis'], $url_mantis.$evn['ResultEventsMantis'],['target' => '_blank'])
+								  .'</td></tr>');
 					}
 				}else {
 					echo '<tr><td colspan="5"> нет данных </td></tr>';
