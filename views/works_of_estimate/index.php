@@ -6,6 +6,7 @@ use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 use yii\widgets\ActiveForm;
+use yii\bootstrap\Collapse;
 
 use app\models\vw_settings; 
 use app\models\Wbs;
@@ -60,20 +61,10 @@ use app\models\BusinessRequests;
 		   </div> 
 		  	   	
 		   <div class="row">
-				<div class="col-sm-10">
-					<?php  echo $this->render('_search', ['model' => $searchModel, 'idBR'=>$idBR, 'id_node'=>$id_node, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]); ?>				   
+				<div class="col-sm-12">
+					<?php  echo $this->render('_search', ['model' => $searchModel, 'idBR'=>$idBR, 'id_node'=>$id_node, 'idEstimateWorkPackages'=>$idEstimateWorkPackages,'related_issue'=>$related_issue]); ?>				   
 			    </div>
-			    <div class="col-sm-2">
-					<?php  
-					   $BR = BusinessRequests::findOne($idBR);
-					   $idLastEWP = $BR->getLastEstimateId();
-					if($idEstimateWorkPackages != $idLastEWP){
-						echo Html::img('@web/picture/vos11.gif', ['alt' => '']);
-						echo 'Внимание! Выбрана не актуальная оценка трудозатрат';
-						
-					};
-					 ?>				   
-			    </div>
+
 		   </div> 
 		   
 		    <div class="row">
@@ -91,20 +82,15 @@ use app\models\BusinessRequests;
 				   ?>
 
 			    </div>
-		   </div> 	
-	   </div> 	
-  
-    <div class="works-of-estimate-search">
-	 <?php $form1 = ActiveForm::begin([
-        'action' => ['index','idBR'=>$idBR, 'id_node'=>$id_node,'idEWP'=>$idEstimateWorkPackages],
-        'method' => 'post',
-        'id' =>'w222'
-		]); 	
-    ?>
-    
-  
-    <?php
-    // echo '<pre>'.var_dump($VwListOfWorkEffort).'</pre>';
+		   </div> 
+		   <div class="row">
+			   <div class="col-sm-12">
+				    <?php $form1 = ActiveForm::begin([
+			        'action' => ['index','idBR'=>$idBR, 'id_node'=>$id_node,'idEWP'=>$idEstimateWorkPackages],
+			        'method' => 'post',
+			        'id' =>'w222'
+					]); 	
+      // echo '<pre>'.var_dump($VwListOfWorkEffort).'</pre>';
      //die;
       if(count($VwListOfWorkEffort)>0){ // по элементу wbs есть работы
 		echo('<table border = "1" cellpadding="4" cellspacing="2">');  
@@ -165,12 +151,20 @@ use app\models\BusinessRequests;
 			$i =$i+1;
 	      } 
 	      echo '  </table>';
+	      echo '<br>';
 		}
      ?>
+			   </div>
+		   </div> 
+		   	
+	   </div> 	
+  
+    <div class="works-of-estimate-search">
+	
   
      <div class="form-group">
        <?php         
-         //echo Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) 
+        // echo Html::submitButton('Сохранитьdddd', ['class' => 'btn btn-primary']) 
         ?>
        
     </div>

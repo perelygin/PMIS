@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use app\models\EstimateWorkPackages;
 use yii\helpers\ArrayHelper;
+use yii\bootstrap\Collapse;
+use app\models\BusinessRequests;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\SearchWorksOfEstimate */
@@ -50,11 +52,41 @@ JS;
         'id' =>'w111'
     ]); ?>
 
-    <?php // $form->field($model, 'idWorksOfEstimate') ?>
-
-    <?= $form->field($model, 'idEstimateWorkPackages')->dropDownList($items,$params); ?>
-   
-   
+ <div class="container">
+	<div class="row">
+			<div class="col-sm-10">   
+					<?= $form->field($model, 'idEstimateWorkPackages')->dropDownList($items,$params); ?>
+			</div>   
+		    <div class="col-sm-2">
+					<?php  
+					   $BR = BusinessRequests::findOne($idBR);
+					   $idLastEWP = $BR->getLastEstimateId();
+					if($idEstimateWorkPackages != $idLastEWP){
+						echo Html::img('@web/picture/vos11.gif', ['alt' => '']);
+						echo 'Внимание! Выбрана не актуальная оценка трудозатрат';
+						
+					};
+					 ?>				   
+			 </div>
+	</div>
+	
+	<div class="row">
+			<div class="col-sm-12">   
+			   <?php // $form->field($model, 'idWorksOfEstimate') 
+			    $BR = BusinessRequests::findOne($idBR);
+			    echo Collapse::widget([
+						    'items' => [
+						        [
+						            'label' => 'Синхронизация работ с mantis',
+						            'content' => $this->render('_synchInc', ['mantis_links' => $BR->getMantisNumbers(2),'related_issue'=>$related_issue]),
+						            'contentOptions' => [],
+						            'options' => []
+						        ],
+						    ]
+						]);
+			    ?>
+			</div>   
+	</div>
 
     <div class="form-group">
         <?php 

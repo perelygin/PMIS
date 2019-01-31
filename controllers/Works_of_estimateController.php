@@ -78,7 +78,11 @@ class Works_of_estimateController extends Controller
        	$a = Yii::$app->request->post();
        	$searchModel = new SearchWorksOfEstimate();
        	$idEstimateWorkPackages = $idEWP;
-       	
+       	$related_issue = array(); //массив для связанных инцидентов
+       	//Считывание настроек
+		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
+						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
+						  else $url_mantis_cr = '';
        	//if(isset($a['workEffort']) or isset($a['team_member'])){  //Если на форме нажали кнопку "сохранить" под оценками трудозатрат,  сохраняем трудозатраты в базе и переотображаем форму с тем же пакетом оценок
 			////$idEstimateWorkPackages = $idEWP;
 
@@ -95,15 +99,79 @@ class Works_of_estimateController extends Controller
 			////Yii::$app->session->addFlash('error',$idEstimateWorkPackages);
 			
 		//} 
+		
+	    if(isset($a['btn'])) {   // анализируем нажатые кнопки
+			
+			$btn_info = explode("_", $a['btn']);
+			if($btn_info[0] == 'mnt1') { //получить список связанных инцидентов
+				//получаем номер выбранного инцидента
+			    $relationships ='';	
+			    $error_code = 99;	
+			    $issue_id = 0;													  
+				if(isset($a['mantis_link'])) {
+					 if(empty($a['mantis_link'])){
+						 $error_code = 1;
+						 $error_str = 'По выбранной работе не указан инцидент mantis. Привязка невозможна';
+	  
+						 } else{
+							$issue_id = (int)$a['mantis_link'];
+							
+						 }	
+					 	 
+					} else{   //головной инцидент не выбран
+						   $error_code = 2;
+						   $error_str = 'Не выбран головной инцидент для привязки. Привязка невозможна';
+					}	
+				//пытаемся получить информацию по инциденту. В том числе и связанные
+				if(!empty($issue_id)){
+				    //wsdl клиент
+					$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+					$username = $User->getUserMantisName();
+					$password = $User->getMantisPwd();
+					$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));
+					$result =  $client->mc_issue_get($username, $password, $issue_id);
+					if (is_soap_fault($result)){   //Ошибка
+									    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
+									    " faultstring: ".$result->faultstring);
+									    //"detail".$result->detail);
+									
+					}else{
+						//делаем массив с перечнем привязанных инцидентов
+						$related_issue=array();
+						foreach ($result->relationships as $rel){
+							//echo ('<br>'. $rel->target_id);
+							$result_issue = $client->mc_issue_get($username, $password, $rel->target_id); 	
+							if(is_soap_fault($result_issue)){   //Ошибка
+							    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
+							    " faultstring: ".$result_issue->faultstring);
+							}else{
+								
+								$related_issue[$rel->target_id] = array('mantisNumber'=>$rel->target_id,'name'=>$result_issue->summary,'handler'=>$result_issue->handler->name);
+							}
+						}
+						//var_dump($related_issue);die;
+					}
+					
+				}	
+			
+				//Yii::$app->session->addFlash('error',"ИИИха ".$issue_id." ".$error_code );
+			}
+			if($btn_info[0] == 'mnt2') {   //создаем работы по выбранным инцдентам
+					if(isset($a['relatedissue'])) {
+						foreach($a['relatedissue'] as $r){
+							echo('<Br>'.$r);
+							}
+						 die;
+						}
+				//Yii::$app->session->addFlash('error',"ИИИха ");
+			}
+		}	 
 		if (isset($a['SearchWorksOfEstimate'])){ 
+			
 			if ($searchModel->load(Yii::$app->request->post())){    //если idEstimateWorkPackages(пакет оценок) был выбран на форме,  то используем его
-				 
 			   $idEstimateWorkPackages = $searchModel->idEstimateWorkPackages;
-	 
-			   
 			}
 		}	
-		 
 		if($idEstimateWorkPackages == -1){ //если все еще -1, то ищем любой по этой BR
 			   $BREstimateList = EstimateWorkPackages::find()->where(['deleted' => 0, 'idBR'=>$idBR])->orderBy('dataEstimate DESC')->one();
 			   if(is_null($BREstimateList)){
@@ -115,9 +183,7 @@ class Works_of_estimateController extends Controller
 		
     
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id_node,$idEstimateWorkPackages);
-        
         $VwListOfWorkEffort = VwListOfWorkEffort::find()->where(['idEstimateWorkPackages'=>$idEstimateWorkPackages, 'idWbs'=>$id_node])->all();
-   
 		return $this->render('index', [
 				 'idBR'=>$idBR,
                  'id_node'=>$id_node,
@@ -125,6 +191,7 @@ class Works_of_estimateController extends Controller
                  'VwListOfWorkEffort'=>$VwListOfWorkEffort,
 				 'searchModel' => $searchModel,
 				'dataProvider' => $dataProvider,
+				'related_issue'	=> $related_issue
         ]);
     }
 
@@ -243,41 +310,47 @@ class Works_of_estimateController extends Controller
 		//
 		$wbs = Wbs::findOne(['id'=>$idWbs]); 
 		$wbs_info = $wbs->getWbsInfo();  				  
-		//список проектов мантис
-		$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
-									 if (is_soap_fault($result_1)){   //Ошибка
-									    Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
-									    " faultstring: ".$result_1->faultstring);
-									  // и вываливаемся
-									  return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
-									
-								     }else{
-										 foreach($result_1 as $rs){
-											  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13){
-												  $mntprjArr = array('name' =>$rs->name,'Checked' =>' ');
-												  $MntPrjLstArray[$rs->id] = $mntprjArr;
-											  }
-											 } 
-											 // проставляем признак выбранности
-											   if($wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4 or $wbs_info['idResultType'] == 2){
-												   //SpectrumFront
-												    $name = $MntPrjLstArray['12']['name'];
-													$MntPrjLstArray['12']  = array('name'=>$name,'Checked' =>'checked');
-												}
-												if($wbs_info['idResultType'] == 1){
-												   //VTB24 Согласование экспертиз
-												    $name = $MntPrjLstArray['17']['name'];
-													$MntPrjLstArray['17']  = array('name'=>$name,'Checked' =>'checked');
-												}
-										   //print_r($MntPrjLstArray);
-										   //die;
-										 }
+		$model = $this->findModel($idWorksOfEstimate);
+		 
+		//список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
+		$MntPrjLstArray =  array();
+		if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
+			$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
+				 if (is_soap_fault($result_1)){   //Ошибка
+				    Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
+				    " faultstring: ".$result_1->faultstring);
+				  // и вываливаемся
+				  return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
+				
+			     }else{
+					 foreach($result_1 as $rs){
+						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13){
+							  $mntprjArr = array('name' =>$rs->name,'Checked' =>' ');
+							  $MntPrjLstArray[$rs->id] = $mntprjArr;
+						  }
+						 } 
+						 // проставляем признак выбранности
+						   if($wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4 or $wbs_info['idResultType'] == 2){
+							   //SpectrumFront
+							    $name = $MntPrjLstArray['12']['name'];
+								$MntPrjLstArray['12']  = array('name'=>$name,'Checked' =>'checked');
+							}
+							if($wbs_info['idResultType'] == 1){
+							   //VTB24 Согласование экспертиз
+							    $name = $MntPrjLstArray['17']['name'];
+								$MntPrjLstArray['17']  = array('name'=>$name,'Checked' =>'checked');
+							}
+					   //print_r($MntPrjLstArray);
+					   //die;
+					 }
 			//[13]  VTB24 SpectrumAdmin 
 			//[12]  VTB24 SpectrumFront 
 			//[22]  VTB24 SpectrumTrs24 
 			//[17]  VTB24 Согласование экспертиз 
+		}
 		
-        $model = $this->findModel($idWorksOfEstimate);
+		
+       
 		$a = Yii::$app->request->post();
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//////
