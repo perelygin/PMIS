@@ -200,4 +200,14 @@ class BusinessRequests extends \yii\db\ActiveRecord
 		
       
 		}
+	/*
+	 * Возвращает перечень результатов для текущей BR
+	 * в выборку попадают только те результаты, у которых нет подчинных результатов
+	 */
+	public function getResults()
+    {
+		$sql =	"SELECT id,name FROM wbs Where (wbs.rgt - wbs.lft <= 1) and idBr=".$this->idBR;
+		$Results = Yii::$app->db->createCommand($sql)->queryAll();		
+		return $Results;
+	}
 }

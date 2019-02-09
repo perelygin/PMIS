@@ -77,6 +77,12 @@ use app\models\BusinessRequests;
 					 $url2 = Url::to(['works_of_estimate/create', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-plus-sign"></span>', $url2,['title' => 'Добавить работу',]);
 					 echo "   ";
+					 $url3 = Url::to(['works_of_estimate/take_works_from_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
+					 echo  Html::a('<span class="glyphicon glyphicon-bishop"></span>', $url3,['title' => 'Cоздать работы на основе инцидентов mantis',]);
+					 echo "   ";
+					 $url4 = Url::to(['works_of_estimate/move_works_to_another_result', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
+					 echo  Html::a('<span class="glyphicon glyphicon-resize-horizontal"></span>', $url4,['title' => 'Перемещение работ в другой результат',]);
+					 echo "   ";
 					 //$url2 = Url::to(['works_of_estimate/works_template', 'idBR'=>$idBR]);;
 					 //echo  Html::a('<span class="glyphicon glyphicon-save-file"></span>', $url2,['title' => 'Добавить работы по шаблону',]);
 				   ?>
@@ -101,7 +107,12 @@ use app\models\BusinessRequests;
         $url5 = Url::to(['works_of_estimate/deletework', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //Удалить работу
         echo('<tr><td colspan="3" ><b>'
 		        //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
-		        .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',])
+		        .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',
+																						'data' => [
+																							'confirm' => 'Точно удаляем?',
+																							'method' => 'post',	
+																						],
+																				 ])
 				.Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
 				.Html::a($VwListOfWorkEffort[$i]['mantisNumber'], $url_mantis.$VwListOfWorkEffort[$i]['mantisNumber'],['target' => '_blank'])
 				.' '

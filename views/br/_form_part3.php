@@ -110,7 +110,13 @@
 									if($haveChild > 1){  //есть подчиненные узлы
 										return '';
 									} else{
-										return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url,['title' => 'Удалить узел']);
+										//return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url,['title' => 'Удалить узел']);
+										return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url,['title' => 'Удалить узел',
+																												 'data' => [
+																															'confirm' => 'Точно удаляем?',
+																															'method' => 'post',	
+																															],
+																												]);
 									}
 									
 				                },	

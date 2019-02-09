@@ -14,6 +14,7 @@ use app\models\Wbs;
 use app\models\vw_settings; 
 use app\models\BusinessRequests;
 use app\models\User;
+use app\models\MoveWorksToAnotherResultForm;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -104,6 +105,7 @@ class Works_of_estimateController extends Controller
 			
 			$btn_info = explode("_", $a['btn']);
 			if($btn_info[0] == 'mnt1') { //получить список связанных инцидентов
+				
 				//получаем номер выбранного инцидента
 			    $relationships ='';	
 			    $error_code = 99;	
@@ -282,7 +284,7 @@ class Works_of_estimateController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
+    public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$page_number=1)
     {
         //проверка на то, что оценка трудозатрат не закрыта
         $ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
@@ -302,11 +304,7 @@ class Works_of_estimateController extends Controller
 							 //$MntPrjLstArray = explode(';',$settingsMntPrjLst->enm_str_value); 
 						//}	 
 						  //else $MntPrjLstArray = array();
-		//wsdl клиент
-		$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
-		$username = $User->getUserMantisName();
-		$password = $User->getMantisPwd();
-		$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));	
+		
 		//
 		$wbs = Wbs::findOne(['id'=>$idWbs]); 
 		$wbs_info = $wbs->getWbsInfo();  				  
@@ -315,6 +313,11 @@ class Works_of_estimateController extends Controller
 		//список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
 		$MntPrjLstArray =  array();
 		if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
+			//wsdl клиент
+			$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+			$username = $User->getUserMantisName();
+			$password = $User->getMantisPwd();
+			$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));	
 			$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
 				 if (is_soap_fault($result_1)){   //Ошибка
 				    Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
@@ -396,6 +399,7 @@ class Works_of_estimateController extends Controller
 					   if($modelWE->hasErrors()){
 							Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
 					   }
+					   $page_number = 1;
 			
 				} 
 				elseif($btn_info[0] == 'del'){ //удаление трудозатрат из работы
@@ -404,6 +408,7 @@ class Works_of_estimateController extends Controller
 				       if($modelWE->hasErrors()){
 								Yii::$app->session->addFlash('error',"Ошибка удаления трудозатрат по работе " );
 					   }
+					   $page_number = 1;
 				  }
 				elseif($btn_info[0] == 'save'){  //сохранение формы
 					   
@@ -622,6 +627,7 @@ class Works_of_estimateController extends Controller
 					}else{ //Иначе - синхронизируем. т.е. читаем состояние инцидента в мантиссе и вносим измеения в pmis
 						Yii::$app->session->addFlash('success',"Указан номер инцидента. Считываем его состояние из mantis ".$model->GetMantisNumber());
 						}
+					$page_number = 2;
 					
 				}
 						
@@ -641,6 +647,7 @@ class Works_of_estimateController extends Controller
         ]);	
 			
          return $this->render('update', [
+			'page_number' =>$page_number,
             'model' => $model,
             'VwListOfWorkEffort'=>$VwListOfWorkEffort,
             'LogDataProvider'=>$LogDataProvider,
@@ -699,6 +706,134 @@ class Works_of_estimateController extends Controller
 	   //}
 	   //return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate, 'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
     }
+    
+    /**
+ * 
+ * Cоздать работы на основе инцидентов mantis
+ */
+    public function actionTake_works_from_mantis($idEstimateWorkPackages,$idWbs,$idBR)
+    {
+       $related_issue = array(); //массив для связанных инцидентов
+       $BR = BusinessRequests::findOne($idBR);
+       //Считывание настроек
+		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
+						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
+						  else $url_mantis_cr = '';
+						  
+       $a = Yii::$app->request->post();
+ 		if (!empty($a)) {
+			if(isset($a['btn'])) {   // анализируем нажатые кнопки
+				$btn_info = explode("_", $a['btn']);
+				if($btn_info[0] == 'mnt1') { //получить список связанных инцидентов
+									//получаем номер выбранного инцидента
+			    $relationships ='';	
+			    $error_code = 99;	
+			    $issue_id = 0;													  
+				if(isset($a['mantis_link'])) {
+					 if(empty($a['mantis_link'])){
+						 $error_code = 1;
+						 $error_str = 'По выбранной работе не указан инцидент mantis. Привязка невозможна';
+	  
+						 } else{
+							$issue_id = (int)$a['mantis_link'];
+							
+						 }	
+					 	 
+					} else{   //головной инцидент не выбран
+						   $error_code = 2;
+						   $error_str = 'Не выбран головной инцидент для привязки. Привязка невозможна';
+					}	
+				//пытаемся получить информацию по инциденту. В том числе и связанные
+				if(!empty($issue_id)){
+				    //wsdl клиент
+					$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+					$username = $User->getUserMantisName();
+					$password = $User->getMantisPwd();
+					$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));
+					$result =  $client->mc_issue_get($username, $password, $issue_id);
+					if (is_soap_fault($result)){   //Ошибка
+									    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
+									    " faultstring: ".$result->faultstring);
+									    //"detail".$result->detail);
+									
+					}else{
+						//делаем массив с перечнем привязанных инцидентов
+						$related_issue=array();
+						foreach ($result->relationships as $rel){
+							//echo ('<br>'. $rel->target_id);
+							$result_issue = $client->mc_issue_get($username, $password, $rel->target_id); 	
+							if(is_soap_fault($result_issue)){   //Ошибка
+							    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
+							    " faultstring: ".$result_issue->faultstring);
+							}else{
+								
+								$related_issue[$rel->target_id] = array('mantisNumber'=>$rel->target_id,'name'=>$result_issue->summary,'handler'=>$result_issue->handler->name);
+							}
+						}
+						//var_dump($related_issue);die;
+					}
+					
+				  }	
+				
+				}
+				if($btn_info[0] == 'mnt2') {   //создаем работы по выбранным инцдентам
+					if(isset($a['relatedissue'])) {
+						foreach($a['relatedissue'] as $r){
+							echo('<Br>'.$r);
+							}
+						 die;
+				}
+				//Yii::$app->session->addFlash('error',"ИИИха ");
+			}
+			}
+		}   
+	   
+       
+        
+	  $VwListOfWorkEffort = VwListOfWorkEffort::find()->where(['idEstimateWorkPackages'=>$idEstimateWorkPackages, 'idWbs'=>$idWbs])->all();	
+	  return $this->render('TakeWorksFromMantis', [
+			'idBR'=>$idBR,
+            'id_node'=>$idWbs,
+            'VwListOfWorkEffort' => $VwListOfWorkEffort,
+            'idEstimateWorkPackages' => $idEstimateWorkPackages,
+            'mantis_links' => $BR->getMantisNumbers(2),
+            'related_issue'=>$related_issue
+        ]);	
+    }
+    
+ /* 
+ * Перемещение работ в другой результат
+ */
+    public function actionMove_works_to_another_result($idEstimateWorkPackages,$idWbs,$idBR)
+    {
+	   $model = new MoveWorksToAnotherResultForm();
+       $a = Yii::$app->request->post();
+       if ($model->load(Yii::$app->request->post())) {
+		if (!empty($a)) {
+			if(isset($a['selectedWorks'])) {
+				//переносим работы
+				foreach($a['selectedWorks'] as $r){
+					Yii::$app->db->createCommand()->update('WorksOfEstimate'
+					, ['idWbs' => $model->NewResult	,'idEstimateWorkPackages'=>$idEstimateWorkPackages], 'idWorksOfEstimate = '.$r)->execute();
+					}
+				$this->redirect(['index', 'id_node' => $model->NewResult ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
+				} else {
+					Yii::$app->session->addFlash('error','Не выбраны работы для переноса' );
+					}
+		}   
+	   }
+       
+        
+	  $VwListOfWorkEffort = VwListOfWorkEffort::find()->where(['idEstimateWorkPackages'=>$idEstimateWorkPackages, 'idWbs'=>$idWbs])->all();	
+	  return $this->render('MoveWorksToAnotherResult', [
+			'model'=> $model,
+			'idBR'=>$idBR,
+            'id_node'=>$idWbs,
+            'VwListOfWorkEffort' => $VwListOfWorkEffort,
+            'idEstimateWorkPackages' => $idEstimateWorkPackages
+        ]);	
+    }
+    
     /**
      * Finds the WorksOfEstimate model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

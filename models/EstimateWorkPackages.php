@@ -59,7 +59,12 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
     public function getBrInfo()
     {
 		$BR = BusinessRequests::findOne($this->idBR);
-		$BrInfo = array('BRName' => $BR->BRName,'BRNumber'=>$BR->BRNumber,'EstimateName'=>$this->EstimateName,'dataEstimate'=>$this->dataEstimate);
+			
+		$BrInfo = array('BRName' => $BR->BRName,
+					    'BRNumber'=> $BR->BRNumber,
+					    'EstimateName'=>$this->EstimateName,
+					    'dataEstimate'=>$this->dataEstimate,
+					    'finished'=>$this->isFinished() ? 'Закрыта':'Активна');
         return $BrInfo;
     }
     /*

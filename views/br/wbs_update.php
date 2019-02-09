@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use vova07\imperavi\Widget;
 use app\models\ResultType;
@@ -38,8 +39,25 @@ use app\models\vw_settings;
 		$params3 = [
 		
 		];
-		$WBSInfo = Wbs::findOne(['id'=>$model->id])->getWbsInfo();
 		
+		$wbs_current_node = Wbs::findOne(['id'=>$model->id]);
+		$WBSInfo = $wbs_current_node->getWbsInfo();
+		
+		//ищем родителей для rootid
+			
+			if(!is_null($wbs_current_node)){
+				$parents = $wbs_current_node->parents()->all();	
+				foreach($parents as $prn){
+					$this->params['breadcrumbs'][] = ['label' => $prn['name'], 
+					'url' => Url::toRoute(['br/update', 
+											'id' =>$WBSInfo['idBr'], 
+											'page_number' => 3, 
+											'root_id'=>$prn['id']])];
+				}
+				
+				
+				$this->params['breadcrumbs'][] = 'Изменение параметров результата';
+			}
 		
 		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе

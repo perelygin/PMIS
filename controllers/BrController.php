@@ -154,7 +154,7 @@ class BrController extends Controller
 			$LifeCycleStages = new LifeCycleStages();
 			$wbs_template = $LifeCycleStages->getLifeCycleStages($model->BRLifeCycleType);
 			//корень - номер BR
-			$root = new Wbs(['name' => 'BR '.$model->BRNumber,'tree'=>$model->idBR]);
+			$root = new Wbs(['name' => 'BR ','tree'=>$model->idBR]);
 				$root->mantis = 'www.mantis.com';
 				$root->idBr = $model->idBR;
 				$root->makeRoot();
