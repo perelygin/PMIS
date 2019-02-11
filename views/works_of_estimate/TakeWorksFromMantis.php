@@ -8,10 +8,15 @@ use app\models\Wbs;
 use app\models\EstimateWorkPackages;
 use app\models\BusinessRequests;
 use yii\helpers\Url;
+use app\models\vw_settings; 
 
 
 /* @var $this yii\web\View */
 /* @var $model app\models\WorksOfEstimate */
+		//настройки
+		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
+		if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе
+		  else $url_mantis = '';
          //название оценки
          
          $EstimateWorkPackages = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]);
@@ -72,12 +77,12 @@ $form = ActiveForm::begin();
 	<div class="row">
 		<div class="col-sm-6"> 
 				   <?php
-						echo( Html::submitButton('', [
+						echo( '<b> Выбери инцидент с БФТЗ и нажми кнопку: </b>'. Html::submitButton('', [
 										'span class' => 'glyphicon glyphicon-knight',
 										'title'=>'Получить перечень связанных инцидентов',
 										'name'=>'btn',
-										'value' => 'mnt1_']).'<b> Выбери инцидент с БФТЗ: </b>
-						   </p>
+										'value' => 'mnt1_']).
+						   '</p>
 						    <table border = "1" cellpadding="4" cellspacing="2">
 							 <tr><th>Результат</th><th>Работа</th><th>Номер инцидента</th><th></th></tr>
 						  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>');
@@ -96,19 +101,22 @@ $form = ActiveForm::begin();
 		</div>   
 		<div class="col-sm-6"> 
 			<?php
-			echo( Html::submitButton('', [
+			echo('<b> Выбери инциденты по которым будут регистрироваться работы: </b>'. Html::submitButton('', [
 						'span class' => 'glyphicon glyphicon-bishop',
 						'title'=>'Регистрация работ по выбранным инцидентам',
 						'name'=>'btn',
-						'value' => 'mnt2_']).'<b> Выбери инциденты для регистрации работ: </b>
-		   </p>
+						'value' => 'mnt2_']).
+			'</p>
 		    <table border = "1" cellpadding="4" cellspacing="2">
-			 <tr><th>Инцидент</th><th>Название</th><th>Ответственный</th><th></th></tr>
-		  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>');
+			 <tr><th>Инцидент</th><th>Название</th><th>Ответственный</th><th>Проект</th><th></th></tr>
+		  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=5>&nbsp;</td></tr>');
 		   if(!empty($related_issue)){
 			foreach($related_issue as $rli){
-				echo('<tr><td>'.$rli['mantisNumber'].'</td><td>'.$rli['name'].'</td><td>'.$rli['handler']
-								.'</td><td> <input name="relatedissue[]" type="checkbox" value='.$rli['mantisNumber'].'></td></tr>');
+				echo('<tr><td>'.
+				Html::a($rli['mantisNumber'], $url_mantis.$rli['mantisNumber'],['target' => '_blank'])
+				.'</td><td>'.$rli['name'].'</td><td>'.$rli['handler'].
+								'</td><td>'.$rli['project'].'</td>
+								<td> <input name="relatedissue[]" type="checkbox" value='.$rli['mantisNumber'].'></td></tr>');
 			}	
 		   }
 		   echo('</table>');

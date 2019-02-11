@@ -35,7 +35,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
             [['idEstimateWorkPackages', 'WorkName'], 'required'],
             [['idEstimateWorkPackages', 'idWbs', 'deleted'], 'integer'],
             [['WorkName','mantisNumber'], 'string', 'max' => 250],
-            [['WorkDescription'], 'string', 'max' => 1000],
+            [['WorkDescription'], 'string', 'max' => 65535],
             [['mantisNumber'],'match','pattern'=>'#^[0-9]+$#' ],
            ];
     }
@@ -133,8 +133,20 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 			} else {
 				return '';
 					}	
-		
-			
-        
+	   
     }
+    public function addWork($idEstimateWorkPackages,$idWbs,$workName,$workDescr,$MantisNumber=0)
+    {
+	   $this->idEstimateWorkPackages = $idEstimateWorkPackages;
+	   $this->idWbs = $idWbs;
+	   $this->WorkName = $workName;
+	   $this->WorkDescription = $workDescr;
+	   if($MantisNumber != 0){$this->mantisNumber = $MantisNumber;}
+	   $this->save();
+	   if($this->hasErrors()){
+				return -1; 
+	   }else{
+				return 0;
+	   }
+	}
 }

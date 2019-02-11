@@ -59,7 +59,7 @@ class ResultEvents extends \yii\db\ActiveRecord
             [['idwbs', 'ResultEventResponsible', 'deleted'], 'integer'],
             [['ResultEventsDate'], 'safe'],
             [['ResultEventResponsible','ResultEventsDate','ResultEventsName'], 'required'],
-            [['ResultEventsDescription'], 'string', 'max' => 65000],
+            [['ResultEventsDescription'], 'string', 'max' => 65535 ],
             [['ResultEventsName'], 'string', 'max' => 100],
             [['ResultEventsMantis'], 'string', 'max' => 45],
         ];

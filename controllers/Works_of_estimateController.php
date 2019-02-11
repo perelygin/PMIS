@@ -223,18 +223,26 @@ class Works_of_estimateController extends Controller
 				return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
 			}
        $modelWOS = new WorksOfEstimate();
-	   $modelWOS->idEstimateWorkPackages = $idEstimateWorkPackages;
-	   $modelWOS->idWbs = $idWbs;
-	   $modelWOS->WorkName = 'Название работы';
-	   $modelWOS->WorkDescription = 'Описание работы';
-	   $modelWOS->save();
-	   if($modelWOS->hasErrors()){
+       $result = $modelWOS->addWork($idEstimateWorkPackages,$idWbs,'Название работы','Описание работы');
+       if($result<0){
 				Yii::$app->session->addFlash('error',"Ошибка сохранения работ ");
 				return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]); 
 	   }else{
-				//return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
 				return $this->redirect(['update', 'idWorksOfEstimate'=>$modelWOS->idWorksOfEstimate,'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
 	   }
+	   
+	   //$modelWOS->idEstimateWorkPackages = $idEstimateWorkPackages;
+	   //$modelWOS->idWbs = $idWbs;
+	   //$modelWOS->WorkName = 'Название работы';
+	   //$modelWOS->WorkDescription = 'Описание работы';
+	   //$modelWOS->save();
+	   //if($modelWOS->hasErrors()){
+				//Yii::$app->session->addFlash('error',"Ошибка сохранения работ ");
+				//return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]); 
+	   //}else{
+				////return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);
+				//return $this->redirect(['update', 'idWorksOfEstimate'=>$modelWOS->idWorksOfEstimate,'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
+	   //}
 	   
     }
     
@@ -715,11 +723,16 @@ class Works_of_estimateController extends Controller
     {
        $related_issue = array(); //массив для связанных инцидентов
        $BR = BusinessRequests::findOne($idBR);
+       
        //Считывание настроек
 		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
 						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
 						  else $url_mantis_cr = '';
-						  
+	 //wsdl клиент
+					$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+					$username = $User->getUserMantisName();
+					$password = $User->getMantisPwd();
+					$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));					  
        $a = Yii::$app->request->post();
  		if (!empty($a)) {
 			if(isset($a['btn'])) {   // анализируем нажатые кнопки
@@ -732,7 +745,7 @@ class Works_of_estimateController extends Controller
 				if(isset($a['mantis_link'])) {
 					 if(empty($a['mantis_link'])){
 						 $error_code = 1;
-						 $error_str = 'По выбранной работе не указан инцидент mantis. Привязка невозможна';
+						 $error_str = 'не указан инцидент mantis для получения связанных инцидентов.';
 	  
 						 } else{
 							$issue_id = (int)$a['mantis_link'];
@@ -741,16 +754,11 @@ class Works_of_estimateController extends Controller
 					 	 
 					} else{   //головной инцидент не выбран
 						   $error_code = 2;
-						   $error_str = 'Не выбран головной инцидент для привязки. Привязка невозможна';
+						   $error_str = 'Не выбран головной инцидент для получения связанных инцидентов.';
 					}	
 				//пытаемся получить информацию по инциденту. В том числе и связанные
 				if(!empty($issue_id)){
-				    //wsdl клиент
-					$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
-					$username = $User->getUserMantisName();
-					$password = $User->getMantisPwd();
-					$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));
-					$result =  $client->mc_issue_get($username, $password, $issue_id);
+				   	$result =  $client->mc_issue_get($username, $password, $issue_id);
 					if (is_soap_fault($result)){   //Ошибка
 									    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
 									    " faultstring: ".$result->faultstring);
@@ -766,8 +774,14 @@ class Works_of_estimateController extends Controller
 							    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
 							    " faultstring: ".$result_issue->faultstring);
 							}else{
+								if($result_issue->project->id != 17){//связанный инцидент не принадлежить проекту 17(согласование экспертиз)
+									$related_issue[$rel->target_id] = array('mantisNumber'=>$rel->target_id,
+																		'name'=>$result_issue->summary,
+																		'handler'=>$result_issue->handler->name,
+																		'project' =>$result_issue->project->name,
+																		);
+									}
 								
-								$related_issue[$rel->target_id] = array('mantisNumber'=>$rel->target_id,'name'=>$result_issue->summary,'handler'=>$result_issue->handler->name);
 							}
 						}
 						//var_dump($related_issue);die;
@@ -777,12 +791,37 @@ class Works_of_estimateController extends Controller
 				
 				}
 				if($btn_info[0] == 'mnt2') {   //создаем работы по выбранным инцдентам
-					if(isset($a['relatedissue'])) {
+					 
+  					 if(isset($a['relatedissue'])) {
 						foreach($a['relatedissue'] as $r){
-							echo('<Br>'.$r);
+							$result_issue = $client->mc_issue_get($username, $password, $r); 	
+							if(is_soap_fault($result_issue)){   //Ошибка
+							    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
+							    " faultstring: ".$result_issue->faultstring);
+							}else{
+								
+								$modelWOS = new WorksOfEstimate();
+								$result = $modelWOS->addWork($idEstimateWorkPackages,$idWbs,$result_issue->summary,$result_issue->description,$r);
+									if($result<0){
+										Yii::$app->session->addFlash('error',"Ошибка создания работы на основе инцидента ".$r);
+									}else{
+										Yii::$app->session->addFlash('success',"Создана работа на основе инцидента ".$r);
+										//теперь привязываем исполнителя
+										//'handler'=>$result_issue->handler->name,
+										   //$modelWE = new WorkEffort();
+									       //$modelWE->idWorksOfEstimate = $modelWOS->idWorksOfEstimate;
+									       //$modelWE->workEffort = 0;
+									       //$idAnyTeamMember = People::getIdByName($idBR);
+									       
+									       //$modelWE->idTeamMember = $idAnyTeamMember;
+									      
+										}
+									
+								}
 							}
-						 die;
+						
 				}
+				//die;
 				//Yii::$app->session->addFlash('error',"ИИИха ");
 			}
 			}
