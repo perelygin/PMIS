@@ -70,6 +70,10 @@ class BusinessRequests extends \yii\db\ActiveRecord
        // throw new NotFoundHttpException('The requested page does not exist.');
     }
     
+    /*
+	  * Возвращает тип ролевой модели
+	  * 
+	  */ 
     public function get_BRRoleModelType(){
 		return $this->BRRoleModelType;
 	}
@@ -210,4 +214,57 @@ class BusinessRequests extends \yii\db\ActiveRecord
 		$Results = Yii::$app->db->createCommand($sql)->queryAll();		
 		return $Results;
 	}
+	
+	/*Возвращает массив с mantis-логинами членов команды
+	 * 
+	 * 
+	 */
+	public function getCMembersLogins()
+    {
+		$sql =	"SELECT 
+				  ppl.mantis_login
+				FROM ProjectCommand as pcm
+				 LEFT OUTER JOIN People ppl ON pcm.idHuman = ppl.idHuman
+				where parent_id != 0 and pcm.idBR = ".$this->idBR;
+		$Results = Yii::$app->db->createCommand($sql)->queryAll();		
+		return $Results;
+	}
+	/*Возвращает id члена команды по mantis-логинаму
+	 * 
+	 * 
+	 */
+	public function getIdTeamMemberBylogin($mantis_login)
+    {
+		$sql =	"SELECT 
+					pcm.id
+					FROM ProjectCommand as pcm
+					LEFT OUTER JOIN People ppl ON pcm.idHuman = ppl.idHuman
+					where ppl.mantis_login = '". $mantis_login.   "' and pcm.idBR = ".$this->idBR;
+		$Results = Yii::$app->db->createCommand($sql)->queryOne();		
+		if($Results){
+			return $Results['id'];
+			} else{
+				return -1;
+				}
+		
+	}
+	    /*
+     * Возвращает ParentId для роли в текущей BR
+     */
+    public function getParentId($idRole){
+		 $sql = 'SELECT * FROM ProjectCommand WHERE idBR = :idBR and parent_id = 0 and idRole = :idRole';
+		 $pc = ProjectCommand::findBySql($sql, [
+		':idBR' =>$this->idBR,
+		':idRole'=>$idRole
+		])->one();
+		 
+		 if(isset($pc)){
+			 return $pc->id;
+			 } else{
+				 return null;
+				 }
+	} 
+	public function getBrId(){
+		return $this->idBR;
+	} 
 }

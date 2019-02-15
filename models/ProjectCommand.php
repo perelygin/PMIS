@@ -102,6 +102,8 @@ class ProjectCommand extends \yii\db\ActiveRecord
 				 return null;
 				 }
 	}
+	
+	 
 	 public function beforeDelete(){
         if (parent::beforeDelete()){
 			//смотрим наличие  записей в подчиненной таблице с трудозатратами	
@@ -114,4 +116,5 @@ class ProjectCommand extends \yii\db\ActiveRecord
         }
         return false;
     }
+
 }

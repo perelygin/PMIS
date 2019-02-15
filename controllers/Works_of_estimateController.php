@@ -15,12 +15,14 @@ use app\models\vw_settings;
 use app\models\BusinessRequests;
 use app\models\User;
 use app\models\MoveWorksToAnotherResultForm;
+use app\models\People;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\helpers\ArrayHelper;
 use SoapClient;
 
 /**
@@ -317,15 +319,15 @@ class Works_of_estimateController extends Controller
 		$wbs = Wbs::findOne(['id'=>$idWbs]); 
 		$wbs_info = $wbs->getWbsInfo();  				  
 		$model = $this->findModel($idWorksOfEstimate);
-		 
-		//список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
-		$MntPrjLstArray =  array();
-		if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
-			//wsdl клиент
+		//wsdl клиент
 			$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
 			$username = $User->getUserMantisName();
 			$password = $User->getMantisPwd();
-			$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));	
+			$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 
+		//список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
+		$MntPrjLstArray =  array();
+		if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
+				
 			$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
 				 if (is_soap_fault($result_1)){   //Ошибка
 				    Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
@@ -722,6 +724,7 @@ class Works_of_estimateController extends Controller
     public function actionTake_works_from_mantis($idEstimateWorkPackages,$idWbs,$idBR)
     {
        $related_issue = array(); //массив для связанных инцидентов
+       $missingMembers=array();  //перечень логинов,  которые не принадлежат членам команды;
        $BR = BusinessRequests::findOne($idBR);
        
        //Считывание настроек
@@ -767,6 +770,9 @@ class Works_of_estimateController extends Controller
 					}else{
 						//делаем массив с перечнем привязанных инцидентов
 						$related_issue=array();
+						$missingMembers=array();
+						$CommandMembersLogins = ArrayHelper::getColumn($BR->getCMembersLogins(), 'mantis_login');//массив логинов членов команды
+						//print_r($ids); die;
 						foreach ($result->relationships as $rel){
 							//echo ('<br>'. $rel->target_id);
 							$result_issue = $client->mc_issue_get($username, $password, $rel->target_id); 	
@@ -780,15 +786,45 @@ class Works_of_estimateController extends Controller
 																		'handler'=>$result_issue->handler->name,
 																		'project' =>$result_issue->project->name,
 																		);
+									//формируем перечень логинов,  которые не принадлежат членам команды									
+									if(!ArrayHelper::isIn($result_issue->handler->name, $CommandMembersLogins)){
+										    $man = People::find()->where(['mantis_login'=>$result_issue->handler->name])->one();	
+										    if(!is_null($man)){
+												$fio = $man->getFIO();
+												$id_ppl = $man->getid();
+												} else {
+													$fio = 'В PMIS нет такого человека';
+													$id_ppl = -1;
+													}
+											$missingMembers[] = array('handler'=> $result_issue->handler->name,
+																	  'fio'=>$fio,
+																	  'id'=>$id_ppl,
+																	  );
+										}
 									}
 								
 							}
 						}
-						//var_dump($related_issue);die;
+						//var_dump($missingMembers);die;
 					}
 					
 				  }	
 				
+				}
+				if($btn_info[0] == 'add') { //добавление сотрудника в команду
+					$idPeople = $btn_info[1];
+					$SelectedRole = $a['idRole'][$idPeople]; 
+					$Role_info = explode("_", $SelectedRole);
+					$prjComm = new ProjectCommand();
+					$prjComm->parent_id = $Role_info[1];
+					$prjComm->idBR = $BR->getBrId();
+					$prjComm->idRole = $Role_info[0];
+					$prjComm->idHuman = $idPeople;
+					 if(!$prjComm->save()){
+						 Yii::$app->session->addFlash('error',"Ошибка добавление сотрудника в команду" );
+					 } 
+					
+					
 				}
 				if($btn_info[0] == 'mnt2') {   //создаем работы по выбранным инцдентам
 					 
@@ -806,15 +842,24 @@ class Works_of_estimateController extends Controller
 										Yii::$app->session->addFlash('error',"Ошибка создания работы на основе инцидента ".$r);
 									}else{
 										Yii::$app->session->addFlash('success',"Создана работа на основе инцидента ".$r);
-										//теперь привязываем исполнителя
-										//'handler'=>$result_issue->handler->name,
-										   //$modelWE = new WorkEffort();
-									       //$modelWE->idWorksOfEstimate = $modelWOS->idWorksOfEstimate;
-									       //$modelWE->workEffort = 0;
-									       //$idAnyTeamMember = People::getIdByName($idBR);
-									       
-									       //$modelWE->idTeamMember = $idAnyTeamMember;
-									      
+										//теперь привязываем исполнителя  если он есть в команде
+										 $idTeamMember = $BR->getIdTeamMemberBylogin($result_issue->handler->name);
+										   if($idTeamMember > 0 ){
+											$modelWE = new WorkEffort();
+									        $modelWE->idWorksOfEstimate = $modelWOS->idWorksOfEstimate;
+									        $modelWE->workEffort = 0;
+									        $modelWE->idTeamMember = $idTeamMember;
+									        if(!$modelWE->save()){
+											//Yii::$app->session->addFlash('error',"Ошибка добавления трудозатрат в работу" );
+												$ErrorsArray = $modelWE->getErrors(); 	 
+													foreach ($ErrorsArray as $key => $value1){
+														foreach($value1 as $value2){
+																Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+														}
+													}
+										    }   
+										   }
+										    
 										}
 									
 								}
@@ -836,7 +881,8 @@ class Works_of_estimateController extends Controller
             'VwListOfWorkEffort' => $VwListOfWorkEffort,
             'idEstimateWorkPackages' => $idEstimateWorkPackages,
             'mantis_links' => $BR->getMantisNumbers(2),
-            'related_issue'=>$related_issue
+            'related_issue'=>$related_issue,
+            'missingMembers'=>$missingMembers
         ]);	
     }
     

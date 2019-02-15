@@ -33,7 +33,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
     {
         return [
             [['idEstimateWorkPackages', 'WorkName'], 'required'],
-            [['idEstimateWorkPackages', 'idWbs', 'deleted'], 'integer'],
+            [['idEstimateWorkPackages', 'idWbs', 'deleted','ServiceType'], 'integer'],
             [['WorkName','mantisNumber'], 'string', 'max' => 250],
             [['WorkDescription'], 'string', 'max' => 65535],
             [['mantisNumber'],'match','pattern'=>'#^[0-9]+$#' ],
@@ -51,7 +51,8 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
             'WorkName' => 'Наименование работы',
             'idWbs' => 'Id Wbs',
             'WorkDescription' => 'Описание работы',
-            'mantisNumber' => 'Номер инцидента в мантиссе'
+            'mantisNumber' => 'Номер инцидента в мантиссе',
+            'ServiceType'=>'Тип услуги'
         ];
     }
    

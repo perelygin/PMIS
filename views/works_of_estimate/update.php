@@ -9,6 +9,7 @@
 use app\models\EstimateWorkPackages;
 use app\models\Wbs;
 use app\models\VwProjectCommand;
+use app\models\ServiceType;
 
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
@@ -24,6 +25,11 @@ use vova07\imperavi\Widget;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\WorksOfEstimate */
+//Данные для выпадающего списка типа услуг
+$ServiceType = ServiceType::find()->all();
+$items1 = ArrayHelper::map($ServiceType,'idServiceType','ServiceName');
+$params1 = [
+];
 
 $EWP_BrInfo = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$model->idEstimateWorkPackages])->getBrInfo();
 $wbs_current_node = Wbs::findOne(['id'=>$model->idWbs]);
@@ -107,8 +113,11 @@ $this->params['breadcrumbs'][] = 'Изменение параметров раб
 		</div>
 	</div>
    <div class="row">
-		<div class="col-sm-12">
+		<div class="col-sm-8">
 		    <?= $form->field($model, 'WorkName')->textInput(['maxlength' => true]) ?>
+	    </div>
+	    <div class="col-sm-4">
+		    <?php // $form->field($model, 'ServiceType')->dropDownList($items1,$params1) ?>
 	    </div>
    </div> 
    <div class="row">

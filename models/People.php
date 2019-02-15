@@ -82,4 +82,17 @@ class People extends \yii\db\ActiveRecord
     {
         return $this->hasMany(ProjectCommand::className(), ['idHuman' => 'idHuman']);
     }
+    /*
+     * Возвращает ФИО человека
+     * 
+     * 
+     */
+    public function getFIO()
+    {
+        return $this->Family.' '.$this->Name.' '.$this->patronymic;
+    }
+    public function getid()
+    {
+        return $this->idHuman;
+    }
 }

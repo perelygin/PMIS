@@ -9,10 +9,12 @@ use app\models\EstimateWorkPackages;
 use app\models\BusinessRequests;
 use yii\helpers\Url;
 use app\models\vw_settings; 
+use app\models\RoleModel;
 
 
 /* @var $this yii\web\View */
 /* @var $model app\models\WorksOfEstimate */
+
 		//настройки
 		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		if (!is_null($settings)) $url_mantis = $settings->enm_str_value; //путь к мантиссе
@@ -44,6 +46,13 @@ use app\models\vw_settings;
 			}
 		//перечень результатов
 		$BR = BusinessRequests::findOne(['idBR'=>$idBR]);
+				
+		//готовим массив для dropdownist c ролями
+		$ResultType = RoleModel::find()->where(['idRoleModelType'=>$BR->get_BRRoleModelType()])->all();
+		$items1 = ArrayHelper::map($ResultType,'idRole','RoleName');
+		$params1 = [
+		];
+		
 	//Wbs::findOne(['idBr'=>$idBr,'depth'=>'0'])
 		$Results = $BR->getResults();
 		$items = ArrayHelper::map($Results,'id','name');
@@ -101,12 +110,7 @@ $form = ActiveForm::begin();
 		</div>   
 		<div class="col-sm-6"> 
 			<?php
-			echo('<b> Выбери инциденты по которым будут регистрироваться работы: </b>'. Html::submitButton('', [
-						'span class' => 'glyphicon glyphicon-bishop',
-						'title'=>'Регистрация работ по выбранным инцидентам',
-						'name'=>'btn',
-						'value' => 'mnt2_']).
-			'</p>
+			echo('<b> Выбери инциденты по которым будут регистрироваться работы: </b></p>
 		    <table border = "1" cellpadding="4" cellspacing="2">
 			 <tr><th>Инцидент</th><th>Название</th><th>Ответственный</th><th>Проект</th><th></th></tr>
 		  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=5>&nbsp;</td></tr>');
@@ -120,12 +124,55 @@ $form = ActiveForm::begin();
 			}	
 		   }
 		   echo('</table>');
+		   echo('Этих логинов mantis нет в команде проекта');
+		   echo('<table border = "1" cellpadding="4" cellspacing="2">
+			 <tr><th></th><th>Логин</th><th>ФИО</th><th>Роль</th></tr>
+		  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>');
+		   if(!empty($missingMembers)){
+			foreach($missingMembers as $msm){
+				
+				//воттакой dropdown.....
+				echo('<tr><td>');
+				if($msm['id']>0){  //т.е. человек есть в справочнике людей
+					echo(Html::submitButton('', [
+							'span class' => 'glyphicon glyphicon-plus-sign',
+							'title'=>'Добавить в команду ',
+							'name'=>'btn',
+							'value' => 'add_'.$msm['id']]));	 
+					 }
+				 echo('</td><td>'.$msm['handler'].'</td><td>'.$msm['fio'].'</td><td>
+				<p><select name="idRole['.$msm['id'].']">');	 
+				
+				
+				foreach($ResultType as $rlt){
+					echo('<option value='.$rlt->idRole.'_'.$BR->getParentId($rlt->idRole).'>'.$rlt->RoleName.'</option>');
+				}
+				echo('</select></p>
+				 </td>');
+				 
+				 
+				 echo('</tr>');
+			}	
+		   }
+		   echo('</table>');
+			echo('<br>');		   
+
 			?>
 		</div>					
-					
-
-
-    <?php ActiveForm::end(); ?>
-
-
-</div>
+    </div>
+    <div class="row">
+		<div class="col-sm-4"> 
+			</div>
+		<div class="col-sm-4"> 
+			<?php 
+			echo(Html::submitButton('Регистрация работ по выбранным инцидентам', [
+						//'span class' => 'glyphicon glyphicon-bishop',
+						'title'=>'Регистрация работ по выбранным инцидентам',
+						'name'=>'btn',
+						'value' => 'mnt2_']));				
+			?>
+		</div>
+		<div class="col-sm-4"> 
+			</div>
+	</div>	
+<?php ActiveForm::end(); ?>
