@@ -69,26 +69,7 @@ JS;
 					 ?>				   
 			 </div>
 	</div>
-	
-	<div class="row">
-			<div class="col-sm-12">   
-			   <?php // $form->field($model, 'idWorksOfEstimate') 
-			    $BR = BusinessRequests::findOne($idBR);
-			    echo Collapse::widget([
-						    'items' => [
-						        [
-						            'label' => 'Синхронизация работ с mantis',
-						            'content' => $this->render('_synchInc', ['mantis_links' => $BR->getMantisNumbers(2),'related_issue'=>$related_issue]),
-						            'contentOptions' => [],
-						            'options' => []
-						        ],
-						    ]
-						]);
-			    ?>
-			</div>   
-	</div>
-
-    <div class="form-group">
+	<div class="form-group">
         <?php 
         // вскрыть, если перестанет рабоать по id
         // Html::submitButton('Выбрать', ['class' => 'btn btn-primary']) ?>

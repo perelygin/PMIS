@@ -38,7 +38,7 @@ $params1 = [
 						if(isset($vlwe['workEffort'])){
 							echo('<tr><td>  '
 							.Html::submitButton('', [
-								'span class' => 'glyphicon glyphicon-plus-minus-sign',
+								'span class' => 'glyphicon glyphicon-minus-sign',
 								'title'=>'Удалить трудозатраты по работе',
 								'name'=>'btn',
 								'value' => 'del_'.$vlwe['idLaborExpenditures']])
