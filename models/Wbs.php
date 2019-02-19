@@ -133,5 +133,19 @@ class Wbs extends \yii\db\ActiveRecord
 		  }
 		   else return false;
     }
-    
+    /*
+     * 
+     * Проверяет,  есть ли работа с таким номером mantis  по текущему результату в этой оценке
+     */ 
+    public function isWbsHasMantisNumber($idEstimateWorkPackages,$MantisNumber)  
+    {
+		$sql =  "SELECT count(*) mantisNumber FROM WorksOfEstimate 
+					where idEstimateWorkPackages =".$idEstimateWorkPackages. " and idWbs=".$this->id." and mantisNumber = '".$MantisNumber."'";
+		$WbsWorkNumber = Yii::$app->db->createCommand($sql)->queryScalar();
+		 
+		if ($WbsWorkNumber>0) { 
+			 return true;
+		  }
+		   else return false;
+	}	
 }

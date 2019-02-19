@@ -726,6 +726,7 @@ class Works_of_estimateController extends Controller
        $related_issue = array(); //массив для связанных инцидентов
        $missingMembers=array();  //перечень логинов,  которые не принадлежат членам команды;
        $BR = BusinessRequests::findOne($idBR);
+      
        
        //Считывание настроек
 		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
@@ -773,13 +774,16 @@ class Works_of_estimateController extends Controller
 						$missingMembers=array();
 						$CommandMembersLogins = ArrayHelper::getColumn($BR->getCMembersLogins(), 'mantis_login');//массив логинов членов команды
 						//print_r($ids); die;
+						$WBS = Wbs::findOne($idWbs);
 						foreach ($result->relationships as $rel){
-							//echo ('<br>'. $rel->target_id);
+							
 							$result_issue = $client->mc_issue_get($username, $password, $rel->target_id); 	
 							if(is_soap_fault($result_issue)){   //Ошибка
 							    Yii::$app->session->addFlash('error',"Ошибка получения информации из mantis SOAP: (faultcode: ".$result->faultcode.
 							    " faultstring: ".$result_issue->faultstring);
 							}else{
+								// проверить,  что по данному результату еще нет работ с таким номером инцидента мантис
+							  if(!$WBS->isWbsHasMantisNumber($idEstimateWorkPackages,$rel->target_id)){
 								if($result_issue->project->id != 17){//связанный инцидент не принадлежить проекту 17(согласование экспертиз)
 									$related_issue[$rel->target_id] = array('mantisNumber'=>$rel->target_id,
 																		'name'=>$result_issue->summary,
@@ -787,7 +791,8 @@ class Works_of_estimateController extends Controller
 																		'project' =>$result_issue->project->name,
 																		);
 									//формируем перечень логинов,  которые не принадлежат членам команды									
-									if(!ArrayHelper::isIn($result_issue->handler->name, $CommandMembersLogins)){
+									if(!ArrayHelper::isIn($result_issue->handler->name, $CommandMembersLogins) // логина нет в  массиве с членами комманды
+										and !ArrayHelper::isIn($result_issue->handler->name, ArrayHelper::getColumn($missingMembers,'handler'))){ // логина еще нет в массиве с логинами,  которых нет в команде проекта
 										    $man = People::find()->where(['mantis_login'=>$result_issue->handler->name])->one();	
 										    if(!is_null($man)){
 												$fio = $man->getFIO();
@@ -802,6 +807,7 @@ class Works_of_estimateController extends Controller
 																	  );
 										}
 									}
+								}	
 								
 							}
 						}
