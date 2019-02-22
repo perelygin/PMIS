@@ -28,7 +28,8 @@ class WorkEffort extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['idWorksOfEstimate', 'idTeamMember'], 'integer'],
+            [['idWorksOfEstimate', 'idTeamMember','idServiceType','workEffortHour'], 'integer'],
+            [['idTeamMember', 'idServiceType'], 'required'],
             [['workEffort'], 'number'],
         ];
     }
@@ -42,7 +43,8 @@ class WorkEffort extends \yii\db\ActiveRecord
             'idLaborExpenditures' => 'Id Labor Expenditures',
             'idWorksOfEstimate' => 'Id Works Of Estimate',
             'idTeamMember' => 'Id Team Member',
-            'workEffort' => 'Work Effort',
+            'workEffort' => 'ч.д.',
+            'workEffortHour'=>'+ ч.час'
         ];
     }
     //public function afterSave($insert, $changedAttributes){

@@ -92,7 +92,7 @@ class ProjectCommand extends \yii\db\ActiveRecord
 	 }
 	 
 	 public function getAnyTeamMember($idBR){
-		 $sql = 'SELECT * FROM ProjectCommand WHERE idBR=:idBR and parent_id != 0';
+		 $sql = 'SELECT * FROM ProjectCommand WHERE idBR=:idBR and parent_id != 0 and idRole in (3,4,5,6,8)';
 		 $pc = ProjectCommand::findBySql($sql, [
 		':idBR' =>$idBR])->one();
 		 
@@ -102,8 +102,50 @@ class ProjectCommand extends \yii\db\ActiveRecord
 				 return null;
 				 }
 	}
-	
-	 
+	/*
+	 * Возвращает любую услугу,  которая доступна члену команды
+	 * 
+	 * 
+	 */ 
+	public function getAnyServTeamMember($id_team_memb){
+		$sql = "SELECT srt.idServiceType FROM ProjectCommand as prc
+					LEFT OUTER JOIN  ServiceType srt ON prc.idRole = srt.idRole
+					where prc.id = ".$id_team_memb;
+        $Results =  Yii::$app->db->createCommand($sql)->queryOne();					
+          
+         if($Results){
+			return $Results['idServiceType'];
+			} else{
+				return null;
+				} 
+     }
+	///*
+	 //* Проверяет, доступна ли переданная услуга переданному члену команды
+	 //* Если нет, то возвращает первую доступную.
+	 //* Если да, то возвращает переданную услугу
+	 //* 
+	 //*/ 
+	//public function getServForTeamMember($id_team_memb,$idServiceType){
+		//$sql = "SELECT count(srt.idServiceType) FROM ProjectCommand as prc
+					//LEFT OUTER JOIN  ServiceType srt ON prc.idRole = srt.idRole
+					//where prc.id = ".$id_team_memb. " and  srt.idServiceType =$idServiceType".;
+        //$Results =  Yii::$app->db->createCommand($sql)->count();					
+          
+         //if($Results>0){
+			//return $idServiceType;
+			//} else{
+				//$sql = "SELECT srt.idServiceType FROM ProjectCommand as prc
+					//LEFT OUTER JOIN  ServiceType srt ON prc.idRole = srt.idRole
+					//where prc.id = ".$id_team_memb;
+					//$Results =  Yii::$app->db->createCommand($sql)->queryOne();	
+					 //if($Results){
+						//return $Results['idServiceType'];
+						//} else{
+							//return null;
+							//} 
+						//} 
+     //}
+     	 
 	 public function beforeDelete(){
         if (parent::beforeDelete()){
 			//смотрим наличие  записей в подчиненной таблице с трудозатратами	
@@ -116,5 +158,9 @@ class ProjectCommand extends \yii\db\ActiveRecord
         }
         return false;
     }
+
+
+
+
 
 }

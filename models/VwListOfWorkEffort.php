@@ -42,7 +42,7 @@ class VwListOfWorkEffort extends \yii\db\ActiveRecord
         return [
             [['idWorksOfEstimate', 'idEstimateWorkPackages', 'idWbs', 'idTeamMember', 'idRole', 'idHuman','idLaborExpenditures'], 'integer'],
             [['WorkName', 'idEstimateWorkPackages'], 'required'],
-            [['workEffort'], 'number'],
+            [['workEffort','workEffortHour'], 'number'],
             [['WorkName'], 'string', 'max' => 250],
             [['RoleName'], 'string', 'max' => 45],
             [['fio'], 'string', 'max' => 302],
@@ -61,6 +61,7 @@ class VwListOfWorkEffort extends \yii\db\ActiveRecord
             'idEstimateWorkPackages' => 'Id Estimate Work Packages',
             'idWbs' => 'Id Wbs',
             'workEffort' => 'ч/д',
+            'workEffortHour'=>'ч/час',
             'idTeamMember' => '',
             'idRole' => 'Id Role',
             'RoleName' => 'Role Name',

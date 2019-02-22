@@ -16,6 +16,7 @@ use app\models\BusinessRequests;
 use app\models\User;
 use app\models\MoveWorksToAnotherResultForm;
 use app\models\People;
+use app\models\AddWorkEffortForm;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -248,25 +249,25 @@ class Works_of_estimateController extends Controller
 	   
     }
     
-    public function actionCreate_workeffort($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
-    {
-       //$modelWE = new WorkEffort();
-       //$modelWE->idWorksOfEstimate = $idWorksOfEstimate;
-       //$modelWE->workEffort = 0;
-       //$idAnyTeamMember = ProjectCommand::getAnyTeamMember($idBR);
-       //if($idAnyTeamMember != -1){
-		   //$modelWE->idTeamMember = $idAnyTeamMember;
-	   //} else {
-		   //Yii::$app->session->addFlash('error',"для данной BR нет ни одного члена команды. Регистрация трудозатрат невозможна ");
-		   //return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]);
-	   //}
+    //public function actionCreate_workeffort($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages)
+    //{
+       ////$modelWE = new WorkEffort();
+       ////$modelWE->idWorksOfEstimate = $idWorksOfEstimate;
+       ////$modelWE->workEffort = 0;
+       ////$idAnyTeamMember = ProjectCommand::getAnyTeamMember($idBR);
+       ////if($idAnyTeamMember != -1){
+		   ////$modelWE->idTeamMember = $idAnyTeamMember;
+	   ////} else {
+		   ////Yii::$app->session->addFlash('error',"для данной BR нет ни одного члена команды. Регистрация трудозатрат невозможна ");
+		   ////return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]);
+	   ////}
        
-	   //$modelWE->save();
-	   //if($modelWE->hasErrors()){
-			//Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
-	   //}
-	   //return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate, 'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
-    }    
+	   ////$modelWE->save();
+	   ////if($modelWE->hasErrors()){
+			////Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
+	   ////}
+	   ////return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate, 'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
+    //}    
     
     ///**
      //* Creates a new WorksOfEstimate model.
@@ -294,6 +295,58 @@ class Works_of_estimateController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
+     
+     /*
+      * 
+      *Добавляем трудозатраты по работе
+      * 
+      */
+    public function actionEdit_work_effort($idBR,$idWbs,$idWorksOfEstimate,$idEstimateWorkPackages,$idLaborExpenditures,$idTeamMember=0){
+		
+		$modelWE = WorkEffort::findOne($idLaborExpenditures);
+		if ($idTeamMember == 0){ 
+			$mark = 0;
+		} else {
+			$mark = 1;
+			$modelWE->idTeamMember = $idTeamMember;
+		}
+		// $model = new AddWorkEffortForm();
+		$a = Yii::$app->request->post();
+		if ($modelWE->load(Yii::$app->request->post())){
+			//echo $modelWE->idTeamMember; die;
+			 if(isset($a['btn'])) {   // анализируем нажатые кнопки
+				$btn_info = explode("_", $a['btn']);
+				if($btn_info[0] == 'add1') {  //кнопка Далее
+					$this->redirect(['edit_work_effort','idBR'=>$idBR,
+														'idWbs'=>$idWbs,
+														'idWorksOfEstimate'=>$idWorksOfEstimate,
+														'idEstimateWorkPackages'=>$idEstimateWorkPackages,
+														'idLaborExpenditures'=>$idLaborExpenditures,
+														'idTeamMember'=>$modelWE->idTeamMember]);
+				}
+				if($btn_info[0] == 'cancel') {  //кнопка отмена
+					$this->redirect(['update', 'idWorksOfEstimate'=>$idWorksOfEstimate,'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
+				}
+				if($btn_info[0] == 'add2') {  //кнопка Сохранить
+					if($modelWE->save()){
+						   $this->redirect(['update', 'idWorksOfEstimate'=>$idWorksOfEstimate,'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
+						}
+		   
+							Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
+				}
+			 }	
+		}
+		
+	    
+	    return $this->render('editWorkEffort', [
+				 'model' =>$modelWE,
+				 'idBR'=>$idBR,
+                 'idWbs'=>$idWbs,
+                 'idWorksOfEstimate'=>$idWorksOfEstimate, 
+                 'mark'=>$mark
+        ]);
+		
+	}
     public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$page_number=1)
     {
         //проверка на то, что оценка трудозатрат не закрыта
@@ -368,17 +421,22 @@ class Works_of_estimateController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//////
 			//  сохраняем трудозатраты в базе 
-	        if(isset($a['workEffort']) or isset($a['team_member'])){  
+	        if(isset($a['workEffort']) or isset($a['team_member']) or isset($a['workEffortHour'])){  
 				foreach($a['workEffort'] as $key => $value){
 					$WorkEffort = WorkEffort::findOne($key);
 					$WorkEffort->workEffort = $value;
 					if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния трудозатарт WorkEffort' );
 				}
-				foreach($a['team_member'] as $key => $value){
+				foreach($a['workEffortHour'] as $key => $value){
 					$WorkEffort = WorkEffort::findOne($key);
-					$WorkEffort->idTeamMember = $value;
-					if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния членов команды WorkEffort' );
+					$WorkEffort->workEffortHour = $value;
+					if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния трудозатарт workEffortHour' );
 				}
+				//foreach($a['team_member'] as $key => $value){
+					//$WorkEffort = WorkEffort::findOne($key);
+					//$WorkEffort->idTeamMember = $value;
+					//if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния членов команды WorkEffort' );
+				//}
 				$sql='SELECT Sum(workEffort) as summ FROM WorkEffort  where idWorksOfEstimate = '.$idWorksOfEstimate;
 			    $sumWef = Yii::$app->db->createCommand($sql)->queryScalar();
 			    $SysLog = new Systemlog();
@@ -393,13 +451,22 @@ class Works_of_estimateController extends Controller
 				$btn_info = explode("_", $a['btn']);
 				
 				if($btn_info[0] == 'add') {   // добавление трудозатрат в работу
-					
+					   
+					   
 					   $modelWE = new WorkEffort();
 				       $modelWE->idWorksOfEstimate = $idWorksOfEstimate;
 				       $modelWE->workEffort = 0;
 				       $idAnyTeamMember = ProjectCommand::getAnyTeamMember($idBR);
 				       if(!is_null($idAnyTeamMember)){
-						   $modelWE->idTeamMember = $idAnyTeamMember;
+						   $modelWE->idTeamMember = $idAnyTeamMember;  //любой член команды
+						   //любой тип услуги для роли этого человека
+						   $idServTeamMember = ProjectCommand::getAnyServTeamMember($idAnyTeamMember);
+						   if(!is_null($idServTeamMember)){
+							   $modelWE->idServiceType = $idServTeamMember;
+							   }else{
+								    Yii::$app->session->addFlash('error',"для выбранного члена команды нет ни одной услуги. Регистрация трудозатрат невозможна ");
+									return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]);
+								   }
 					   } else {
 						   Yii::$app->session->addFlash('error',"для данной BR нет ни одного члена команды. Регистрация трудозатрат невозможна ");
 						   return $this->redirect(['index','id_node'=>$idWbs,'idBR' => $idBR]);
@@ -408,9 +475,11 @@ class Works_of_estimateController extends Controller
 					   
 					   if($modelWE->hasErrors()){
 							Yii::$app->session->addFlash('error',"Ошибка регистрации трудозатрат ");
-					   }
-					   $page_number = 1;
-			
+					   } else{
+						    $page_number = 1;
+							$idLaborExpenditures  = $modelWE->idLaborExpenditures; 
+							$this->redirect(['edit_work_effort','idBR'=>$idBR,'idWbs'=>$idWbs,'idWorksOfEstimate'=>$idWorksOfEstimate,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'idLaborExpenditures'=>$idLaborExpenditures]);	
+						}
 				} 
 				elseif($btn_info[0] == 'del'){ //удаление трудозатрат из работы
 					   $modelWE = new WorkEffort();
@@ -420,6 +489,11 @@ class Works_of_estimateController extends Controller
 					   }
 					   $page_number = 1;
 				  }
+				elseif($btn_info[0] == 'edit'){ //Изменение трудозатрат из работы
+					   $idLaborExpenditures  =$btn_info[1]; 
+					   $this->redirect(['edit_work_effort','idBR'=>$idBR,'idWbs'=>$idWbs,'idWorksOfEstimate'=>$idWorksOfEstimate,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'idLaborExpenditures'=>$idLaborExpenditures]);
+				       $page_number = 1;
+				  }  
 				elseif($btn_info[0] == 'save'){  //сохранение формы
 					   
 						return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
