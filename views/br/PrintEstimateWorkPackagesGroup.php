@@ -62,11 +62,14 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				$str = '<tr><td>&nbsp&nbsp'
 				  .Html::a($pwoe['mantisNumber'], $url_mantis.$pwoe['mantisNumber'],['target' => '_blank'])
 				  .'</td><td>'.$pwoe['WorkName'].'</td>';
+				  $sum_of_work = 0;//сумма трудозатрат по работе
 				foreach($print_wef as $pwef){
-					$str = $str.'<td align="center">'.$pwef['sumWE'].'</td>'; //.' '.$pwef['RoleName']
-					$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
-					$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']; //подсчет итогов
+					$str = $str.'<td align="center">'.($pwef['sumWE']+$pwef['sumWEh']/8).'</td>'; //.' '.$pwef['RoleName']
+					$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
+					$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
+					$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8; 
 				}
+				$str = $str.'<td align="center"><b>'.$sum_of_work.'</b></td>';
 				$str = $str.'</tr>';
 					
 				if($pwoe['id'] == $id){
@@ -86,6 +89,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$v.'&nbsp </td>';
 		  $total =$total + $v;
 		}
+		$strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$total.'&nbsp </td>';
 		$total10 = $total/10;
 		echo $strbottom0;
 		
@@ -100,16 +104,20 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 			}
 		echo $strbottom1;
 		$strbottom2 = '<tr><td></td><td><b>Итого с учетом доп. затрат</b></td>';
+		$sum_of_work = 0;//сумма трудозатрат по работе
 		foreach($arraySum as $ars => $v){
 		  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 			  
 			  $a = $v+$total10;
 			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$a.'&nbsp </b></td>';
+			  $sum_of_work = $sum_of_work+ $a;
 		 
 		  } else {
 			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$v.'&nbsp </b></td>';
+			  $sum_of_work = $sum_of_work+ $v;
 		  }
 		}
+		$strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$sum_of_work.'&nbsp </b></td>';
 		echo $strbottom2;
 	  ?>
 		  

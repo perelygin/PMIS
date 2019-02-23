@@ -600,7 +600,7 @@ class BrController extends Controller
    public function actionPrint_estimate_work_packages_grouped($idEWP,$idBR){
 	   $BR = BusinessRequests::findOne($idBR);
 	   $RoleModelType = $BR->get_BRRoleModelType();
-	   
+	   //запрос для информации по работе
 	   $sql=   "SELECT 
 					rlm.idRole,  
 				    rlm.RoleName,
@@ -608,18 +608,20 @@ class BrController extends Controller
 				    tmp_tbl2.idWorksOfEstimate,
 				    tmp_tbl2.WorkName,
 				    tmp_tbl2.sumWE,
+				    tmp_tbl2.sumWEh,
 				    trf.idTariff,
 					trf.TariffName
 				FROM RoleModel as rlm
 				LEFT OUTER JOIN Tariff trf ON rlm.idTariff = trf.idTariff
 				LEFT OUTER JOIN 
-				(Select idWbs,idWorksOfEstimate,WorkName,idRole, SUM(workEffort) as sumWE FROM
+				(Select idWbs,idWorksOfEstimate,WorkName,idRole, SUM(workEffort) as sumWE,SUM(workEffortHour) as sumWEh FROM
 					(Select 
 						wos.idWorksOfEstimate,  
 						wos.WorkName,
 						wos.idWbs,
 						wos.mantisNumber,
 						wef.workEffort,
+						wef.workEffortHour,
 						pc.idRole
 					from WorksOfEstimate as wos
 					LEFT OUTER JOIN WorkEffort wef ON wos.idWorksOfEstimate = wef.idWorksOfEstimate
@@ -654,7 +656,9 @@ class BrController extends Controller
 							//where wos.idWorksOfEstimate =:idwoe) as tmp_tbl
 						//GROUP BY idRole) tmp_tbl2 ON rlm.idRole = tmp_tbl2.idRole
 						//where idRoleModelType = ".$RoleModelType
-						//." order by idTariff";				
+						//." order by idTariff";	
+						
+		// все работы поBR				
 		$sql1 = "SELECT 
 						wbs.id,
 						wbs.tree, 
@@ -732,14 +736,18 @@ class BrController extends Controller
 						$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
 						$sheet->getRowDimension($ex_row)->setRowHeight(-1);
 						$j=2;
+						$sum_of_work = 0;//сумма трудозатрат по работе
 						foreach($print_wef as $pwef){
-							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']);
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
-							$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']; //подсчет итогов для группировки по тарифу
+							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
+							$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов для группировки по тарифу
+							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
 							$j=$j+1;
 						}
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$ex_row = $ex_row+1;	
 					} else{
 						$sheet->setCellValue('A'.$ex_row, 'Результат:'.$pwoe['name']);
@@ -750,14 +758,18 @@ class BrController extends Controller
 						$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
 						$sheet->getRowDimension($ex_row)->setRowHeight(-1);
 						$j=2;
+						$sum_of_work = 0;//сумма трудозатрат по работе
 						foreach($print_wef as $pwef){
-							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']);
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']; //подсчет итогов
-							$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']; //подсчет итогов для группировки по тарифу
+							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
+							$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов для группировки по тарифу
+							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
 							$j=$j+1;
 						}
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$ex_row = $ex_row+1;
 						$id = $pwoe['id'];
 					}	
@@ -774,10 +786,13 @@ class BrController extends Controller
 				
 				foreach($arraySum as $as => $v){
 					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+					//$sum_of_work = 
 					$j=$j+1;
 					$totalsumm = $totalsumm + $v;
 					$totalSymbol = substr($Alfabet,$j,1);
 				}
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm);
+				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 				$total10 = $totalsumm/10;
 				$ex_row = $ex_row+1;
 				$sheet->setCellValue('B'.$ex_row,'Дополнительное тестирование (10% от общих трудозатрат)');
@@ -797,18 +812,22 @@ class BrController extends Controller
 				$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
 				$sheet->getRowDimension($ex_row)->setRowHeight(-1);
 				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
-				
+				$sum_of_work = 0;
 				foreach($arraySum as $as => $v){
 					if($as == 'Инженер по тестированию'){
 						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10+$v);
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+						$sum_of_work = $sum_of_work+ $totalsumm/10+$v;
 					} else{
 						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+						$sum_of_work = $sum_of_work+ $v;
 					}
 					$j=$j+1;
 					
 				}
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 				//ставим границы
 				$styleThinBlackBorderOutline = [
 				    'borders' => [

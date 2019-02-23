@@ -42,9 +42,10 @@ class WorkEffort extends \yii\db\ActiveRecord
         return [
             'idLaborExpenditures' => 'Id Labor Expenditures',
             'idWorksOfEstimate' => 'Id Works Of Estimate',
-            'idTeamMember' => 'Id Team Member',
+            'idTeamMember' => 'Участник проекта',
             'workEffort' => 'ч.д.',
-            'workEffortHour'=>'+ ч.час'
+            'workEffortHour'=>'+ ч.час',
+            'idServiceType' => 'Тип услуги'
         ];
     }
     //public function afterSave($insert, $changedAttributes){

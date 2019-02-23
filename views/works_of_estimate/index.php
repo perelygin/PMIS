@@ -105,7 +105,7 @@ use app\models\BusinessRequests;
         $url2 = Url::to(['works_of_estimate/create_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id ]);  //добавление трудозатрат в работу
         $url3 = Url::to(['works_of_estimate/update', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //изменить работу
         $url5 = Url::to(['works_of_estimate/deletework', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //Удалить работу
-        echo('<tr><td colspan="3" ><b>'
+        echo('<tr><td colspan="4" ><b>'
 		        //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
 		        .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',
 																						'data' => [
@@ -124,13 +124,11 @@ use app\models\BusinessRequests;
 			if($vlwe['idWorksOfEstimate'] == $id){
 				if(isset($vlwe['workEffort'])){
 					echo('<tr><td>'
-						//.Html::a('<span class="glyphicon glyphicon-minus"></span>', $url4,['title' => 'Удалить трудозатраты по работе',])
-						//.'</td><td>'
 						.$vlwe['team_member']
-						//.$form1->field($vlwe, 'idTeamMember',['inputOptions' => ['name'=>'team_member['.$vlwe['idLaborExpenditures'].']']])->dropDownList($items1,$params1)
 						.'</td><td>'
 						.$vlwe['workEffort'].' ч.д.'
-						//.$form1->field($vlwe, 'workEffort',['inputOptions' => ['name'=>'workEffort['.$vlwe['idLaborExpenditures'].']']])
+						.'</td><td>'
+						.$vlwe['workEffortHour'].' ч.час.'
 						.'</td></tr>');	
 			    }
 			}	else{
@@ -138,7 +136,7 @@ use app\models\BusinessRequests;
 				 $url2 = Url::to(['works_of_estimate/create_workeffort', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id ]);  //добавление трудозатрат в работу
 				 $url3 = Url::to(['works_of_estimate/update', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);   //изменить работу
 				 $url5 = Url::to(['works_of_estimate/deletework', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node, 'idWorksOfEstimate'=>$id]);             //Удалить работу
-				 echo('<tr><td colspan="3"><b>'
+				 echo('<tr><td colspan="4"><b>'
 				 //.Html::a('<span class="glyphicon glyphicon-plus"></span>', $url2,['title' => 'Добавить трудозатраты по работе',])
 				 .Html::a('<span class="glyphicon glyphicon-minus-sign"></span>', $url5,['title' => 'Удалить работу',])
 				 .Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url3,['title' => 'Изменить описание работы',])
@@ -147,13 +145,11 @@ use app\models\BusinessRequests;
 				 .$vlwe['WorkName'].'</td></tr>');
 				 if(isset($vlwe['workEffort'])){
 					 echo('<tr><td>'
-					 //.Html::a('<span class="glyphicon glyphicon-minus"></span>', $url4,['title' => 'Удалить трудозатраты по работе',])
-					 //.'</td><td>'
 					 .$vlwe['team_member']
-					 //.$form1->field($vlwe, 'idTeamMember',['inputOptions' => ['name'=>'team_member['.$vlwe['idLaborExpenditures'].']']])->dropDownList($items1,$params1)
 					 .'</td><td>'
 					 .$vlwe['workEffort'].' ч.д.'
-					 //.$form1->field($vlwe, 'workEffort', ['inputOptions' => ['name'=>'workEffort['.$vlwe['idLaborExpenditures'].']']])
+					 .'</td><td>'
+					 .$vlwe['workEffortHour'].' ч.час.'
 					 .'</td></tr>');		
 				 }	 
 			}

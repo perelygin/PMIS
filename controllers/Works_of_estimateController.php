@@ -343,6 +343,7 @@ class Works_of_estimateController extends Controller
 				 'idBR'=>$idBR,
                  'idWbs'=>$idWbs,
                  'idWorksOfEstimate'=>$idWorksOfEstimate, 
+                 'idEstimateWorkPackages'=>$idEstimateWorkPackages,
                  'mark'=>$mark
         ]);
 		
@@ -376,11 +377,11 @@ class Works_of_estimateController extends Controller
 			$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
 			$username = $User->getUserMantisName();
 			$password = $User->getMantisPwd();
-			$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 
+			
 		//список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
 		$MntPrjLstArray =  array();
 		if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
-				
+			$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 	
 			$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
 				 if (is_soap_fault($result_1)){   //Ошибка
 				    Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
@@ -456,6 +457,7 @@ class Works_of_estimateController extends Controller
 					   $modelWE = new WorkEffort();
 				       $modelWE->idWorksOfEstimate = $idWorksOfEstimate;
 				       $modelWE->workEffort = 0;
+				       $modelWE->workEffortHour = 0;
 				       $idAnyTeamMember = ProjectCommand::getAnyTeamMember($idBR);
 				       if(!is_null($idAnyTeamMember)){
 						   $modelWE->idTeamMember = $idAnyTeamMember;  //любой член команды
@@ -676,7 +678,7 @@ class Works_of_estimateController extends Controller
 										'sponsorship_total'=>$LastEstimateSumm, 
 										'view_state' => $view_state  
 									);
-									 
+									 $client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 
 									 $result =  $client->mc_issue_add($username, $password, $issue);
 									 if (is_soap_fault($result)){   //Ошибка
 									    Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode.

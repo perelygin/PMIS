@@ -1,20 +1,31 @@
 <?php 
  use app\models\VwProjectCommand;
  use app\models\ServiceType;
+ use app\models\EstimateWorkPackages;
+ use app\models\Wbs;
+ use app\models\WorksOfEstimate;
+
+
  use yii\helpers\ArrayHelper;
  use yii\helpers\Html;
+ use yii\helpers\Url;
  use yii\widgets\ActiveForm;
- 
- 
-	$ProjectCommand = VwProjectCommand::find()->where(['idBR'=>$idBR])->all();
-	$items1 = ArrayHelper::map($ProjectCommand,'id','team_member');
+ //Выпадающий список сотрудников
+      $sql1 = 'SELECT * FROM vw_ProjectCommand  vpc
+					RIGHT OUTER JOIN ServiceType srt ON srt.idRole = vpc.idRole
+					where idBr='.$idBR;
+	$TeamWithServs = Yii::$app->db->createCommand($sql1)->queryAll();
+	
+	
+	$items1 = ArrayHelper::map($TeamWithServs,'id','team_member');
 	$params1 = [
 		
 	];
 	$params11 = [
 		'disabled'=>"disabled"
 	];
-	//$ServiceType = ServiceType::find()->all();
+	//Выпадающий список услуг
+	
 	$sql = "SELECT srt.idServiceType,srt.ServiceName FROM ProjectCommand as prc
 					LEFT OUTER JOIN  ServiceType srt ON prc.idRole = srt.idRole
 					where prc.id = ".$model->idTeamMember;
@@ -27,13 +38,54 @@
 	    'prompt'=>'выбери тип услуги',
 		'disabled'=>"disabled"
 	];
+	
+	//для заголовка
+	$EWP_BrInfo = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages])->getBrInfo();
+	$wbs_current_node = Wbs::findOne(['id'=>$idWbs]);
+	$WBSInfo = $wbs_current_node->getWbsInfo();
+	$WorkOfEstimate = WorksOfEstimate::findOne(['idWorksOfEstimate'=>$idWorksOfEstimate]);
+
+//ищем родителей для rootid
+			
+			if(!is_null($wbs_current_node)){
+				$parents = $wbs_current_node->parents()->all();	
+				foreach($parents as $prn){
+					$this->params['breadcrumbs'][] = ['label' => $prn['name'], 
+					'url' => Url::toRoute(['br/update', 
+											'id' =>$idBR, 
+											'page_number' => 3, 
+											'root_id'=>$prn['id']])];
+				}
+				
+				
+				$this->params['breadcrumbs'][]=	['label' => $wbs_current_node->name,'url' => Url::toRoute(['works_of_estimate/index', 
+											'idBR' =>$idBR, 
+											'id_node' => $idWbs, ])];
+			}
+			$this->params['breadcrumbs'][] = ['label' => 'Изменение параметров работы','url' => Url::toRoute(['works_of_estimate/update', 
+											'idWorksOfEstimate'=>$idWorksOfEstimate,
+											'idBR'=>$idBR,
+											'idWbs'=>$idWbs,
+											'idEstimateWorkPackages'=>$idEstimateWorkPackages,
+											'page_number'=>1,
+											 ])];
+
+$this->title = 'Изменение трудозатрат по работе: '.$WorkOfEstimate->WorkName;
+$this->params['breadcrumbs'][] = 'Изменение трудозатрат по работе';
 ?>
  
  <?php 
  
    $form = ActiveForm::begin();
  ?>
- 
+  <h3><?= Html::encode($this->title) ?></h3>
+    <?= '<b>BR-'. $WBSInfo['BRNumber'].' "'.$WBSInfo['BRName'].'"</b>' ?>
+    <br>
+    Результат: " <b><?= $WBSInfo['name'].'"'  ?></b>
+    <br>
+    Оценка трудозатрат: <b> "<?= Html::encode($EWP_BrInfo['EstimateName']).'"</b> от <b>'. $EWP_BrInfo['dataEstimate'].'  '.$EWP_BrInfo['finished']?></b>
+    <br>
+    <br> 
  <div class="row">
 	 <div class="col-sm-4">
 		 <?php 

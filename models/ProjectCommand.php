@@ -90,9 +90,15 @@ class ProjectCommand extends \yii\db\ActiveRecord
 			
 		 return $prjCommand;	
 	 }
-	 
+	 /***
+	  * 
+	  * Возвращает любого члена команды, который может оказывать услуги
+	  */
 	 public function getAnyTeamMember($idBR){
-		 $sql = 'SELECT * FROM ProjectCommand WHERE idBR=:idBR and parent_id != 0 and idRole in (3,4,5,6,8)';
+		 //$sql = 'SELECT * FROM ProjectCommand WHERE idBR=:idBR and parent_id != 0 and idRole in (3,4,5,6,8)';
+		 $sql = 'SELECT * FROM vw_ProjectCommand  vpc
+					RIGHT OUTER JOIN ServiceType srt ON srt.idRole = vpc.idRole
+					where idBr=:idBR';
 		 $pc = ProjectCommand::findBySql($sql, [
 		':idBR' =>$idBR])->one();
 		 
@@ -119,6 +125,18 @@ class ProjectCommand extends \yii\db\ActiveRecord
 				return null;
 				} 
      }
+     /**
+      * Возвращает комманду с услугами
+      * 
+      */ 
+     public function getTeamWithServs($idBr){
+		 $sql = 'SELECT * FROM vw_ProjectCommand  vpc
+					RIGHT OUTER JOIN ServiceType srt ON srt.idRole = vpc.idRole
+					where idBr='.$idBr;
+		$TeamWithServs = Yii::$app->db->createCommand($sql)->queryAll();	
+		
+		return $TeamWithServs;
+	 }
 	///*
 	 //* Проверяет, доступна ли переданная услуга переданному члену команды
 	 //* Если нет, то возвращает первую доступную.
