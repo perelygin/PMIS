@@ -19,6 +19,7 @@ use app\models\WbsSearch;
 use app\models\EstimateWorkPackages;
 use app\models\WorksOfEstimate;
 use app\models\User;
+use app\models\ServiceType;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -600,8 +601,37 @@ class BrController extends Controller
    public function actionPrint_estimate_work_packages_grouped($idEWP,$idBR){
 	   $BR = BusinessRequests::findOne($idBR);
 	   $RoleModelType = $BR->get_BRRoleModelType();
-	   //запрос для информации по работе
-	   $sql=   "SELECT 
+	   //запрос для информации по работе  с группировкой по услугам
+	   $sql2 = "Select 
+						tmp_tbl2.idWbs,
+					    tmp_tbl2.idWorksOfEstimate,
+					    tmp_tbl2.WorkName,
+					    tmp_tbl2.sumWE,
+					    tmp_tbl2.sumWEh,
+				        srt.ServiceName,
+				        srt.idServiceType,
+                        srt.idRole
+				From ServiceType as srt
+                LEFT OUTER JOIN RoleModel as rlm ON  rlm.idRole = srt.idRole
+				LEFT OUTER JOIN(
+				Select idWbs,idWorksOfEstimate,WorkName,idServiceType, SUM(workEffort) as sumWE,SUM(workEffortHour) as sumWEh FROM
+									(Select 
+										wos.idWorksOfEstimate,  
+										wos.WorkName,
+										wos.idWbs,
+										wos.mantisNumber,
+										wef.workEffort,
+										wef.workEffortHour,
+										wef.idServiceType
+									from WorksOfEstimate as wos
+									LEFT OUTER JOIN WorkEffort wef ON wos.idWorksOfEstimate = wef.idWorksOfEstimate
+									LEFT OUTER JOIN ProjectCommand pc ON wef.idTeamMember = pc.id
+									where wos.idWorksOfEstimate = :idwoe) as tmp_tbl
+								GROUP BY idServiceType) tmp_tbl2 ON srt.idServiceType = tmp_tbl2.idServiceType
+                                where rlm.idRoleModelType = ".$RoleModelType
+				                ." order by srt.idRole";				
+	   //запрос для информации по работе с группировкой по ролям
+	   $sql =   "SELECT 
 					rlm.idRole,  
 				    rlm.RoleName,
 					tmp_tbl2.idWbs,
@@ -676,8 +706,12 @@ class BrController extends Controller
 						where wbs.idBr = ".$idBR." and (woe.idEstimateWorkPackages = ".$idEWP." or isnull(woe.idEstimateWorkPackages)) 
 			  		       and (wbs.rgt - wbs.lft) <= 1
 						order by id,idWorksOfEstimate";
+						
+		
 		$RM = new RoleModel();
-		$RoleHeader = $RM->get_RoleModel($RoleModelType);
+		$RoleHeader = $RM->get_RoleModel($RoleModelType); //заголовок по ролям
+		$ProjectCommand = new ServiceType();
+		$ServiceHeader = $ProjectCommand->getServs($RoleModelType);  //заголовок по услугам 
 		$RoleTarifHeader = $RM->get_RoleTarifModel($RoleModelType);
 		
 		$print_WOEs = Yii::$app->db->createCommand($sql1)->queryAll(); 				// выбрали все работы по BR
@@ -909,7 +943,9 @@ class BrController extends Controller
 	        'BR'=>$BR,
 	        'EWP'=>$EWP,
 	        'sql'=>$sql,
+	        'sql2'=>$sql2,
 	        'RoleHeader'=>$RoleHeader,
+	        'ServiceHeader'=>$ServiceHeader,
 	        'RoleTarifHeader'=>$RoleTarifHeader
 	    ]); 
 			

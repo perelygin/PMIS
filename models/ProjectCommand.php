@@ -137,6 +137,10 @@ class ProjectCommand extends \yii\db\ActiveRecord
 		
 		return $TeamWithServs;
 	 }
+	 
+
+	  
+ 
 	///*
 	 //* Проверяет, доступна ли переданная услуга переданному члену команды
 	 //* Если нет, то возвращает первую доступную.

@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 //use kartik\date\DatePicker;
+use vova07\imperavi\Widget;
 use kartik\datetime\DateTimePicker;
 
 /* @var $this yii\web\View */
@@ -63,6 +64,21 @@ use kartik\datetime\DateTimePicker;
 		</div>
 		<div class="col-sm-3">
 			<?= $form->field($model, 'finished')->dropDownList($items,$params) ?>
+		</div>
+	  </div>	
+	  <div class="row">
+		<div class="col-sm-6">
+			<?php 
+				echo $form->field($model, 'ewp_comment')->widget(Widget::className(), [
+				    'settings' => [
+				        'lang' => 'ru',
+				        'minHeight' => 200,
+				        'plugins' => [
+			            'fullscreen',
+				        ],
+				    ],
+				]);
+	        ?>
 		</div>
 	  </div>	
       <div class="form-group">

@@ -4,6 +4,7 @@
 	use app\models\LifeCycleType;
     use yii\helpers\ArrayHelper;
     use app\models\Projects;
+    use vova07\imperavi\Widget;
     
 		$Organization = Projects::find()->all();
 		$items = ArrayHelper::map($Organization,'idProject','ProjectName');
@@ -50,6 +51,21 @@
 		
 	      </div>
 	   </div>
+	   <div class="row">
+		<div class="col-sm-6">
+			<?php 
+				echo $form->field($model, 'BRDescription')->widget(Widget::className(), [
+				    'settings' => [
+				        'lang' => 'ru',
+				        'minHeight' => 200,
+				        'plugins' => [
+			            'fullscreen',
+				        ],
+				    ],
+				]);
+	        ?>
+		</div>
+	  </div>
  	</div>
  	
  	

@@ -37,6 +37,7 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
             [['EstimateName'], 'required','message' => 'Пожалуйста, укажите название оценки'],
             [['idBR','deleted','finished'], 'integer'],
             [['EstimateName'], 'string', 'max' => 250],
+            [['ewp_comment'], 'safe'],
         ];
     }
 
@@ -50,7 +51,8 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
             'dataEstimate' => 'Дата оценки',
             'EstimateName' => 'Наименование оценки',
             'idBR' => 'Id Br',
-            'finished' =>'Статус'
+            'finished' =>'Статус',
+            'ewp_comment' =>'Примечание'
         ];
     }
     /*

@@ -42,6 +42,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
             [['BRRoleModelType'], 'required','message' => 'Пожалуйста, укажите тип ролевой модели'],
             [['BRLifeCycleType'], 'required','message' => 'Пожалуйста, укажите шаблон WBS'],
             [['BRName'], 'string', 'max' => 150],
+            [['BRDescription'], 'safe'],
             
         ];
     }
@@ -59,6 +60,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
             'BRDeleted' => 'Brdeleted',
             'BRNumber' => 'Номер BR',
             'BRRoleModelType' =>'Тип ролевой модели',
+            'BRDescription' =>'Описание'
         ];
     }
     public function findModelWbs($idBr)
