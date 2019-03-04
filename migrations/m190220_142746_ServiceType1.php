@@ -38,7 +38,7 @@ class m190220_142746_ServiceType1 extends Migration
 	        ]);
 	        $this->insert('ServiceType', [
 	            'idServiceType' => '5',
-	            'ServiceName' => 'Тестирование ',
+	            'ServiceName' => 'Тестирование',
 	            'ServiceDescript'=>'Проверка результата оказания Услуг модификаций Продуктов на предмет наличия ошибок методами функционального и регрессионного тестирования',
 	            'idRole'=>'6'
 	        ]);

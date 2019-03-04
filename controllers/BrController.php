@@ -629,7 +629,7 @@ class BrController extends Controller
 									where wos.idWorksOfEstimate = :idwoe) as tmp_tbl
 								GROUP BY idServiceType) tmp_tbl2 ON srt.idServiceType = tmp_tbl2.idServiceType
                                 where rlm.idRoleModelType = ".$RoleModelType
-				                ." order by srt.idRole";				
+				                ." order by srt.idServiceType";				
 	   //запрос для информации по работе с группировкой по ролям
 	   $sql =   "SELECT 
 					rlm.idRole,  
@@ -710,8 +710,8 @@ class BrController extends Controller
 		
 		$RM = new RoleModel();
 		$RoleHeader = $RM->get_RoleModel($RoleModelType); //заголовок по ролям
-		$ProjectCommand = new ServiceType();
-		$ServiceHeader = $ProjectCommand->getServs($RoleModelType);  //заголовок по услугам 
+		$ServiceType = new ServiceType();
+		$ServiceHeader = $ServiceType->getServs($RoleModelType);  //заголовок по услугам 
 		$RoleTarifHeader = $RM->get_RoleTarifModel($RoleModelType);
 		
 		$print_WOEs = Yii::$app->db->createCommand($sql1)->queryAll(); 				// выбрали все работы по BR
@@ -745,9 +745,12 @@ class BrController extends Controller
 			 $sheet->setCellValue('A'.$ex_row, 'Оценка трудозатрат по BR-'.$BR->BRNumber.'  "'.$BR->BRName.'"');
 			 $ex_row = $ex_row+1;
 			 $sheet->setCellValue('A'.$ex_row, 'Пакет оценок: "'.$EWP->EstimateName.'" от '. $EWP->dataEstimate);
-			 $ex_row = $ex_row+4;
+			  $ex_row = $ex_row+1;
+			  $sheet->setCellValue('A'.$ex_row, 'В разбивке по ролям');
+			 $ex_row = $ex_row+3;
 			 $j=2;
 			 $sheet->getRowDimension($ex_row)->setRowHeight(40);
+			 
 			 foreach($RoleHeader as $rh){
 				 $sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$rh['RoleName']);
 				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setWrapText(true);
@@ -931,6 +934,163 @@ class BrController extends Controller
 				
 				
 			 }
+			// группировка по услугам
+			$ex_row = $ex_row+2;
+			$sheet->setCellValue('A'.$ex_row, 'В разбивке по услугам');
+			  $ex_row = $ex_row+1;
+			 $j=2;
+			  $arraySum =array(); //для подсчета итогов
+			 $sheet->getRowDimension($ex_row)->setRowHeight(40);
+			 foreach($ServiceHeader as $rh){
+				 $sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$rh['ServiceName']);
+				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setWrapText(true);
+				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+				 $sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+				 $arraySum[$rh['ServiceName']] = 0;
+				 $j=$j+1;
+			 }
+   		    $ex_row = $ex_row+1;
+   		    if(count($print_WOEs)>0){
+				 $id = -1;
+				 foreach($print_WOEs as $pwoe){
+					$print_wef = Yii::$app->db->createCommand($sql2)->bindValue(':idwoe',$pwoe['idWorksOfEstimate'])->queryAll(); //выбрали трудозатраты по ролям  для работы
+					if($pwoe['id'] == $id){
+						$sheet->setCellValue('B'.$ex_row,$pwoe['WorkName']);
+						$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+						$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+						$j=2;
+						$sum_of_work = 0;//сумма трудозатрат по работе
+						foreach($print_wef as $pwef){
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+							$arraySum[$pwef['ServiceName']] = $arraySum[$pwef['ServiceName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
+							//$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов для группировки по тарифу
+							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
+							$j=$j+1;
+						}
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+						$ex_row = $ex_row+1;	
+					} else{
+						$sheet->setCellValue('A'.$ex_row, 'Результат:'.$pwoe['name']);
+						$sheet->mergeCells('A'.$ex_row.':B'.$ex_row);
+						$sheet->getStyle('A'.$ex_row)->getFont()->setBold(true);
+						$ex_row = $ex_row+1;
+						$sheet->setCellValue('B'.$ex_row,$pwoe['WorkName']);
+						$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+						$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+						$j=2;
+						$sum_of_work = 0;//сумма трудозатрат по работе
+						foreach($print_wef as $pwef){
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+							$arraySum[$pwef['ServiceName']] = $arraySum[$pwef['ServiceName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
+							//$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов для группировки по тарифу
+							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
+							$j=$j+1;
+						}
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+						$ex_row = $ex_row+1;
+						$id = $pwoe['id'];
+					}	
+				}
+				////итоги услуги
+				$totalsumm =0;
+				
+				$totalSymbol ='A';
+				$ex_row = $ex_row+1;
+				$j=2;
+				$sheet->setCellValue('B'.$ex_row,'Итого');
+				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
+				
+				foreach($arraySum as $as => $v){
+					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+					//$sum_of_work = 
+					$j=$j+1;
+					$totalsumm = $totalsumm + $v;
+					$totalSymbol = substr($Alfabet,$j,1);
+				}
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm);
+				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+				$total10 = $totalsumm/10;
+				$ex_row = $ex_row+1;
+				$sheet->setCellValue('B'.$ex_row,'Дополнительное тестирование (10% от общих трудозатрат)');
+				$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+				$j=2;
+				foreach($arraySum as $as => $v){
+					if($as == 'Тестирование'){
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10);
+						}
+					$j=$j+1;
+				}
+				$ex_row = $ex_row+1;
+				$j=2;
+				
+				$sheet->setCellValue('B'.$ex_row,'Итого с учетом доп. затрат');
+				$sheet->getStyle('B'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension($ex_row)->setRowHeight(-1);
+				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
+				$sum_of_work = 0;
+				foreach($arraySum as $as => $v){
+					if($as == 'Тестирование'){
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10+$v);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+						$sum_of_work = $sum_of_work+ $totalsumm/10+$v;
+					} else{
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+						$sum_of_work = $sum_of_work+ $v;
+					}
+					$j=$j+1;
+					
+				}
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
+				//ставим границы
+				$styleThinBlackBorderOutline = [
+				    'borders' => [
+					    'allBorders' => [
+		                    'borderStyle' => Border::BORDER_THIN,
+		                ],
+				    ],
+				];
+				$sheet->getStyle('A7:'.$totalSymbol.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
+				
+				$ex_row = $ex_row+3;
+				$totalrow = $ex_row;  //начало рамки
+				$total = 0;
+				
+				foreach($arraySum as $ars => $v){
+					  if($ars=='Тестирование' ){  //инженер по тестированию
+						    $a = MyHelper::Round_05($v+$total10);
+							$total =$total + $a;
+							
+						   	$sheet->setCellValue('B'.$ex_row,$ars);
+							$sheet->setCellValue('C'.$ex_row,$a);
+							$ex_row = $ex_row+1; 
+					  } else {
+						    $v_r= MyHelper::Round_05($v);
+						    $total =$total + $v_r;
+							$sheet->setCellValue('B'.$ex_row,$ars);
+							$sheet->setCellValue('C'.$ex_row,$v_r);
+							$ex_row = $ex_row+1;
+						
+					  }
+				}
+				$ex_row = $ex_row+2;
+				$sheet->setCellValue('B'.$ex_row,'Итого');
+				$sheet->setCellValue('C'.$ex_row,$total);
+				$sheet->getStyle('B'.$ex_row.':C'.$ex_row)->getFont()->setBold(true);
+				//ставим рамки
+				$sheet->getStyle('B'.$totalrow.':C'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);	
+				
+			}	 
+			   
 			$writer = new Xlsx($spreadsheet);
 			$file_name = 'BR_'.$BR->BRNumber.'_work_estimate_'.$EWP->dataEstimate.'.xlsx';
 			$writer->save($file_name);

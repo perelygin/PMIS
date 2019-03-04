@@ -37,6 +37,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				   ]) ;
               ?>
       </div>
+      <h2>В разбивке по ролям</h2>
       <table border = "1" cellpadding="4" cellspacing="2">
 	  <?php 
 	    $strhead = '<tr><td></td><td></td>';
@@ -105,6 +106,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		echo $strbottom1;
 		$strbottom2 = '<tr><td></td><td><b>Итого с учетом доп. затрат</b></td>';
 		$sum_of_work = 0;//сумма трудозатрат по работе
+		
 		foreach($arraySum as $ars => $v){
 		  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 			  
@@ -172,11 +174,12 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 			  </table>
 		 </div>
 		</div>
+		</div>
 	
 		
 	 	
 	 	
-	 	
+	 	<br>
       <div class="form-group">
            <?php
                   echo Html::submitButton('Обновить', ['class' => 'btn btn-primary',
@@ -194,6 +197,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 <!--
    таблица с группировкой по услугам
 -->
+  <h2>В разбивке по услугам</h2>
     <table border = "1" cellpadding="4" cellspacing="2">
 	  <?php 
 	    $strhead = '<tr><td></td><td></td>';
@@ -238,9 +242,82 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				}	
 			}
 		}
+		//итоги
+		$total =0;
+		$strbottom0 = '<tr><td></td><td><b>Итого</td>';
+		//var_dump($arraySum);die;
+		foreach($arraySum as $ars => $v){
+		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$v.'&nbsp </td>';
+		  $total =$total + $v;
+		}
+		$strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$total.'&nbsp </td>';
+		$total10 = $total/10;
+		echo $strbottom0;
+		
+		//Дополнительное тестирование (10% от общих трудозатрат
+		$strbottom1 = '<tr><td></td><td>Дополнительное тестирование (10% от общих трудозатрат</td>';
+		foreach($arraySum as $ars => $v){
+		  if($ars=='Тестирование' ){  //услуги по тестированию
+			  $strbottom1 =$strbottom1.'<td align="center"> &nbsp'.$total10.'&nbsp </td>';
+		 
+		  } else {
+			  $strbottom1 =$strbottom1.'<td> </td>';
+		  }
+		}
+		echo $strbottom1;
+		
+		$strbottom2 = '<tr><td></td><td><b>Итого с учетом доп. затрат</b></td>';
+		$sum_of_work = 0;//сумма трудозатрат по работе
+		
+		//итоговая строка
+		foreach($arraySum as $ars => $v){
+		  if($ars=='Тестирование' ){  //инженер по тестированию
+			  
+			  $a = $v+$total10;
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$a.'&nbsp </b></td>';
+			  $sum_of_work = $sum_of_work+ $a;
+		 
+		  } else {
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$v.'&nbsp </b></td>';
+			  $sum_of_work = $sum_of_work+ $v;
+		  }
+		}
+		$strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$sum_of_work.'&nbsp </b></td>';
+		echo $strbottom2;
+		
       ?>
       
       </table>
+      <br>
+       <div class="container">
+	   <div class="row">
+		  <div class="col-sm-3">
+		    <table border = "1" cellpadding="4" cellspacing="2">
+				<?php
+				$total = 0;
+					foreach($arraySum as $ars => $v){
+						
+					  if($ars=='Тестирование' ){  //инженер по тестированию
+						  $a =  MyHelper::Round_05($v+$total10);
+						   $total =$total + $a;
+						   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+					  } else {
+						    $v_r = MyHelper::Round_05($v);
+							$total =$total + $v_r;
+							echo('<tr><td>'.$ars.'</td><td>'.$v_r.'</td></tr>');
+						
+					  }
+						
+					}
+				//}
+				echo('<tr><td><b>Итого</b></td><td><b>'.$total.'</b></td></tr>');
+				?>	
+			</table>
+		</div>
+
+		</div>
+		</div>
+		<br>
       <div class="form-group">
            <?php
                   echo Html::submitButton('Обновить', ['class' => 'btn btn-primary',
