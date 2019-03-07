@@ -125,13 +125,7 @@ $this->params['breadcrumbs'][] = 'Изменение параметров раб
 		    <?php echo Tabs::widget(['items' => $items]); ?>
 	    </div>
    </div> 
-   
-   
-   
-
-		
-    
-    
+      
     <div class="row">
 		<div class="col-sm-12">
 			<br>

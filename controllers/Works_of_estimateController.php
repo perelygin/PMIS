@@ -17,6 +17,7 @@ use app\models\User;
 use app\models\MoveWorksToAnotherResultForm;
 use app\models\People;
 use app\models\AddWorkEffortForm;
+use app\models\select_Work_search;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -504,6 +505,10 @@ class Works_of_estimateController extends Controller
 					    $url1 = Url::to(['site/help']).'#SystemDesc24';
 						return $this->redirect($url1);			//
 						}
+				elseif($btn_info[0] == 'addpw'){  //добавление работы-предшественика
+						return $this->redirect(['add_work_prev', 'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
+							
+						}						
 				elseif($btn_info[0] == 'mant'){  //синхронизация с mantis
 					$LastEstimateSumm = 0;
 					$error_code = 0;
@@ -999,6 +1004,64 @@ class Works_of_estimateController extends Controller
             'VwListOfWorkEffort' => $VwListOfWorkEffort,
             'idEstimateWorkPackages' => $idEstimateWorkPackages
         ]);	
+    }
+  /*
+   * Добавление задачи предшественницы
+   * 
+   */   
+   public function actionAdd_work_prev($idBR,$idEWP,$idPrevWrk=0)   
+    {
+    $searchModel = new select_Work_search();	
+    $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$idEWP,$idBR);					
+	if($idPrevWrk==0){
+		return $this->render('select_work_prev', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'idBR'=> $idBR,
+            'idEWP'=>$idEWP
+        ]);
+	}else{
+		echo($idPrevWrk);
+	}
+		
+		
+	   //$model_w = array('idBr'=>$idBr,'idRole'=>$idRole,'ParentId'=>$ParentId);
+       //$searchModel = new VwListOfPeopleSearch();
+       //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+       //if($idHuman==0){
+		  ////выбор человека из списка
+         //return $this->render('select_human', [
+            //'searchModel' => $searchModel,
+            //'dataProvider' => $dataProvider,
+            //'model_w'=> $model_w
+        //]);
+	  //}	else{
+		//$prjComm = new ProjectCommand();
+		//$prjComm->parent_id = $ParentId;
+		//$prjComm->idBR = $idBr;
+		//$prjComm->idRole = $idRole;
+		//$prjComm->idHuman = $idHuman;
+		 //if($prjComm->save()){
+			//return $this->redirect(['update','id' => $idBr, 'page_number'=>2]);
+		 //} 
+		 //else{
+			 //if($prjComm->hasErrors()){
+				//$ErrorsArray = $prjComm->getErrors(); 	 
+				//foreach ($ErrorsArray as $key => $value1){
+					//foreach($value1 as $value2){
+							//Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+					//}
+				//}	
+				////echo '<pre>'; print_r($ErrorsArray); die;
+			 //}
+			 //// если не удалось сохранить  продолжаем выбирать
+			//return $this->render('select_human', [
+            //'searchModel' => $searchModel,
+            //'dataProvider' => $dataProvider,
+            //'model_w'=> $model_w
+        //]);
+		 //}
+	 //} 
     }
     
     /**
