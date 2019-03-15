@@ -22,11 +22,21 @@ class select_Work_search extends Model
           [['name', 'WorkName','mantisNumber','idWorksOfEstimate'], 'safe'],
         ];
     }
-    public function search($params,$idEWP,$idBR)
+    public function search($params,$idEWP,$idBR,$idWorksOfEstimate)  
     {
         //$query = VwListOfPeople::find();
+		//$subQuery = (new \yii\db\Query())->from('WorksOfEstimate')
+		//							  ->where(['idEstimateWorkPackages' =>$idEWP]);
+									  
+		//уже привязанные работы
+		$subQuery1 = (new \yii\db\Query())
+							->select(['idFirstWork'])
+							->from('Links')
+							->where(['=','idSecondWork',$idWorksOfEstimate]);
+		//выбираем все работы, по пакету оценок,  без учета работы,  к которой ппривязываем работы, и без  учета уже привязанных.		
 		$subQuery = (new \yii\db\Query())->from('WorksOfEstimate')
-									  ->where(['idEstimateWorkPackages' =>$idEWP]);
+									  ->where(['and',['not in','idWorksOfEstimate',$subQuery1],['and',['!=','idWorksOfEstimate',$idWorksOfEstimate],['=','idEstimateWorkPackages',$idEWP]]]);									 
+		//выбираем результаты с работами
 		$query = (new \yii\db\Query())
 						->select(['wbs.id','wbs.tree','wbs.lft','wbs.rgt','wbs.depth','name',
 								  'wbs.idBr','woe.idEstimateWorkPackages',

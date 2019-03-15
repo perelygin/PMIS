@@ -11,7 +11,9 @@ use yii\helpers\Url;
  $wbs = WBS::find()->where(['and', 'wbs.rgt - wbs.lft <= 1',['=','wbs.idBr',$idBR]])->all();
  $items = ArrayHelper::map($wbs,'name','name');
 ?>
-
+<?php 
+	$form = ActiveForm::begin(); 
+  ?>
  <div class="row">
 	<div class="col-sm-12">
 		<?= GridView::widget([
@@ -25,9 +27,9 @@ use yii\helpers\Url;
 			            'template' => '{add_prev_work}',
 			            //Замыкание в анонимной функции PHP- 
 			            'buttons' => [
-			                'add_prev_work' => function ($url,$model) use($idBR,$idEWP){  
+			                'add_prev_work' => function ($url,$model) use($idBR,$idEWP,$idWbs,$idWOS){  
 								//var_dump($model);
-							    $url = Url::to(['works_of_estimate/add_work_prev', 'idBR'=>$idBR,'idEWP'=>$idEWP,'idPrevWrk' => $model['idWorksOfEstimate']]);
+							    $url = Url::to(['works_of_estimate/add_work_prev', 'idWbs' =>$idWbs, 'idBR'=>$idBR,'idWOS'=>$idWOS,'idEWP'=>$idEWP,'idPrevWrk' => $model['idWorksOfEstimate']]);
 			                    return Html::a(
 			                    '<span class="glyphicon glyphicon-ok"></span>', 
 			                    $url,['title' => 'Выбери работу-предшественницу']);
@@ -67,6 +69,20 @@ use yii\helpers\Url;
 	
 	
 </div>
-
+ <div class="row">
+		
+		<div class="col-sm-4"> 
+			<?php 
+			echo(Html::submitButton('Отмена', [
+						'class' => 'btn btn-success',
+						'title'=>'Отменить привязку работы',
+						'name'=>'btn',
+						'value' => 'cancl_']));				
+			?>
+		</div>
+		<div class="col-sm-4"> 
+			</div>
+	</div>	
+<?php ActiveForm::end(); ?>
 
 

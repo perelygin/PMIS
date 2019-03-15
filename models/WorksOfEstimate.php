@@ -107,6 +107,35 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
    public function GetMantisNumber(){
 	   return $this->mantisNumber;
 	   }
+	/*
+	 * Возвращает информациюпо работе
+	 * 
+	 */    
+	public function GetWOEInfo($idWorksOfEstimate){
+		$sql = "SELECT 
+						wbs.name,
+						wbs.idBr,
+						woe.idWorksOfEstimate,
+						woe.WorkName,
+						woe.mantisNumber
+						FROM wbs  
+						LEFT OUTER JOIN  WorksOfEstimate woe ON woe.idWbs=wbs.id
+						where woe.idWorksOfEstimate= ".$idWorksOfEstimate;
+		
+		$WOEInfo = Yii::$app->db->createCommand($sql)->queryOne();		
+		
+		if($WOEInfo){
+			if(!empty($WOEInfo)){
+				
+				return $WOEInfo;	
+			} else {
+				return '';
+					}	
+			} else {
+				return '';
+					}					
+	   
+	   }   
 	public function get_analit_login()
     {
 	    $sql = "SELECT 
@@ -150,4 +179,6 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 				return 0;
 	   }
 	}
+	
+	
 }

@@ -18,6 +18,7 @@ use app\models\MoveWorksToAnotherResultForm;
 use app\models\People;
 use app\models\AddWorkEffortForm;
 use app\models\select_Work_search;
+use app\models\Links;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -349,6 +350,35 @@ class Works_of_estimateController extends Controller
         ]);
 		
 	}
+	
+	/*
+	 * редактирование информации о связи между работами
+	 * тип связи, задержка
+	 * 
+	 */ 
+	public function actionEdit_link($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$idLink){
+		$model = Links::findOne(['idLink'=>$idLink]); 
+		$a = Yii::$app->request->post();   
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			if(isset($a['btn'])) {   // анализируем нажатые кнопки
+				$btn_info = explode("_", $a['btn']);
+				if($btn_info[0] == 'cancl') {   // отмена
+					return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,$page_number=3]);		
+				}		
+			}
+
+			return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,$page_number=3]);
+		}
+			
+		 return $this->render('edit_link', [
+			'model' => $model,
+            'idWbs'=>$idWbs,
+            'idEstimateWorkPackages'=>$idEstimateWorkPackages
+         ]);
+			
+		}
+		 
+		 
     public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$page_number=1)
     {
         //проверка на то, что оценка трудозатрат не закрыта
@@ -506,9 +536,22 @@ class Works_of_estimateController extends Controller
 						return $this->redirect($url1);			//
 						}
 				elseif($btn_info[0] == 'addpw'){  //добавление работы-предшественика
-						return $this->redirect(['add_work_prev', 'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
+						return $this->redirect(['add_work_prev','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWOS'=>$idWorksOfEstimate, 'idEWP'=>$idEstimateWorkPackages]);	
 							
-						}						
+						}	
+				elseif($btn_info[0] == 'dellnk'){  //удаление связи с работы-предшественика
+					   $lnk = new Links();
+				       $lnk->findOne($btn_info[1])->delete();    //$idLaborExpenditures  =$btn_info[1] 
+				       if($lnk->hasErrors()){
+								Yii::$app->session->addFlash('error',"Ошибка удаления связи " );
+					   }
+					   $page_number = 3;
+						//return $this->redirect(['add_work_prev','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWOS'=>$idWorksOfEstimate, 'idEWP'=>$idEstimateWorkPackages]);	
+						}	
+				elseif($btn_info[0] == 'editlnk'){  //Изменнеи связи с работы-предшественика
+			   
+						return $this->redirect(['edit_link','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWorksOfEstimate'=>$idWorksOfEstimate, 'idEstimateWorkPackages'=>$idEstimateWorkPackages,'idLink'=>$btn_info[1]]);	
+						}			
 				elseif($btn_info[0] == 'mant'){  //синхронизация с mantis
 					$LastEstimateSumm = 0;
 					$error_code = 0;
@@ -731,6 +774,8 @@ class Works_of_estimateController extends Controller
 			'idWbs'=>$idWbs,
 			'idWorksOfEstimate'=>$idWorksOfEstimate])->orderBy('idLaborExpenditures')->all();
 		
+		$ListPrevWorks = Links::getPrevWorks($idWorksOfEstimate);
+		
 		$QueryLogDataProvider = Systemlog::find()->where(['IdTypeObject' => 4,'idObject' => $idWorksOfEstimate])->orderBy('DataChange'); //лог для работ
         $LogDataProvider = new ActiveDataProvider([
             'query' => $QueryLogDataProvider,
@@ -743,7 +788,8 @@ class Works_of_estimateController extends Controller
             'VwListOfWorkEffort'=>$VwListOfWorkEffort,
             'LogDataProvider'=>$LogDataProvider,
             'idBR'=>$idBR,
-            'MantisPrjLstArray' =>$MntPrjLstArray
+            'MantisPrjLstArray' =>$MntPrjLstArray,
+            'ListPrevWorks'=>$ListPrevWorks
         ]);
     }
 
@@ -1009,59 +1055,57 @@ class Works_of_estimateController extends Controller
    * Добавление задачи предшественницы
    * 
    */   
-   public function actionAdd_work_prev($idBR,$idEWP,$idPrevWrk=0)   
+   public function actionAdd_work_prev($idWbs,$idBR,$idEWP,$idWOS,$idPrevWrk=0)   
     {
+	$a = Yii::$app->request->post();   
     $searchModel = new select_Work_search();	
-    $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$idEWP,$idBR);					
+    $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$idEWP,$idBR,$idWOS);	
+    	
+    if(isset($a['btn'])) {   // анализируем нажатые кнопки
+		$btn_info = explode("_", $a['btn']);
+		if($btn_info[0] == 'cancl') {   // отмена
+			return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,$page_number=3]);		
+	    }		
+    }				
 	if($idPrevWrk==0){
 		return $this->render('select_work_prev', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'idBR'=> $idBR,
-            'idEWP'=>$idEWP
+            'idEWP'=>$idEWP,
+            'idWOS' => $idWOS,
+            'idWbs'=>$idWbs
         ]);
 	}else{
-		echo($idPrevWrk);
-	}
-		
-		
-	   //$model_w = array('idBr'=>$idBr,'idRole'=>$idRole,'ParentId'=>$ParentId);
-       //$searchModel = new VwListOfPeopleSearch();
-       //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-       //if($idHuman==0){
-		  ////выбор человека из списка
-         //return $this->render('select_human', [
-            //'searchModel' => $searchModel,
-            //'dataProvider' => $dataProvider,
-            //'model_w'=> $model_w
-        //]);
-	  //}	else{
-		//$prjComm = new ProjectCommand();
-		//$prjComm->parent_id = $ParentId;
-		//$prjComm->idBR = $idBr;
-		//$prjComm->idRole = $idRole;
-		//$prjComm->idHuman = $idHuman;
-		 //if($prjComm->save()){
-			//return $this->redirect(['update','id' => $idBr, 'page_number'=>2]);
-		 //} 
-		 //else{
-			 //if($prjComm->hasErrors()){
-				//$ErrorsArray = $prjComm->getErrors(); 	 
-				//foreach ($ErrorsArray as $key => $value1){
-					//foreach($value1 as $value2){
-							//Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
-					//}
-				//}	
-				////echo '<pre>'; print_r($ErrorsArray); die;
-			 //}
-			 //// если не удалось сохранить  продолжаем выбирать
-			//return $this->render('select_human', [
-            //'searchModel' => $searchModel,
-            //'dataProvider' => $dataProvider,
-            //'model_w'=> $model_w
-        //]);
-		 //}
-	 //} 
+		$lnk = new Links();
+		$lnk->idFirstWork = $idPrevWrk;
+		$lnk->idSecondWork = $idWOS;
+		$lnk->idLinkType = 1;
+		if($lnk->save()){
+		//сохраняем и редактируем связь
+			return $this->redirect(['edit_link','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,'idLink'=>$lnk->idLink]);
+			
+			
+		 } else{
+			 if($lnk->hasErrors()){
+				$ErrorsArray = $lnk->getErrors(); 	 
+				foreach ($ErrorsArray as $key => $value1){
+					foreach($value1 as $value2){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+					}
+				}	
+				//// если не удалось сохранить  продолжаем выбирать
+				return $this->render('select_work_prev', [
+		            'searchModel' => $searchModel,
+		            'dataProvider' => $dataProvider,
+		            'idBR'=> $idBR,
+		            'idEWP'=>$idEWP,
+		            'idWOS' => $idWOS,
+		            'idWbs'=>$idWbs
+		        ]);
+			 }
+		}	 
+  	 }
     }
     
     /**

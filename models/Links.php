@@ -28,7 +28,7 @@ class Links extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['idFirstWork', 'idSecondWork', 'idLinkType'], 'integer'],
+            [['idFirstWork', 'idSecondWork', 'idLinkType', 'lag'], 'integer'],
             [['idFirstWork'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idFirstWork' => 'idWorksOfEstimate']],
             [['idSecondWork'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idSecondWork' => 'idWorksOfEstimate']],
             [['idLinkType'], 'exist', 'skipOnError' => true, 'targetClass' => LinkType::className(), 'targetAttribute' => ['idLinkType' => 'idLinkType']],
@@ -44,7 +44,42 @@ class Links extends \yii\db\ActiveRecord
             'idLink' => 'Id Link',
             'idFirstWork' => 'Id First Work',
             'idSecondWork' => 'Id Second Work',
-            'idLinkType' => 'Id Link Type',
+            'idLinkType' => 'Тип связи',
+            'lag' => 'Запаздывание',
         ];
     }
+    
+    
+    	/*
+	 * Возвращает перечень предшествующих работ
+	 * 
+	 */    
+	public function getPrevWorks($idWorksOfEstimate){
+		$sql = "SELECT 
+						wbs.name,
+						wbs.idBr,
+						woe.idWorksOfEstimate,
+						woe.WorkName,
+						woe.mantisNumber,
+						lnk.idLink,
+                        lnk.lag
+						FROM wbs  
+						LEFT OUTER JOIN  WorksOfEstimate woe ON woe.idWbs=wbs.id
+                        LEFT OUTER JOIN  Links lnk ON lnk.idFirstWork = woe.idWorksOfEstimate
+						where lnk.idSecondWork = ".$idWorksOfEstimate;
+		
+		$WOEInfo = Yii::$app->db->createCommand($sql)->query();		
+		
+		if($WOEInfo){
+			if(!empty($WOEInfo)){
+				
+				return $WOEInfo;	
+			} else {
+				return '';
+					}	
+			} else {
+				return '';
+					}					
+	   
+	   }  
 }
