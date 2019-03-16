@@ -23,12 +23,32 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php echo $this->render('_search_report1', ['model' => $searchModel]); ?>
-
+<!--
+	 <style type="text/css">
+	   TABLE {
+	    background: white; /* Цвет фона таблицы */
+	    color: white; /* Цвет текста */
+	   }
+	   TD, TH {
+	    background: maroon; /* Цвет фона ячеек */
+	    padding: 5px; /* Поля вокруг текста */
+	   }
+	  </style>
+-->
     
       <table border = "1" cellpadding="4" cellspacing="2">
 		  <?php 
 		    echo '<tr><th>Проект</th><th>Результат проекта</th><th>Статус результата</th><th>Ответственный</th><th>Плановая версия</th><th>Организация отв.</th></tr>';
+		    if(!empty($dataProvider)){
+				$i = $dataProvider[0]['idBr'];
+			}else {
+				$i=0;
+				}
 		    foreach($dataProvider as $dp_str){
+				 if($i <> $dp_str->idBr){
+					   echo '<tr bgcolor="#b1b84f" ><td colspan="6">&nbsp</td></tr>';
+					  $i = $dp_str->idBr ;
+				} 
 			 echo '<tr>
 			  <td> BR-'.$dp_str->BRNumber.' '.$dp_str->BRName.'</td>
 			  <td>'.Html::a($dp_str->name, Url::toRoute(['br/update_wbs_node', 'id_node'=>$dp_str->id,'idBR'=>$dp_str->idBr]),['title' => '','target' => '_blank']). '</td>
@@ -51,12 +71,15 @@ $this->params['breadcrumbs'][] = $this->title;
 				
 					  </tr>';	
 				    }
+				   
 				  }
 				  
+				   
 				  
 			  } 
-			 
+			  
 			}
+			
 		  ?>
 	  </table>
     

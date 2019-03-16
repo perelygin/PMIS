@@ -65,12 +65,12 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				  .'</td><td>'.$pwoe['WorkName'].'</td>';
 				  $sum_of_work = 0;//сумма трудозатрат по работе
 				foreach($print_wef as $pwef){
-					$str = $str.'<td align="center">'.($pwef['sumWE']+$pwef['sumWEh']/8).'</td>'; //.' '.$pwef['RoleName']
+					$str = $str.'<td align="center">'.round(($pwef['sumWE']+$pwef['sumWEh']/8),2).'</td>'; //.' '.$pwef['RoleName']
 					$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
 					$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
 					$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8; 
 				}
-				$str = $str.'<td align="center"><b>'.$sum_of_work.'</b></td>';
+				$str = $str.'<td align="center"><b>'.round($sum_of_work,2).'</b></td>';
 				$str = $str.'</tr>';
 					
 				if($pwoe['id'] == $id){
@@ -87,17 +87,17 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		$total =0;
 		$strbottom0 = '<tr><td></td><td><b>Итого</td>';
 		foreach($arraySum as $ars => $v){
-		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$v.'&nbsp </td>';
+		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.round($v,2).'&nbsp </td>';
 		  $total =$total + $v;
 		}
-		$strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$total.'&nbsp </td>';
+		$strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.round($total,2).'&nbsp </td>';
 		$total10 = $total/10;
 		echo $strbottom0;
 		
 		$strbottom1 = '<tr><td></td><td>Дополнительное тестирование (10% от общих трудозатрат</td>';
 		foreach($arraySum as $ars => $v){
 		  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
-			  $strbottom1 =$strbottom1.'<td align="center"> &nbsp'.$total10.'&nbsp </td>';
+			  $strbottom1 =$strbottom1.'<td align="center"> &nbsp'.round($total10,2).'&nbsp </td>';
 		 
 		  } else {
 			  $strbottom1 =$strbottom1.'<td> </td>';
@@ -111,15 +111,15 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 			  
 			  $a = $v+$total10;
-			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$a.'&nbsp </b></td>';
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.round($a,2).'&nbsp </b></td>';
 			  $sum_of_work = $sum_of_work+ $a;
 		 
 		  } else {
-			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$v.'&nbsp </b></td>';
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.round($v,2).'&nbsp </b></td>';
 			  $sum_of_work = $sum_of_work+ $v;
 		  }
 		}
-		$strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$sum_of_work.'&nbsp </b></td>';
+		$strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.round($sum_of_work,2).'&nbsp </b></td>';
 		echo $strbottom2;
 	  ?>
 		  
@@ -137,15 +137,15 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 						
 					  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 						  $a = $v+$total10;
-						   	echo('<tr><td>'.$ars.'</td><td>'.$a.'</td></tr>');  
+						   	echo('<tr><td>'.$ars.'</td><td>'.round($a,2).'</td></tr>');  
 					  } else {
-							echo('<tr><td>'.$ars.'</td><td>'.$v.'</td></tr>');
+							echo('<tr><td>'.$ars.'</td><td>'.round($v,2).'</td></tr>');
 						
 					  }
 						
 					}
 				//}
-				echo('<tr><td><b>Итого</b></td><td><b>'.($total+$total10).'</b></td></tr>');
+				echo('<tr><td><b>Итого</b></td><td><b>'.round(($total+$total10),2).'</b></td></tr>');
 				?>	
 			</table>
 		</div>
@@ -221,7 +221,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				  .'</td><td>'.$pwoe['WorkName'].'</td>';
 				  $sum_of_work = 0;//сумма трудозатрат по работе
 				foreach($print_wef as $pwef){
-					$str = $str.'<td align="center">'.($pwef['sumWE']+$pwef['sumWEh']/8).'</td>'; //.' '.$pwef['RoleName']
+					$str = $str.'<td align="center">'.round(($pwef['sumWE']+$pwef['sumWEh']/8),2).'</td>'; //.' '.$pwef['RoleName']
 					if(!is_null($pwef['ServiceName'])){
 						$arraySum[$pwef['ServiceName']] = $arraySum[$pwef['ServiceName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
 					} else{  //для старых работ,  по которым оценка трудозатрат без услуг
@@ -230,7 +230,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 					//$arraySum1[$pwef['TariffName']] = $arraySum1[$pwef['TariffName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
 					$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8; 
 				}
-				$str = $str.'<td align="center"><b>'.$sum_of_work.'</b></td>';
+				$str = $str.'<td align="center"><b>'.round($sum_of_work,2).'</b></td>';
 				$str = $str.'</tr>';
 					
 				if($pwoe['id'] == $id){
@@ -247,10 +247,10 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		$strbottom0 = '<tr><td></td><td><b>Итого</td>';
 		//var_dump($arraySum);die;
 		foreach($arraySum as $ars => $v){
-		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$v.'&nbsp </td>';
+		  $strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.round($v,2).'&nbsp </td>';
 		  $total =$total + $v;
 		}
-		$strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.$total.'&nbsp </td>';
+		$strbottom0 =$strbottom0.'<td align="center"><b> &nbsp'.round($total,2).'&nbsp </td>';
 		$total10 = $total/10;
 		echo $strbottom0;
 		
@@ -258,7 +258,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		$strbottom1 = '<tr><td></td><td>Дополнительное тестирование (10% от общих трудозатрат</td>';
 		foreach($arraySum as $ars => $v){
 		  if($ars=='Тестирование' ){  //услуги по тестированию
-			  $strbottom1 =$strbottom1.'<td align="center"> &nbsp'.$total10.'&nbsp </td>';
+			  $strbottom1 =$strbottom1.'<td align="center"> &nbsp'.round($total10,2).'&nbsp </td>';
 		 
 		  } else {
 			  $strbottom1 =$strbottom1.'<td> </td>';
@@ -274,15 +274,15 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		  if($ars=='Тестирование' ){  //инженер по тестированию
 			  
 			  $a = $v+$total10;
-			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$a.'&nbsp </b></td>';
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.round($a,2).'&nbsp </b></td>';
 			  $sum_of_work = $sum_of_work+ $a;
 		 
 		  } else {
-			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$v.'&nbsp </b></td>';
+			  $strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.round($v,2).'&nbsp </b></td>';
 			  $sum_of_work = $sum_of_work+ $v;
 		  }
 		}
-		$strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.$sum_of_work.'&nbsp </b></td>';
+		$strbottom2 =$strbottom2.'<td align="center"> <b>&nbsp'.round($sum_of_work,2).'&nbsp </b></td>';
 		echo $strbottom2;
 		
       ?>

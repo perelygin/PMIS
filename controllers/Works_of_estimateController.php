@@ -363,11 +363,11 @@ class Works_of_estimateController extends Controller
 			if(isset($a['btn'])) {   // анализируем нажатые кнопки
 				$btn_info = explode("_", $a['btn']);
 				if($btn_info[0] == 'cancl') {   // отмена
-					return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,$page_number=3]);		
+					return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'page_number'=>3]);		
 				}		
 			}
 
-			return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,$page_number=3]);
+			return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'page_number'=>3]);
 		}
 			
 		 return $this->render('edit_link', [
@@ -381,6 +381,7 @@ class Works_of_estimateController extends Controller
 		 
     public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$page_number=1)
     {
+       
         //проверка на то, что оценка трудозатрат не закрыта
         $ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
 		if($ewp->isFinished()){
@@ -1064,7 +1065,7 @@ class Works_of_estimateController extends Controller
     if(isset($a['btn'])) {   // анализируем нажатые кнопки
 		$btn_info = explode("_", $a['btn']);
 		if($btn_info[0] == 'cancl') {   // отмена
-			return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,$page_number=3]);		
+			return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,$page_number=>3]);		
 	    }		
     }				
 	if($idPrevWrk==0){

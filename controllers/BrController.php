@@ -775,7 +775,7 @@ class BrController extends Controller
 						$j=2;
 						$sum_of_work = 0;//сумма трудозатрат по работе
 						foreach($print_wef as $pwef){
-							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($pwef['sumWE']+$pwef['sumWEh']/8,2));
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
@@ -783,7 +783,7 @@ class BrController extends Controller
 							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
 							$j=$j+1;
 						}
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($sum_of_work,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$ex_row = $ex_row+1;	
 					} else{
@@ -797,7 +797,7 @@ class BrController extends Controller
 						$j=2;
 						$sum_of_work = 0;//сумма трудозатрат по работе
 						foreach($print_wef as $pwef){
-							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($pwef['sumWE']+$pwef['sumWEh']/8,2));
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['RoleName']] = $arraySum[$pwef['RoleName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
@@ -805,7 +805,7 @@ class BrController extends Controller
 							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
 							$j=$j+1;
 						}
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($sum_of_work,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$ex_row = $ex_row+1;
 						$id = $pwoe['id'];
@@ -822,13 +822,13 @@ class BrController extends Controller
 				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
 				
 				foreach($arraySum as $as => $v){
-					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($v,2));
 					//$sum_of_work = 
 					$j=$j+1;
 					$totalsumm = $totalsumm + $v;
 					$totalSymbol = substr($Alfabet,$j,1);
 				}
-				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm);
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($totalsumm,2));
 				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 				$total10 = $totalsumm/10;
 				$ex_row = $ex_row+1;
@@ -838,7 +838,7 @@ class BrController extends Controller
 				$j=2;
 				foreach($arraySum as $as => $v){
 					if($as == 'Инженер по тестированию'){
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($totalsumm/10,2));
 						}
 					$j=$j+1;
 				}
@@ -852,18 +852,18 @@ class BrController extends Controller
 				$sum_of_work = 0;
 				foreach($arraySum as $as => $v){
 					if($as == 'Инженер по тестированию'){
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10+$v);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($totalsumm/10+$v,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$sum_of_work = $sum_of_work+ $totalsumm/10+$v;
 					} else{
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($v,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$sum_of_work = $sum_of_work+ $v;
 					}
 					$j=$j+1;
 					
 				}
-				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($sum_of_work,2));
 				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 				//ставим границы
 				$styleThinBlackBorderOutline = [
@@ -883,18 +883,18 @@ class BrController extends Controller
 					  if($ars=='Инженер по тестированию' ){  //инженер по тестированию
 						  
 						   	$sheet->setCellValue('B'.$ex_row,$ars);
-							$sheet->setCellValue('C'.$ex_row,$totalsumm/10+$v);
+							$sheet->setCellValue('C'.$ex_row,round($totalsumm/10+$v,2));
 							$ex_row = $ex_row+1; 
 					  } else {
 							$sheet->setCellValue('B'.$ex_row,$ars);
-							$sheet->setCellValue('C'.$ex_row,$v);
+							$sheet->setCellValue('C'.$ex_row,round($v,2));
 							$ex_row = $ex_row+1;
 						
 					  }
 				}
 				$ex_row = $ex_row+2;
 				$sheet->setCellValue('B'.$ex_row,'Итого');
-				$sheet->setCellValue('C'.$ex_row,$totalsumm+$totalsumm/10);
+				$sheet->setCellValue('C'.$ex_row,round($totalsumm+$totalsumm/10,2));
 				$sheet->getStyle('B'.$ex_row.':C'.$ex_row)->getFont()->setBold(true);
 				//ставим рамки
 				$sheet->getStyle('B'.$totalrow.':C'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
@@ -962,7 +962,7 @@ class BrController extends Controller
 						$j=2;
 						$sum_of_work = 0;//сумма трудозатрат по работе
 						foreach($print_wef as $pwef){
-							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($pwef['sumWE']+$pwef['sumWEh']/8,2));
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['ServiceName']] = $arraySum[$pwef['ServiceName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
@@ -970,7 +970,7 @@ class BrController extends Controller
 							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
 							$j=$j+1;
 						}
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($sum_of_work,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$ex_row = $ex_row+1;	
 					} else{
@@ -984,7 +984,7 @@ class BrController extends Controller
 						$j=2;
 						$sum_of_work = 0;//сумма трудозатрат по работе
 						foreach($print_wef as $pwef){
-							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$pwef['sumWE']+$pwef['sumWEh']/8);
+							$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($pwef['sumWE']+$pwef['sumWEh']/8,2));
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 							$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 							$arraySum[$pwef['ServiceName']] = $arraySum[$pwef['ServiceName']] + $pwef['sumWE']+$pwef['sumWEh']/8; //подсчет итогов
@@ -992,7 +992,7 @@ class BrController extends Controller
 							$sum_of_work = $sum_of_work + $pwef['sumWE']+$pwef['sumWEh']/8;
 							$j=$j+1;
 						}
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($sum_of_work,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$ex_row = $ex_row+1;
 						$id = $pwoe['id'];
@@ -1008,13 +1008,13 @@ class BrController extends Controller
 				$sheet->getStyle('B'.$ex_row)->getFont()->setBold(true);
 				
 				foreach($arraySum as $as => $v){
-					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+					$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($v,2));
 					//$sum_of_work = 
 					$j=$j+1;
 					$totalsumm = $totalsumm + $v;
 					$totalSymbol = substr($Alfabet,$j,1);
 				}
-				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm);
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($totalsumm,2));
 				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 				$total10 = $totalsumm/10;
 				$ex_row = $ex_row+1;
@@ -1024,7 +1024,7 @@ class BrController extends Controller
 				$j=2;
 				foreach($arraySum as $as => $v){
 					if($as == 'Тестирование'){
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($totalsumm/10,2));
 						}
 					$j=$j+1;
 				}
@@ -1038,18 +1038,18 @@ class BrController extends Controller
 				$sum_of_work = 0;
 				foreach($arraySum as $as => $v){
 					if($as == 'Тестирование'){
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$totalsumm/10+$v);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($totalsumm/10+$v,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$sum_of_work = $sum_of_work+ $totalsumm/10+$v;
 					} else{
-						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$v);
+						$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($v,2));
 						$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 						$sum_of_work = $sum_of_work+ $v;
 					}
 					$j=$j+1;
 					
 				}
-				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,$sum_of_work);
+				$sheet->setCellValue(substr($Alfabet,$j,1).$ex_row,round($sum_of_work,2));
 				$sheet->getStyle(substr($Alfabet,$j,1).$ex_row)->getFont()->setBold(true);
 				//ставим границы
 				$styleThinBlackBorderOutline = [

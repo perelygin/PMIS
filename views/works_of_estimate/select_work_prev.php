@@ -38,18 +38,16 @@ use yii\helpers\Url;
 			        ],
 		            ['class' => 'yii\grid\SerialColumn'],
 		            ['class' => 'yii\grid\DataColumn', 
+		             'attribute' => 'WorkName',
+					 'format' => 'text',
+					 'label' => 'Работа'
+					 ],
+		            ['class' => 'yii\grid\DataColumn', 
 		             'attribute' => 'name',
 					 'format' => 'text',
 					 'label' => 'Результат',
 					  'filter' => $items
 					 ],
-					 
-		            ['class' => 'yii\grid\DataColumn', 
-		             'attribute' => 'WorkName',
-					 'format' => 'text',
-					 'label' => 'Работа'
-					 ],
-		            
 		            ['class' => 'yii\grid\DataColumn', 
 		             'attribute' => 'mantisNumber',
 					 'format' => 'text',
