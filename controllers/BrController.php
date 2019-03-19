@@ -90,7 +90,7 @@ class BrController extends Controller
        $EstimateWorkPackages =  EstimateWorkPackages::findOne($idEWP);
 	   if(!is_null($EstimateWorkPackages)){  //копируем пакет
 		   $NewEstimateWorkPackages = new EstimateWorkPackages();
-		   $NewEstimateWorkPackages->dataEstimate = date("Y-m-d"); 
+		   $NewEstimateWorkPackages->dataEstimate = date("Y-m-d H:i:s");
 		   $NewEstimateWorkPackages->EstimateName = $EstimateWorkPackages->EstimateName.' копия ';
 		   $NewEstimateWorkPackages->idBR = $EstimateWorkPackages->idBR;
 		   $NewEstimateWorkPackages->save();
@@ -111,8 +111,8 @@ class BrController extends Controller
 					     if($NewWorksOfEstimate->hasErrors()){
 						   Yii::$app->session->addFlash('error',"Ошибка копирования работ из пакета оценок ");
 						  }else{	     //копируем трудозатраты
-						    $sql= "insert into WorkEffort (idWorksOfEstimate, idTeamMember,WorkEffort) 
-									select '".$NewWorksOfEstimate->idWorksOfEstimate."',idTeamMember,WorkEffort from WorkEffort
+						    $sql= "insert into WorkEffort (idWorksOfEstimate, idTeamMember,WorkEffort,workEffortHour,idServiceType) 
+									select '".$NewWorksOfEstimate->idWorksOfEstimate."',idTeamMember,WorkEffort,workEffortHour,idServiceType from WorkEffort
 									 where idWorksOfEstimate = ".$woe['idWorksOfEstimate'];
 						    $a = Yii::$app->db->createCommand($sql)->execute(); 
 						    

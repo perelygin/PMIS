@@ -458,7 +458,16 @@ class Works_of_estimateController extends Controller
 				foreach($a['workEffort'] as $key => $value){
 					$WorkEffort = WorkEffort::findOne($key);
 					$WorkEffort->workEffort = $value;
-					if(!$WorkEffort ->save()) Yii::$app->session->addFlash('error','ошибка сохраненния трудозатарт WorkEffort' );
+					if(!$WorkEffort ->save()){
+						 if($WorkEffort->hasErrors()){
+							$ErrorsArray = $WorkEffort->getErrors(); 	 
+							foreach ($ErrorsArray as $key => $value1){
+								foreach($value1 as $value2){
+										Yii::$app->session->addFlash('error',"Ошибка сохранения трудозатарт WorkEffort. Реквизит ".$key." ".$value2);
+								}
+							}	
+						}	
+					}	 
 				}
 				foreach($a['workEffortHour'] as $key => $value){
 					$WorkEffort = WorkEffort::findOne($key);
