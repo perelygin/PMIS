@@ -42,7 +42,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
             [['BRRoleModelType'], 'required','message' => 'Пожалуйста, укажите тип ролевой модели'],
             [['BRLifeCycleType'], 'required','message' => 'Пожалуйста, укажите шаблон WBS'],
             [['BRName'], 'string', 'max' => 150],
-            [['BRDescription'], 'safe'],
+            [['BRDescription','BRDateBegin'], 'safe'],
             
         ];
     }
@@ -60,7 +60,8 @@ class BusinessRequests extends \yii\db\ActiveRecord
             'BRDeleted' => 'Brdeleted',
             'BRNumber' => 'Номер BR',
             'BRRoleModelType' =>'Тип ролевой модели',
-            'BRDescription' =>'Описание'
+            'BRDescription' =>'Описание',
+            'BRDateBegin'=>'Дата начала работ'
         ];
     }
     public function findModelWbs($idBr)
@@ -207,6 +208,46 @@ class BusinessRequests extends \yii\db\ActiveRecord
       
 		}
 	/*
+	 * возвращает перечень работ,  по указанной оценке трудозатрат
+	 * 
+	 */ 	
+	 public function getWOEList($idEWP)
+		{
+			$sql ='select idWorksOfEstimate from WorksOfEstimate as woe
+						where woe.idEstimateWorkPackages = '.$idEWP
+						.' order by idWorksOfEstimate'; 
+			$WOEList = Yii::$app->db->createCommand($sql)->queryAll();	
+		
+		return $WOEList;			
+		}	
+	/*
+	 *Проверяет,  установлены ли даты начала и окончания у работы 
+	 * 
+	 * 
+	 */
+	public function isDatasSet($idWOE)
+	{
+		$sql = "select 
+				  sch.WorkBegin,
+				  sch.WorkEnd,
+				  sch.idSchedule,
+                  sch.idWorksOfEstimate
+				 from Schedule as sch
+				 where  sch.idWorksOfEstimate = ".$idWOE;
+		 $Datas = Yii::$app->db->createCommand($sql)->queryOne();
+		 if($Datas){
+			 if(!is_null($Datas['WorkBegin']) and !is_null($Datas['WorkEnd'])){
+				 return true;
+				 } else{
+					 return false;
+					 }
+				 
+			 }else{
+				 return false;
+				 }
+	} 
+	  	
+	/*
 	 * Возвращает перечень результатов для текущей BR
 	 * в выборку попадают только те результаты, у которых нет подчинных результатов
 	 */
@@ -269,4 +310,11 @@ class BusinessRequests extends \yii\db\ActiveRecord
 	public function getBrId(){
 		return $this->idBR;
 	} 
+	
+	public function getBRDateBegin(){
+		$DateBegin = \DateTime::createFromFormat('Y-m-d H:i:s', $this->BRDateBegin);
+		return 	$DateBegin;
+	} 
+		
+	
 }

@@ -5,6 +5,7 @@
     use yii\helpers\ArrayHelper;
     use app\models\Projects;
     use vova07\imperavi\Widget;
+    use kartik\datetime\DateTimePicker;
     
 		$Organization = Projects::find()->all();
 		$items = ArrayHelper::map($Organization,'idProject','ProjectName');
@@ -48,7 +49,13 @@
 				<?= $form->field($model, 'BRName')->textInput(['maxlength' => true]) ?>
 	      </div>
 	      <div class="col-sm-4">
-		
+				<?= $form->field($model, 'BRDateBegin')->widget(DateTimePicker::className(),[
+			    'pluginOptions' => [
+			        'autoclose'=>true,
+			        'format' => 'yyyy-mm-dd hh:ii:ss',
+			         'todayHighlight' => true
+			    ]
+			]) ?>
 	      </div>
 	   </div>
 	   <div class="row">

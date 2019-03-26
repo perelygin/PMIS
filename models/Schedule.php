@@ -28,7 +28,7 @@ class Schedule extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['WorkBegin', 'WorkEnd'], 'safe'],
+            [['WorkBegin', 'WorkEnd','DataSetting','idBr','idWorkPrev','lag','idLinkType'], 'safe'],
             [['idWorksOfEstimate'], 'integer'],
             [['idWorksOfEstimate'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idWorksOfEstimate' => 'idWorksOfEstimate']],
         ];
@@ -46,4 +46,5 @@ class Schedule extends \yii\db\ActiveRecord
             'idWorksOfEstimate' => 'Id Works Of Estimate',
         ];
     }
+    
 }

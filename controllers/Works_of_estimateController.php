@@ -992,6 +992,7 @@ class Works_of_estimateController extends Controller
 									        $modelWE->idWorksOfEstimate = $modelWOS->idWorksOfEstimate;
 									        $modelWE->workEffort = 0;
 									        $modelWE->idTeamMember = $idTeamMember;
+									        $modelWE->idServiceType = -1;
 									        if(!$modelWE->save()){
 											//Yii::$app->session->addFlash('error',"Ошибка добавления трудозатрат в работу" );
 												$ErrorsArray = $modelWE->getErrors(); 	 
@@ -1074,7 +1075,7 @@ class Works_of_estimateController extends Controller
     if(isset($a['btn'])) {   // анализируем нажатые кнопки
 		$btn_info = explode("_", $a['btn']);
 		if($btn_info[0] == 'cancl') {   // отмена
-			return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,$page_number=>3]);		
+			return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,'page_number'=>3]);		
 	    }		
     }				
 	if($idPrevWrk==0){

@@ -91,10 +91,10 @@
 				                    $url,['title' => 'Изменить оценку']);
 				                },
 				                'print_ewp' => function ($url,$model){  
-									$url = Url::to(['br/print_estimate_work_packages', 'idEWP' =>$model->idEstimateWorkPackages ,'idBR'=>$model->idBR]);
+									$url = Url::to(['br/print_schedule', 'idEWP' =>$model->idEstimateWorkPackages ,'idBR'=>$model->idBR]);
 				                    return Html::a(
-				                    '<span class="glyphicon glyphicon-th"></span>', 
-				                    $url,['title' => 'Показать всю оценку','target' => '_blank']);
+				                    '<span class="glyphicon glyphicon-retweet"></span>', 
+				                    $url,['title' => 'Диаграма Ганта','target' => '_blank']);
 				                },
 				                'print_ewp1' => function ($url,$model){  
 									$url = Url::to(['br/print_estimate_work_packages_grouped', 'idEWP' =>$model->idEstimateWorkPackages ,'idBR'=>$model->idBR]);
