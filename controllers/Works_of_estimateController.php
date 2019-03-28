@@ -19,6 +19,7 @@ use app\models\People;
 use app\models\AddWorkEffortForm;
 use app\models\select_Work_search;
 use app\models\Links;
+use app\models\Schedule;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -381,7 +382,11 @@ class Works_of_estimateController extends Controller
 		 
     public function actionUpdate($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$page_number=1)
     {
-       
+        //проверка авторизации
+        if (Yii::$app->user->isGuest){
+			Yii::$app->session->addFlash('error',"Необходимо авторизоваться в системе");
+			 return $this->goHome();
+		}
         //проверка на то, что оценка трудозатрат не закрыта
         $ewp = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
 		if($ewp->isFinished()){
@@ -423,7 +428,7 @@ class Works_of_estimateController extends Controller
 				
 			     }else{
 					 foreach($result_1 as $rs){
-						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13){
+						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13 or $rs->id == 26){
 							  $mntprjArr = array('name' =>$rs->name,'Checked' =>' ');
 							  $MntPrjLstArray[$rs->id] = $mntprjArr;
 						  }
@@ -446,6 +451,7 @@ class Works_of_estimateController extends Controller
 			//[12]  VTB24 SpectrumFront 
 			//[22]  VTB24 SpectrumTrs24 
 			//[17]  VTB24 Согласование экспертиз 
+			//[26]  VTB тестирование
 		}
 		
 		
@@ -785,6 +791,7 @@ class Works_of_estimateController extends Controller
 			'idWorksOfEstimate'=>$idWorksOfEstimate])->orderBy('idLaborExpenditures')->all();
 		
 		$ListPrevWorks = Links::getPrevWorks($idWorksOfEstimate);
+		$Workdates = Schedule::getWorkdates($idWorksOfEstimate);
 		
 		$QueryLogDataProvider = Systemlog::find()->where(['IdTypeObject' => 4,'idObject' => $idWorksOfEstimate])->orderBy('DataChange'); //лог для работ
         $LogDataProvider = new ActiveDataProvider([
@@ -799,7 +806,8 @@ class Works_of_estimateController extends Controller
             'LogDataProvider'=>$LogDataProvider,
             'idBR'=>$idBR,
             'MantisPrjLstArray' =>$MntPrjLstArray,
-            'ListPrevWorks'=>$ListPrevWorks
+            'ListPrevWorks'=>$ListPrevWorks,
+            'Workdates' =>$Workdates
         ]);
     }
 

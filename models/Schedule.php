@@ -28,7 +28,7 @@ class Schedule extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['WorkBegin', 'WorkEnd','DataSetting','idBr','idWorkPrev','lag','idLinkType'], 'safe'],
+            [['WorkBegin', 'WorkEnd','DataSetting','idBr','idWorkPrev','lag','idLinkType','duration'], 'safe'],
             [['idWorksOfEstimate'], 'integer'],
             [['idWorksOfEstimate'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idWorksOfEstimate' => 'idWorksOfEstimate']],
         ];
@@ -46,5 +46,10 @@ class Schedule extends \yii\db\ActiveRecord
             'idWorksOfEstimate' => 'Id Works Of Estimate',
         ];
     }
-    
+    public function getWorkdates($idWorksOfEstimate)
+    {
+		$sql = 'SELECT WorkBegin,WorkEnd FROM Schedule where idWorksOfEstimate = '.$idWorksOfEstimate;
+		$Workdates = Yii::$app->db->createCommand($sql)->queryOne();		
+		return $Workdates;
+     }  
 }

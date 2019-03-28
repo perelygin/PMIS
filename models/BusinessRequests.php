@@ -310,9 +310,13 @@ class BusinessRequests extends \yii\db\ActiveRecord
 	public function getBrId(){
 		return $this->idBR;
 	} 
+	//public function getBRDateBegin(){
+		//return $this->BRDateBegin;
+	//}
+	
 	
 	public function getBRDateBegin(){
-		$DateBegin = \DateTime::createFromFormat('Y-m-d H:i:s', $this->BRDateBegin);
+		$DateBegin = \DateTime::createFromFormat('Y-m-d', $this->BRDateBegin);
 		return 	$DateBegin;
 	} 
 		

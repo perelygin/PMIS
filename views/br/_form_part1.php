@@ -6,6 +6,7 @@
     use app\models\Projects;
     use vova07\imperavi\Widget;
     use kartik\datetime\DateTimePicker;
+    use kartik\date\DatePicker;
     
 		$Organization = Projects::find()->all();
 		$items = ArrayHelper::map($Organization,'idProject','ProjectName');
@@ -49,13 +50,22 @@
 				<?= $form->field($model, 'BRName')->textInput(['maxlength' => true]) ?>
 	      </div>
 	      <div class="col-sm-4">
-				<?= $form->field($model, 'BRDateBegin')->widget(DateTimePicker::className(),[
-			    'pluginOptions' => [
-			        'autoclose'=>true,
-			        'format' => 'yyyy-mm-dd hh:ii:ss',
-			         'todayHighlight' => true
-			    ]
-			]) ?>
+				<?php
+				//$form->field($model, 'BRDateBegin')->widget(DateTimePicker::className(),[
+			    //'pluginOptions' => [
+			        //'autoclose'=>true,
+			        //'format' => 'yyyy-mm-dd hh:ii:ss',
+			         //'todayHighlight' => true
+			    //]
+			//]) 
+			echo $form->field($model, 'BRDateBegin')->widget(DatePicker::className(),[
+				    'pluginOptions' => [
+				        'autoclose'=>true,
+				        'format' => 'yyyy-mm-dd',
+				         'todayHighlight' => true
+				    ]
+				]); 
+			?>
 	      </div>
 	   </div>
 	   <div class="row">

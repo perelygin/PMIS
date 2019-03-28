@@ -188,14 +188,46 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 	 public function getWorkDuration($idWOE){
 		 $sql = "select sum(workEffort) as Days ,sum(workEffortHour) as Hours from WorkEffort where idWorksOfEstimate = ".$idWOE;
 		 $WorkDuration = Yii::$app->db->createCommand($sql)->queryOne();
-		 if($WorkDuration){
-			 $St = 'P'.round($WorkDuration['Days']+$WorkDuration['Hours']/8).'D';
-		 }else{
-			 $St = 'P0D';
-			 }
-		 return $WorkDurationInt = new \DateInterval($St);	 
+		 //if($WorkDuration){
+			 //$St = 'P'.round($WorkDuration['Days']+$WorkDuration['Hours']/8).'D';
+		 //}else{
+			 //$St = 'P0D';
+			 //}
+		 //return $WorkDurationInt = new \DateInterval($St);	 
+		 return $WorkDurationInt = round($WorkDuration['Days']+$WorkDuration['Hours']/8);	 
 	 }
-	 
+	 /*
+	  * прибавляет к дате n дней с учетом выходых из  таблицы
+	  * 
+	  */
+	  public function addDay($date,$n){
+		  $d = new \DateInterval('P1D');
+		  $a = $n;
+		  $dateA = $date;
+		  while($a>0){
+			  $dateA->add($d); 
+			  if(!Weekends::isWeekend($dateA)){
+				$a=$a-1;
+			  }
+		  }
+		  return $dateA;
+		  } 
+	   /*
+	  * отнимает от даты n дней с учетом выходых из  таблицы
+	  * 
+	  */
+	  public function subDay($date,$n){
+		  $d = new \DateInterval('P1D');
+		  $a = $n;
+		  $dateA = $date;
+		  while($a>0){
+			  $dateA->sub($d); 
+			  if(!Weekends::isWeekend($dateA)){
+				$a=$a-1;
+			  }
+		  }
+		  return $dateA;
+		  }  
 	 /*
 	  * возвращает дату начала работы с учетом типа связи и задержек/опережений
 	  * тип связи конец-начало -> дата начала =  дата окончания работы предшественици +(-)задержка
@@ -204,25 +236,21 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 	  */
 	 public function getWorkDateBegin($lag,$idLinkType,$dataBeg,$dataEnd){
 		 if($idLinkType==1){  //конец-начало
-			 $dataResult = $dataEnd;
-			 }elseif($idLinkType==2){ //начала-начало
+			 $dataResult=WorksOfEstimate::addDay($dataEnd,1);
+			}elseif($idLinkType==2){ //начала-начало
 				 $dataResult = $dataBeg;
 			 }else{
 				 return false;
 				 }
-		 //Добавляем задержки и опережения
+	//Добавляем задержки и опережения
 				if($lag>0){ //задержка
-					 $St = 'P'.round($lag).'D';
-					 $lag = new \DateInterval($St);
-					 $dend1 = $dataResult->add($lag);
+						$dend1 = WorksOfEstimate::addDay($dataResult,round($lag));
 					}elseif($lag<0){//опережение
-					 $St = 'P'.round($lag*-1).'D';	
-					 $lag = new \DateInterval($St);
-					 $dend1 = $dataResult->sub($lag);
+					    $dend1 = WorksOfEstimate::subDay($dataResult,round($lag*-1));
 					}else{
 						$dend1 =$dataResult ;
 						}
-		 return $dend1;
+				 return $dend1;
 	 }
 	/*
 	 * 
@@ -238,7 +266,8 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 				  lnk.idLinkType,
 				  scd.WorkBegin,
 				  scd.WorkEnd,
-				  scd.idSchedule
+				  scd.idSchedule,
+				  scd.duration
 				 from Links as lnk
 				 LEFT OUTER JOIN WorksOfEstimate as woe ON  woe.idWorksOfEstimate = lnk.idFirstWork
 				 LEFT OUTER JOIN Schedule as scd ON scd.idWorksOfEstimate = woe.idWorksOfEstimate	
@@ -253,13 +282,15 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 				$sch = new Schedule();
 				$begArr = WorksOfEstimate::getPrevWorkMaxDateEnd($pwl['idFirstWork'],$idBR);  //получаем максимальную дату окончания у  работ-предшественицу работы-предшественицы
 				$dbeg=$begArr['data'];
-				$sch->WorkBegin = $dbeg->format('Y-m-d H:i:s');
+				$sch->WorkBegin = $dbeg->format('Y-m-d');
 				$sch->idWorkPrev = $begArr['idWorkPrev'];
 				$sch->lag = $begArr['lag'];
 				$sch->idLinkType = $begArr['idLinkType'];
 				
-				$dend = $dbeg->add(WorksOfEstimate::getWorkDuration($pwl['idFirstWork']));  //сдвиг - длительность работы- предшественика
-				$sch->WorkEnd = $dend->format('Y-m-d H:i:s');
+				$duration = WorksOfEstimate::getWorkDuration($pwl['idFirstWork']);
+				$dend = WorksOfEstimate::addDay($dbeg,$duration-1);
+				$sch->duration = $duration;
+				$sch->WorkEnd = $dend->format('Y-m-d');
 				$sch->idWorksOfEstimate = $pwl['idFirstWork'];
 			    $sch->DataSetting =date("Y-m-d H:i:s");
 			    $sch->idBr = $idBR;
@@ -270,20 +301,23 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 				}	
 				//определяем дату начала работы исходя из дат текущей работы-предшественика, типа связи и задержки
 				$dend1 = WorksOfEstimate::getWorkDateBegin($pwl['lag'],$pwl['idLinkType'],$begArr['data'],$dend);
+							
 				if($dend1){
 						//заносим в массив дату начала работы и задержку
-					    $dates_begin[] = ['data'=>$dend1,'lag'=>$pwl['lag'],'idWorkPrev'=>$pwl['idFirstWork'],'idLinkType'=>$pwl['idLinkType']];	
+					    $dates_begin[] = ['data'=>$dend1,'lag'=>$pwl['lag'],'idWorkPrev'=>$pwl['idFirstWork']
+										 ,'idLinkType'=>$pwl['idLinkType']];	
 					}else{
 						Yii::$app->session->addFlash('error',"Ошибка определения даты начала работы");
 					}				
 			} else{//дата окончания не NULL
-				$dend = \DateTime::createFromFormat('Y-m-d H:i:s', $pwl['WorkEnd']);
-				$dbeg = \DateTime::createFromFormat('Y-m-d H:i:s', $pwl['WorkBegin']);
+				$dend = \DateTime::createFromFormat('Y-m-d', $pwl['WorkEnd']);
+				$dbeg = \DateTime::createFromFormat('Y-m-d', $pwl['WorkBegin']);
 				//определяем дату начала работы исходя из дат текущей работы-предшественика, типа связи и задержки
 				$dend1 = WorksOfEstimate::getWorkDateBegin($pwl['lag'],$pwl['idLinkType'],$dbeg,$dend);
 				if($dend1){
 						//заносим в массив дату начала работы и задержку
-					    $dates_begin[] = ['data'=>$dend1,'lag'=>$pwl['lag'],'idWorkPrev'=>$pwl['idFirstWork'],'idLinkType'=>$pwl['idLinkType']];	
+					    $dates_begin[] = ['data'=>$dend1,'lag'=>$pwl['lag'],'idWorkPrev'=>$pwl['idFirstWork']
+										 ,'idLinkType'=>$pwl['idLinkType']];	
 					}else{
 						Yii::$app->session->addFlash('error',"Ошибка определения даты начала работы");
 					}	
@@ -292,6 +326,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 		//для всех дат начала,  определнных на основании всех работ-предшествениц,  определяем максимальную
 		if(empty($dates_begin)){  
 			//возвращаем дату начала проекта 
+			 //$d = WorksOfEstimate::subDay($BR->getBRDateBegin(),1); //потому что иначе дата окончания для первой работы будет больше на 1
 			$d1 = ['data'=>$BR->getBRDateBegin(),'lag'=>0,'idWorkPrev'=>0,'idLinkType'=>0];
 			//$d1 = $BR->getBRDateBegin();
 			return $d1;

@@ -11,7 +11,10 @@ use vova07\imperavi\Widget;
 
  <div class="row">
 	<div class="col-sm-12">
-		Даты начала и окончания работы, история изменения
+		<?php  if($Workdates){
+			echo '<b>Дата начала работы: </b> '.$Workdates['WorkBegin'].'<br>';
+			echo '<b>Дата окончания работы: </b> '.$Workdates['WorkEnd'];
+			}?>
 	</div>
 </div>
  <div class="row">

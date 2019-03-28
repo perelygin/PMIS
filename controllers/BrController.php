@@ -211,6 +211,12 @@ class BrController extends Controller
      */
     public function actionUpdate($id,$page_number=1,$root_id = 0)   //id BR и номер активной вкладки
     {
+		//проверка авторизации
+        if (Yii::$app->user->isGuest){
+			Yii::$app->session->addFlash('error',"Необходимо авторизоваться в системе");
+			 return $this->goHome();
+		}
+		
 		 Yii::$app->getUser()->setReturnUrl( Yii::$app->getRequest()->getUrl()); ///Запомнили текущую страницу
 		$model = $this->findModel($id);
 		
@@ -1122,32 +1128,43 @@ class BrController extends Controller
 		  
 		  //начинаем заполнять даты 
 		  $BR = BusinessRequests::findOne($idBR);
-		  $WOEList = $BR->getWOEList($idEWP);
-		 //$WorkDateBegin  =   WorksOfEstimate::getPrevWorkMaxDateEnd(827,$idBR); //дата начала работы.  Определяется как максимальная из дат окончания работ-предшествеников с учетом запаздывания
-		  foreach($WOEList as $wl){
-			  if(!$BR->isDatasSet($wl['idWorksOfEstimate'])){  //если у работы не установлена дата начала и дата окончания, то начинаем  ее расчитывать
-				//  $WorkDateBegin  =  WorksOfEstimate::getPrevWorkMaxDateEnd($wl['idWorksOfEstimate'],$idBR)['data']; //дата начала работы.  Определяется как максимальная из дат окончания работ-предшествеников с учетом запаздывания
-				//определем и сохраняем даты начала и окончания работы-предшественицы
-				$sch = new Schedule();
-				$begArr = WorksOfEstimate::getPrevWorkMaxDateEnd($wl['idWorksOfEstimate'],$idBR);  //получаем максимальную дату окончания у  работ-предшественицу работы-предшественицы
-				$dbeg=$begArr['data'];
-				$sch->WorkBegin = $dbeg->format('Y-m-d H:i:s');
-				$sch->idWorkPrev = $begArr['idWorkPrev'];
-				$sch->lag = $begArr['lag'];
-				$sch->idLinkType = $begArr['idLinkType'];
-				
-				$dend = $dbeg->add(WorksOfEstimate::getWorkDuration($wl['idWorksOfEstimate']));  //сдвиг - длительность работы- предшественика
-				$sch->WorkEnd = $dend->format('Y-m-d H:i:s');
-				$sch->idWorksOfEstimate = $wl['idWorksOfEstimate'];
-			    $sch->DataSetting =date("Y-m-d H:i:s");
-			    $sch->idBr = $idBR;
-			    
-			    $sch->save();
-			    if($sch->hasErrors()){
-						Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");
-				}	
-			  }
-	      }	  
+		  //echo $BR->getBRDateBegin(); die;
+		  if(empty($BR->getBRDateBegin())){
+			  Yii::$app->session->addFlash('error',"Не указана дата начала работ по BR. Расчет графика не производится");
+		  } else{
+			  //$d = new \DateTime('2019-03-25');
+			  //$f = WorksOfEstimate::addDay($d,4);
+			  //echo $f->format('Y-m-d');;die;
+			  
+			  $WOEList = $BR->getWOEList($idEWP);
+			 //$WorkDateBegin  =   WorksOfEstimate::getPrevWorkMaxDateEnd(827,$idBR); //дата начала работы.  Определяется как максимальная из дат окончания работ-предшествеников с учетом запаздывания
+			  foreach($WOEList as $wl){
+				  if(!$BR->isDatasSet($wl['idWorksOfEstimate'])){  //если у работы не установлена дата начала и дата окончания, то начинаем  ее расчитывать
+					//  $WorkDateBegin  =  WorksOfEstimate::getPrevWorkMaxDateEnd($wl['idWorksOfEstimate'],$idBR)['data']; //дата начала работы.  Определяется как максимальная из дат окончания работ-предшествеников с учетом запаздывания
+					//определем и сохраняем даты начала и окончания работы-предшественицы
+					$sch = new Schedule();
+					$begArr = WorksOfEstimate::getPrevWorkMaxDateEnd($wl['idWorksOfEstimate'],$idBR);  //получаем максимальную дату окончания у  работ-предшественицу работы-предшественицы
+					$dbeg=$begArr['data'];
+					$sch->WorkBegin = $dbeg->format('Y-m-d');
+					$sch->idWorkPrev = $begArr['idWorkPrev'];
+					$sch->lag = $begArr['lag'];
+					$sch->idLinkType = $begArr['idLinkType'];
+					
+					$duration = WorksOfEstimate::getWorkDuration($wl['idWorksOfEstimate']);
+					$sch->duration = $duration;
+					$dend = WorksOfEstimate::addDay($dbeg,$duration-1);
+					$sch->WorkEnd = $dend->format('Y-m-d');
+					$sch->idWorksOfEstimate = $wl['idWorksOfEstimate'];
+				    $sch->DataSetting =date("Y-m-d H:i:s");
+				    $sch->idBr = $idBR;
+				    $sch->save();
+				    if($sch->hasErrors()){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения оценки работ ");
+					}	
+				  }
+		      }
+			}
+		  	  
 		  
 		return $this->render('PrintSchedule', [
 		        'idBR'=>$idBR,
