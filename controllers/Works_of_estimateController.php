@@ -428,7 +428,7 @@ class Works_of_estimateController extends Controller
 				
 			     }else{
 					 foreach($result_1 as $rs){
-						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13 or $rs->id == 26){
+						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13 or $rs->id == 26 or $rs->id == 21){
 							  $mntprjArr = array('name' =>$rs->name,'Checked' =>' ');
 							  $MntPrjLstArray[$rs->id] = $mntprjArr;
 						  }
@@ -452,6 +452,7 @@ class Works_of_estimateController extends Controller
 			//[22]  VTB24 SpectrumTrs24 
 			//[17]  VTB24 Согласование экспертиз 
 			//[26]  VTB тестирование
+			//[21]  VTB24 Согласование методик тестирования
 		}
 		
 		
