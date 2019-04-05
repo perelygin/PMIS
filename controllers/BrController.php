@@ -1128,7 +1128,8 @@ class BrController extends Controller
 		  
 		  //начинаем заполнять даты 
 		  $BR = BusinessRequests::findOne($idBR);
-		  //echo $BR->getBRDateBegin(); die;
+		  //echo $BR->getBRDateBegin()."<br>".$idBR; 
+		  //die;
 		  if(empty($BR->getBRDateBegin())){
 			  Yii::$app->session->addFlash('error',"Не указана дата начала работ по BR. Расчет графика не производится");
 		  } else{
