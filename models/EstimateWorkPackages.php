@@ -66,7 +66,8 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 					    'BRNumber'=> $BR->BRNumber,
 					    'EstimateName'=>$this->EstimateName,
 					    'dataEstimate'=>$this->dataEstimate,
-					    'finished'=>$this->isFinished() ? 'Закрыта':'Активна');
+					    'finished'=>$this->isFinished() ? 'Закрыта':'Активна',
+					    'BRDateBegin'=>$BR->BRDateBegin);
         return $BrInfo;
     }
     /*
@@ -91,4 +92,53 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 			 return true;
 			 } else return false;
 	}
+	/*
+	 * возвращает максимальную дату в расписании 
+	 * 
+	 * 
+	 */ 
+	public function getScheduleLastData($idEWP){
+		$sql = 'select 
+		 sch.WorkBegin,
+		 sch.WorkEnd,
+		 sch.idWorksOfEstimate,
+		 woe.idEstimateWorkPackages
+		 from Schedule  as sch
+		LEFT OUTER JOIN WorksOfEstimate woe ON sch.idWorksOfEstimate = woe.idWorksOfEstimate
+		where woe.idEstimateWorkPackages = '.$idEWP.' order by sch.WorkEnd desc';
+		$Results = Yii::$app->db->createCommand($sql)->queryOne();		
+		return $Results;
+	}
+	/*
+	 * формирует строку состоящую из тэгов <td></td> 
+	 * Число тэгов определяется числом дней между $dataBRBeg,$dataBREnd
+	 * один день - один тэг
+	 * тэги соотв. выходным окрашиваются красным
+	 * тэги соотв. работе окраш. синим
+	 */ 
+	 public function getDayRowTable($dataBRBeg,$dataBREnd,$dataWorkBeg,$dataWorkEnd){
+		 $str='';
+		  $dBRBeg = \DateTime::createFromFormat('Y-m-d', $dataBRBeg);
+		  $dBREnd = \DateTime::createFromFormat('Y-m-d', $dataBREnd);
+		  $dWorkBeg = \DateTime::createFromFormat('Y-m-d', $dataWorkBeg);
+		  $dWorkEnd = \DateTime::createFromFormat('Y-m-d', $dataWorkEnd);
+		  $d = new \DateInterval('P1D');  //интервал в один день
+		  $dateCurent = $dBRBeg;
+		  $dif = $dateCurent->diff($dBREnd);
+		  while($dif->invert != 1){
+			  //текущая дата относится к интервалу работы?
+			  $dif_wb = $dateCurent->diff($dWorkBeg);
+			  $dif_we = $dateCurent->diff($dWorkEnd);
+			  if(Weekends::isWeekend($dateCurent)) {
+				   $str = $str.'<td bgcolor="#fb1c0d">&nbsp</td>';
+				  }elseif($dif_wb->invert == 1 && $dif_we->invert != 1){
+					 $str = $str.'<td bgcolor="#4f7db8">&nbsp</td>';  
+					  }else{
+						  $str = $str.'<td>&nbsp</td>';
+						  }
+			  $dateCurent->add($d); 
+			  $dif = $dateCurent->diff($dBREnd);
+		  }
+		 return $str;
+	 }	 
 }

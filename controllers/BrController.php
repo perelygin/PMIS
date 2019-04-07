@@ -1170,6 +1170,7 @@ class BrController extends Controller
 		return $this->render('PrintSchedule', [
 		        'idBR'=>$idBR,
 		        'idEWP'=>$idEWP,
+		        'SCHData'=>$BR->getBRScheduleData($idEWP)
 		    ]);
 		}
       /*

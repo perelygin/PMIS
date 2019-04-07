@@ -319,6 +319,31 @@ class BusinessRequests extends \yii\db\ActiveRecord
 		$DateBegin = \DateTime::createFromFormat('Y-m-d', $this->BRDateBegin);
 		return 	$DateBegin;
 	} 
-		
+	/*
+	 *  возвращает данные по рассписанию для BR выбранного пакета оценок
+	 * 
+	 */
+	public function getBRScheduleData($idEWP){
+	$sql="select 
+			 sch.WorkBegin,
+			 sch.WorkEnd,
+			 sch.duration,
+			 sch.lag,
+			 woe.WorkName,
+			 wbs.name,
+			 wbs.id,
+			 sch.idWorksOfEstimate,
+			 wbs.idBr,
+			 woe.idEstimateWorkPackages
+			 from Schedule  as sch
+			LEFT OUTER JOIN WorksOfEstimate woe ON sch.idWorksOfEstimate = woe.idWorksOfEstimate
+			LEFT OUTER JOIN wbs ON woe.idWbs = wbs.id
+			where woe.idEstimateWorkPackages = ".$idEWP.
+			" order by woe.idWbs";
+		$Results = Yii::$app->db->createCommand($sql)->queryAll();		
+		return $Results;	
+	}		
+	
+	
 	
 }
