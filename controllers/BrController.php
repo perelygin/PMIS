@@ -1166,6 +1166,12 @@ class BrController extends Controller
 		      }
 			}
 		  	  
+		  //$dBRBeg = \DateTime::createFromFormat('Y-m-d', "2019-02-01");
+		  //$dBREnd = \DateTime::createFromFormat('Y-m-d', "2019-02-11");
+		  //$dCur = \DateTime::createFromFormat('Y-m-d', "2019-02-11");
+		  //$dif = $dCur->diff($dBRBeg);
+		  //$dif2 = $dCur->diff($dBREnd);
+		  //echo('beg '.$dif->invert.'<br>'.$dif->days.'<br> End '.$dif2->invert.'<br>'.$dif2->days); die;
 		  
 		return $this->render('PrintSchedule', [
 		        'idBR'=>$idBR,

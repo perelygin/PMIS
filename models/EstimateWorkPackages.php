@@ -114,9 +114,12 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 	 * Число тэгов определяется числом дней между $dataBRBeg,$dataBREnd
 	 * один день - один тэг
 	 * тэги соотв. выходным окрашиваются красным
-	 * тэги соотв. работе окраш. синим
+	 * тэги соотв. работе($dataWorkBeg,$dataWorkEnd) окраш. синим 
+	 * для первого дня работы выводится подсказка о задачах предшествениках str1
+	 * для последнего дня работы выводится подсказка о последующих задачах  str2
+	 * для всех остальных дней выводится информация о работе
 	 */ 
-	 public function getDayRowTable($dataBRBeg,$dataBREnd,$dataWorkBeg,$dataWorkEnd){
+	 public function getDayRowTable($dataBRBeg,$dataBREnd,$dataWorkBeg,$dataWorkEnd,$rowType=1,$str1='',$str2='',$str3=''){
 		 $str='';
 		  $dBRBeg = \DateTime::createFromFormat('Y-m-d', $dataBRBeg);
 		  $dBREnd = \DateTime::createFromFormat('Y-m-d', $dataBREnd);
@@ -126,16 +129,39 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 		  $dateCurent = $dBRBeg;
 		  $dif = $dateCurent->diff($dBREnd);
 		  while($dif->invert != 1){
-			  //текущая дата относится к интервалу работы?
-			  $dif_wb = $dateCurent->diff($dWorkBeg);
-			  $dif_we = $dateCurent->diff($dWorkEnd);
-			  if(Weekends::isWeekend($dateCurent)) {
-				   $str = $str.'<td bgcolor="#fb1c0d">&nbsp</td>';
-				  }elseif($dif_wb->invert == 1 && $dif_we->invert != 1){
-					 $str = $str.'<td bgcolor="#4f7db8">&nbsp</td>';  
-					  }else{
-						  $str = $str.'<td>&nbsp</td>';
-						  }
+			  if($rowType==1){ //строка с работой
+					  //текущая дата относится к интервалу работы?
+					  $dif_wb = $dateCurent->diff($dWorkBeg);
+					  $dif_we = $dateCurent->diff($dWorkEnd);
+					  if(Weekends::isWeekend($dateCurent)) {
+						   $str = $str.'<td bgcolor="#fb1c0d">&nbsp&nbsp&nbsp</td>';
+						  }elseif(($dif_wb->invert == 1 && $dif_we->invert != 1)||($dif_wb->days == 0)||($dif_we->days == 0)){
+							 if($dif_wb->days == 0){
+								 $str = $str.'<td bgcolor="#4f7db8" title ="'.$str1.'">&nbsp&nbsp&nbsp</td>';  
+								 } elseif($dif_we->days == 0){
+									 $str = $str.'<td bgcolor="#4f7db8" title = "'.$str3.'">&nbsp&nbsp&nbsp</td>';  
+									 } else{
+										 $str = $str.'<td bgcolor="#4f7db8" title = "'.$str2.'">&nbsp&nbsp&nbsp</td>';  
+										 }
+							 
+							  }else{
+								  $str = $str.'<td>&nbsp&nbsp&nbsp</td>';
+								  }
+				  } else if($rowType==2){  //строка с результатом
+					   if(Weekends::isWeekend($dateCurent)) {  //выходной?
+						   $str = $str.'<td bgcolor="#fb1c0d">&nbsp&nbsp&nbsp</td>';
+						   } else{
+							    $str = $str.'<td>&nbsp&nbsp&nbsp</td>';
+							   }
+					  } else if($rowType==3){  //строка заголовка
+					   if(Weekends::isWeekend($dateCurent)) {  //выходной?
+						   $str = $str.'<th "><div class="xuybex">'.$dateCurent->format('j.m').'</div></th>';
+						   } else{
+							    $str = $str.'<th>&nbsp&nbsp&nbsp</th>';
+							   }
+					  }
+			    
+			  
 			  $dateCurent->add($d); 
 			  $dif = $dateCurent->diff($dBREnd);
 		  }

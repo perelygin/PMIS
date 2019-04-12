@@ -330,6 +330,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
 			 sch.duration,
 			 sch.lag,
 			 woe.WorkName,
+			 woe.idWorksOfEstimate,
 			 wbs.name,
 			 wbs.id,
 			 sch.idWorksOfEstimate,

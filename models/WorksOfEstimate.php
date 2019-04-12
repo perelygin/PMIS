@@ -346,5 +346,32 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 			}
 		
 	} 
-	
+	/*
+	 * Возращает перечень id  работ предшествеников или  последователей 
+	 * в зависимости от параметра
+	 * 
+	 * 
+	 */ 
+	public function getPNWOEList($typeList){
+		$str='';
+		if($typeList == 1){  //предшественицы
+			$sql = 'SELECT idFirstWork FROM Links where idSecondWork = '.$this->idWorksOfEstimate;
+			$WorkList = Yii::$app->db->createCommand($sql)->queryAll();	
+			if(!empty($WorkList)){
+				foreach($WorkList as $wl){
+					$str = $str.$wl['idFirstWork'].',';
+					}
+				}	
+			} elseif($typeList == 2 ){ //последующие работы
+				$sql = 'SELECT idSecondWork FROM Links where idFirstWork = '.$this->idWorksOfEstimate;
+				$WorkList = Yii::$app->db->createCommand($sql)->queryAll();	
+					foreach($WorkList as $wl){
+						$str = $str.$wl['idSecondWork'].',';
+						}
+					}
+		return $str;			
+	}
+			
+		 
+	 
 }
