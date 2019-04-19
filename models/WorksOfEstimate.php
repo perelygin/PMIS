@@ -38,6 +38,7 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
             [['WorkName','mantisNumber'], 'string', 'max' => 250],
             [['WorkDescription'], 'string', 'max' => 65535],
             [['mantisNumber'],'match','pattern'=>'#^[0-9]+$#' ],
+            [['WhoseCopy','AllWhoseCopy'],'safe']
            ];
     }
 

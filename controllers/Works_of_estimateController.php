@@ -1101,6 +1101,7 @@ class Works_of_estimateController extends Controller
 		$lnk->idFirstWork = $idPrevWrk;
 		$lnk->idSecondWork = $idWOS;
 		$lnk->idLinkType = 1;
+		$lnk->idEstimateWorkPackages = $idEWP;
 		if($lnk->save()){
 		//сохраняем и редактируем связь
 			return $this->redirect(['edit_link','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,'idLink'=>$lnk->idLink]);

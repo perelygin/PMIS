@@ -29,6 +29,7 @@ class Links extends \yii\db\ActiveRecord
     {
         return [
             [['idFirstWork', 'idSecondWork', 'idLinkType', 'lag'], 'integer'],
+            [['idEstimateWorkPackages'],'safe'],
             [['idFirstWork'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idFirstWork' => 'idWorksOfEstimate']],
             [['idSecondWork'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idSecondWork' => 'idWorksOfEstimate']],
             [['idLinkType'], 'exist', 'skipOnError' => true, 'targetClass' => LinkType::className(), 'targetAttribute' => ['idLinkType' => 'idLinkType']],

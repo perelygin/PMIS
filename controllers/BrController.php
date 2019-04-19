@@ -21,6 +21,7 @@ use app\models\WorksOfEstimate;
 use app\models\User;
 use app\models\ServiceType;
 use app\models\Schedule;
+use app\models\Links;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -108,17 +109,47 @@ class BrController extends Controller
 					     $NewWorksOfEstimate->WorkDescription = $woe['WorkDescription'];
 					     $NewWorksOfEstimate->mantisNumber = $woe['mantisNumber'];
 					     $NewWorksOfEstimate->idEstimateWorkPackages = $NewEstimateWorkPackages['idEstimateWorkPackages'];
+					     $NewWorksOfEstimate->WhoseCopy = $woe['idWorksOfEstimate'];
+					     $NewWorksOfEstimate->AllWhoseCopy = $woe['AllWhoseCopy'].';'.$woe['idWorksOfEstimate'];
 					     $NewWorksOfEstimate->save();
 					     if($NewWorksOfEstimate->hasErrors()){
-						   Yii::$app->session->addFlash('error',"Ошибка копирования работ из пакета оценок ");
+							 $ErrorsArray = $NewWorksOfEstimate->getErrors(); 	 
+									foreach ($ErrorsArray as $key => $value1){
+										foreach($value1 as $value2){
+												Yii::$app->session->addFlash('error',"Ошибка копирования работ из пакета оценок. Реквизит ".$key." ".$value2);
+										}
+									}	
+						   //Yii::$app->session->addFlash('error',"Ошибка копирования работ из пакета оценок ".print_r($NewWorksOfEstimate->errors));
 						  }else{	     //копируем трудозатраты
 						    $sql= "insert into WorkEffort (idWorksOfEstimate, idTeamMember,WorkEffort,workEffortHour,idServiceType) 
 									select '".$NewWorksOfEstimate->idWorksOfEstimate."',idTeamMember,WorkEffort,workEffortHour,idServiceType from WorkEffort
 									 where idWorksOfEstimate = ".$woe['idWorksOfEstimate'];
 						    $a = Yii::$app->db->createCommand($sql)->execute(); 
-						    
 						 }     
 					   }
+					   //копируем связи между работами
+					   $ewp_link = $EstimateWorkPackages->getEWPlinks();
+		
+					   if($ewp_link){
+						   foreach($ewp_link as $el){
+							  $newLnk = new Links();
+							    $newLnk->idEstimateWorkPackages = $NewEstimateWorkPackages->idEstimateWorkPackages;
+							    $newLnk->idFirstWork = $NewEstimateWorkPackages->getWork_WhoseCopy($el['idFirstWork']);
+							    $newLnk->idSecondWork = $NewEstimateWorkPackages->getWork_WhoseCopy($el['idSecondWork']);
+							    $newLnk->idLinkType =$el['idLinkType'];
+							    $newLnk->lag = $el['lag'];
+							    $newLnk->save();
+							    if($newLnk->hasErrors()){
+									$ErrorsArray = $newLnk->getErrors(); 	 
+									foreach ($ErrorsArray as $key => $value1){
+										foreach($value1 as $value2){
+												Yii::$app->session->addFlash('error',"Ошибка копирования СВЯЗЕЙ из пакета оценок. Реквизит ".$key." ".$value2);
+										}
+									}	
+								}
+						   }
+						}
+					   
 				}	   
 			}
 		}
@@ -137,6 +168,7 @@ class BrController extends Controller
 		}
         $sysver =  new SystemVersions(); //актуальная версия
         $model = new BusinessRequests();
+        $model->BRDateBegin = date("Y-m-d");
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//создаем роли для BR
 			$roleModel = new RoleModel();
@@ -1125,7 +1157,7 @@ class BrController extends Controller
     public function actionPrint_schedule($idEWP,$idBR){
 		// удаляем всю информацию о датах расписания
 		Yii::$app->db->createCommand()->delete('Schedule',  ['idBr' => $idBR])->execute();
-		  
+		Yii::$app->db->createCommand()->delete('WbsSchedule',  ['idEstimateWorkPackages' => $idEWP])->execute(); 
 		  //начинаем заполнять даты 
 		  $BR = BusinessRequests::findOne($idBR);
 		  //echo $BR->getBRDateBegin()."<br>".$idBR; 
@@ -1164,6 +1196,13 @@ class BrController extends Controller
 					}	
 				  }
 		      }
+		      //а теперь определяем даты начала и окончания для результатов wbs
+		      $wbsResult = $BR->getResults(); //получаем перечень результатов
+		      foreach($wbsResult as $wr){
+				  $wbs = Wbs::findOne($wr['id']);
+				  $wbs->setBeginEndDate($idEWP); //устанавливаем даты начала и окончания по результату для выбранного пакета оценок
+			  }
+			  
 			}
 		  	  
 		  //$dBRBeg = \DateTime::createFromFormat('Y-m-d', "2019-02-01");

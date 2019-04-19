@@ -324,23 +324,46 @@ class BusinessRequests extends \yii\db\ActiveRecord
 	 * 
 	 */
 	public function getBRScheduleData($idEWP){
-	$sql="select 
-			 sch.WorkBegin,
-			 sch.WorkEnd,
-			 sch.duration,
-			 sch.lag,
-			 woe.WorkName,
-			 woe.idWorksOfEstimate,
-			 wbs.name,
-			 wbs.id,
-			 sch.idWorksOfEstimate,
-			 wbs.idBr,
-			 woe.idEstimateWorkPackages
-			 from Schedule  as sch
-			LEFT OUTER JOIN WorksOfEstimate woe ON sch.idWorksOfEstimate = woe.idWorksOfEstimate
-			LEFT OUTER JOIN wbs ON woe.idWbs = wbs.id
-			where woe.idEstimateWorkPackages = ".$idEWP.
-			" order by woe.idWbs";
+	$sql = 	'select 
+				 sch.WorkBegin,
+				 sch.WorkEnd,
+				 sch.duration,
+				 sch.lag,
+				 sch.idWorksOfEstimate,
+	             woe.WorkName,
+				 woe.idWorksOfEstimate,
+				 wbs.name,
+				 wbs.id,
+				 wbs.idBr,
+				 woe.idEstimateWorkPackages,
+				 wbssh.WbsBegin,
+				 wbssh.WBSEnd
+			 from  wbs
+	            LEFT OUTER JOIN WorksOfEstimate woe ON wbs.id = woe.idWbs
+	            LEFT OUTER JOIN Schedule sch ON sch.idWorksOfEstimate = woe.idWorksOfEstimate
+	            LEFT OUTER JOIN WbsSchedule wbssh ON wbs.id = wbssh.idWbs 
+              where (wbs.idBr = '.$this->idBR.' and (wbs.rgt - wbs.lft <= 1)) 
+				and (woe.idEstimateWorkPackages = '.$idEWP.' or isnull(woe.idEstimateWorkPackages))
+				and (wbssh.idEstimateWorkPackages = '.$idEWP.')
+			 	order by woe.idWbs';
+		
+	//$sql1="select 
+			 //sch.WorkBegin,
+			 //sch.WorkEnd,
+			 //sch.duration,
+			 //sch.lag,
+			 //woe.WorkName,
+			 //woe.idWorksOfEstimate,
+			 //wbs.name,
+			 //wbs.id,
+			 //sch.idWorksOfEstimate,
+			 //wbs.idBr,
+			 //woe.idEstimateWorkPackages
+			 //from Schedule  as sch
+			//LEFT OUTER JOIN WorksOfEstimate woe ON sch.idWorksOfEstimate = woe.idWorksOfEstimate
+			//LEFT OUTER JOIN wbs ON woe.idWbs = wbs.id
+			//where woe.idEstimateWorkPackages = ".$idEWP.
+			//" order by woe.idWbs";
 		$Results = Yii::$app->db->createCommand($sql)->queryAll();		
 		return $Results;	
 	}		

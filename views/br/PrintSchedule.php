@@ -47,34 +47,39 @@ if($dataEnd){
 		      .$EWP->getDayRowTable($dBRBeg,$dBREnd,$dBRBeg,$dBREnd,3).'</tr>'
 			  .'<tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>';
 			  
-			  
-    
+			  	    
     
     $form = ActiveForm::begin(); 
     if(count($SCHData)>0){
 		$id = $SCHData[0]['id'];
-		    echo '<tr><td><b>'.$SCHData[0]['name'].'</td><td></td><td></td><td></td><td></td>'
+		    echo '<tr><td><b>'.$SCHData[0]['name'].'</td><td><b>'.$SCHData[0]['WbsBegin'].'</b></td><td><b>'.$SCHData[0]['WBSEnd'].'</b></td><td></td><td></td>'
 		    .$EWP->getDayRowTable($dBRBeg,$dBREnd,$SCHData[0]['WorkBegin'],$SCHData[0]['WorkEnd'],2);
 		foreach($SCHData as $sch){
 			$woe = WorksOfEstimate::findOne(['idWorksOfEstimate'=>$sch['idWorksOfEstimate']]);
-			if($sch['id']==$id){
+			
+			
 				$url = Url::to(['works_of_estimate/update', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEWP, 'idWbs'=>$sch['id'],
-								'idWorksOfEstimate'=>$sch['idWorksOfEstimate'],'page_number'=>3]);             //изменить работу
-				
-				echo '<tr><td>'.Html::a("<i>".$sch['idWorksOfEstimate']."</i> ".$sch['WorkName'], $url,['title' => 'Изменить описание работы'
-																										,'target' => '_blank']).
-				'</td><td>'.$sch['WorkBegin'].'</td><td>'.$sch['WorkEnd'].'</td><td>'.$sch['duration'].'</td><td>'.$sch['lag'].'</td>'
-				.$EWP->getDayRowTable($dBRBeg,$dBREnd,$sch['WorkBegin'],$sch['WorkEnd'],1,$woe->getPNWOEList(1),$sch['idWorksOfEstimate'].' '.$sch['WorkName'],$woe->getPNWOEList(2));	
-			}else{
-				echo '<tr><td><b>'.$sch['name'].'</td><td></td><td></td><td></td><td></td>'
-				.$EWP->getDayRowTable($dBRBeg,$dBREnd,$sch['WorkBegin'],$sch['WorkEnd'],2);
-				
-				echo '<tr><td>'.Html::a("<i>".$sch['idWorksOfEstimate']."</i> ".$sch['WorkName'], $url,['title' => 'Изменить описание работы'
-																									   ,'target' => '_blank'])	
-				.'</td><td>'.$sch['WorkBegin'].'</td><td>'.$sch['WorkEnd'].'</td><td>'.$sch['duration'].'</td><td>'.$sch['lag'].'</td>'
-				.$EWP->getDayRowTable($dBRBeg,$dBREnd,$sch['WorkBegin'],$sch['WorkEnd'],1,$woe->getPNWOEList(1),$sch['idWorksOfEstimate'].' '.$sch['WorkName'],$woe->getPNWOEList(2));		
-				$id = $sch['id'];
+									'idWorksOfEstimate'=>$sch['idWorksOfEstimate'],'page_number'=>3]);             //изменить работу
+				if($sch['id']==$id){
+				  if($woe){
+					echo '<tr><td>'.Html::a("<i>".$sch['idWorksOfEstimate']."</i> ".$sch['WorkName'], $url,['title' => 'Изменить описание работы'
+																											,'target' => '_blank']).
+					'</td><td>'.$sch['WorkBegin'].'</td><td>'.$sch['WorkEnd'].'</td><td>'.$sch['duration'].'</td><td>'.$sch['lag'].'</td>'
+					.$EWP->getDayRowTable($dBRBeg,$dBREnd,$sch['WorkBegin'],$sch['WorkEnd'],1,$woe->getPNWOEList(1),$sch['idWorksOfEstimate'].' '.$sch['WorkName'],$woe->getPNWOEList(2));	
+				  }
+				}else{
+					echo '<tr><td><b>'.$sch['name'].'</td><td><b>'.$sch['WbsBegin'].'</b></td><td><b>'.$sch['WBSEnd'].'</b></td><td></td><td></td>'
+					.$EWP->getDayRowTable($dBRBeg,$dBREnd,$sch['WorkBegin'],$sch['WorkEnd'],2);
+					if($woe){
+						 echo '<tr><td>'.Html::a("<i>".$sch['idWorksOfEstimate']."</i> ".$sch['WorkName'], $url,['title' => 'Изменить описание работы'
+																											   ,'target' => '_blank'])	
+						.'</td><td>'.$sch['WorkBegin'].'</td><td>'.$sch['WorkEnd'].'</td><td>'.$sch['duration'].'</td><td>'.$sch['lag'].'</td>'
+						.$EWP->getDayRowTable($dBRBeg,$dBREnd,$sch['WorkBegin'],$sch['WorkEnd'],1,$woe->getPNWOEList(1),$sch['idWorksOfEstimate'].' '.$sch['WorkName'],$woe->getPNWOEList(2));		
+					}
+						$id = $sch['id'];
 				}
+			
+			
 			
 		
 		}

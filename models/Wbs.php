@@ -135,7 +135,7 @@ class Wbs extends \yii\db\ActiveRecord
     }
     /*
      * 
-     * Проверяет,  есть ли работа с таким номером mantis  по текущему результату в этой оценке
+     * Проверяет,  есть  ли работа с таким номером mantis  по текущему результату в этой оценке
      */ 
     public function isWbsHasMantisNumber($idEstimateWorkPackages,$MantisNumber)  
     {
@@ -148,4 +148,41 @@ class Wbs extends \yii\db\ActiveRecord
 		  }
 		   else return false;
 	}	
+	 /*
+	  * устанавливаем даты начала и окончания по результату для выбранного пакета оценок
+	  */ 
+	 public function setBeginEndDate($idEWP){
+		 $sqlBeg = 'select 
+						sch.WorkBegin
+ 				   from Schedule as sch
+					LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWorksOfEstimate = sch.idWorksOfEstimate
+					LEFT OUTER JOIN wbs ON wbs.id = woe.idWbs 
+					where woe.idEstimateWorkPackages = '.$idEWP.' and idWbs = '.$this->id.
+					' order by sch.WorkBegin
+					limit 1';
+		 
+		 $sqlEnd = 'select 
+					    sch.WorkEnd
+					 from Schedule as sch
+					LEFT OUTER JOIN WorksOfEstimate woe ON woe.idWorksOfEstimate = sch.idWorksOfEstimate
+					LEFT OUTER JOIN wbs ON wbs.id = woe.idWbs 
+					where woe.idEstimateWorkPackages = '.$idEWP.'  and idWbs = '.$this->id.
+					' order by sch.WorkEnd  desc
+					 limit 1';
+		 $BegDate = Yii::$app->db->createCommand($sqlBeg)->queryScalar(); 	
+		 
+		 $wbsSH = new WbsSchedule();
+		 $wbsSH->idEstimateWorkPackages = $idEWP;
+		 $wbsSH->idWbs = $this->id;
+		 if($BegDate){
+			   $wbsSH->WbsBegin = $BegDate;
+			 }						 
+		 $EndDate = Yii::$app->db->createCommand($sqlEnd)->queryScalar(); 	
+		 if($BegDate){
+			   $wbsSH->WBSEnd =  $EndDate;
+			 }	
+		$wbsSH->save();	 
+	}
+		 
+	
 }

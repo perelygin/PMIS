@@ -166,5 +166,29 @@ class EstimateWorkPackages extends \yii\db\ActiveRecord
 			  $dif = $dateCurent->diff($dBREnd);
 		  }
 		 return $str;
-	 }	 
+	 }
+	/*
+	 * возвращает перечень связей между работами в пакете 
+	 * 
+	 */ 
+	public function getEWPlinks(){
+		$sql = 'select * from Links where idEstimateWorkPackages='.$this->idEstimateWorkPackages;
+		$Results = Yii::$app->db->createCommand($sql)->queryAll();		
+		return $Results;
+	} 
+	/*
+	 * 
+	 * возвращает id работы по id работы с котрой она была скопирована.
+	 * 
+	 */
+	 public function getWork_WhoseCopy($id_woe){
+		 $sql = 'select idWorksOfEstimate from WorksOfEstimate  
+					where idEstimateWorkPackages = '.$this->idEstimateWorkPackages. ' and WhoseCopy = '.$id_woe;
+		$Results = Yii::$app->db->createCommand($sql)->queryScalar();		
+		return $Results;
+	 
+	} 
+	
+	
+	 	 
 }
