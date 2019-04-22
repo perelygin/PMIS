@@ -1079,14 +1079,17 @@ class Works_of_estimateController extends Controller
     {
 	$a = Yii::$app->request->post();   
     $searchModel = new select_Work_search();	
-    $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$idEWP,$idBR,$idWOS);	
-    	
+    //$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$idEWP,$idBR,$idWOS);	
+    $dataProvider = $searchModel->search($a,$idEWP,$idBR,$idWOS);	
+        
     if(isset($a['btn'])) {   // анализируем нажатые кнопки
+		//Yii::$app->session->addFlash('error',"a[btn] ".$a['btn']);				
 		$btn_info = explode("_", $a['btn']);
 		if($btn_info[0] == 'cancl') {   // отмена
 			return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,'page_number'=>3]);		
 	    }		
-    }				
+    }	
+    
 	if($idPrevWrk==0){
 		return $this->render('select_work_prev', [
             'searchModel' => $searchModel,
@@ -1128,6 +1131,50 @@ class Works_of_estimateController extends Controller
 		}	 
   	 }
     }
+    /*
+     * Выстраивает работы по достижению результата последовательно в диаграмме Ганта
+     * 
+     */ 
+	public function actionLine_up_works($idEstimateWorkPackages,$idWbs,$idBR){
+		//удаляем все связи по результату в оценке
+		Yii::$app->db->createCommand('Delete from Links 
+			where idFirstWork in (select idWorksOfEstimate from  WorksOfEstimate where idEstimateWorkPackages = '.$idEstimateWorkPackages.' and idWbs = '.$idWbs.') 
+			or idSecondWork in (select idWorksOfEstimate from  WorksOfEstimate where idEstimateWorkPackages ='.$idEstimateWorkPackages.' and idWbs = '.$idWbs.')')
+			->execute();
+		//
+		$EWP = EstimateWorkPackages::findOne(['idEstimateWorkPackages'=>$idEstimateWorkPackages]); 
+		$workList = $EWP->getWorksList($idWbs);
+		if($workList){
+			$first_work_id = $workList[0]['idWorksOfEstimate'];
+			foreach($workList as $wl){
+				if($wl['idWorksOfEstimate']!=$first_work_id){
+					//создаем связь
+					$lnk = new Links();
+					$lnk->idFirstWork = $first_work_id;
+					$lnk->idSecondWork = $wl['idWorksOfEstimate'];
+					$lnk->idLinkType = 1;
+					$lnk->idEstimateWorkPackages = $idEstimateWorkPackages;
+					if($lnk->save()){
+						$first_work_id = $wl['idWorksOfEstimate'];
+					 } else{
+						 if($lnk->hasErrors()){
+							$ErrorsArray = $lnk->getErrors(); 	 
+							foreach ($ErrorsArray as $key => $value1){
+								foreach($value1 as $value2){
+								   Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+								}
+							}	
+						 }
+					}	
+				}
+			}
+		  }
+		  Yii::$app->session->addFlash('success',"связи установлены");
+		  return $this->redirect(['works_of_estimate/index','idBR'=>$idBR,'id_node'=>$idWbs,'idEWP'=>$idEstimateWorkPackages]);
+		 
+		  	
+		}
+
     
     /**
      * Finds the WorksOfEstimate model based on its primary key value.

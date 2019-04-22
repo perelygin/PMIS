@@ -83,6 +83,10 @@ use app\models\BusinessRequests;
 					 $url4 = Url::to(['works_of_estimate/move_works_to_another_result', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-resize-horizontal"></span>', $url4,['title' => 'Перемещение работ в другой результат',]);
 					 echo "   ";
+					 $url5 = Url::to(['works_of_estimate/line_up_works', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
+					 echo  Html::a('<span class="glyphicon glyphicon-retweet"></span>', $url5,['title' => 'Выстроить работы последовательно в графике',]);
+					 
+					 echo "   ";
 					 //$url2 = Url::to(['works_of_estimate/works_template', 'idBR'=>$idBR]);;
 					 //echo  Html::a('<span class="glyphicon glyphicon-save-file"></span>', $url2,['title' => 'Добавить работы по шаблону',]);
 				   ?>

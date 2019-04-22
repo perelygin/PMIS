@@ -13,6 +13,11 @@ use yii\helpers\Url;
 ?>
 <?php 
 	$form = ActiveForm::begin(); 
+				echo  Html::submitButton('', [
+						'span class' => 'glyphicon glyphicon-question-sign',
+						'title'=>'Жаль, подмога не пришла, подкрепленье не прислали',
+						'name'=>'btn',
+						'value' => 'help_'])
   ?>
  <div class="row">
 	<div class="col-sm-12">
