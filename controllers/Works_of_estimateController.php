@@ -1132,10 +1132,15 @@ class Works_of_estimateController extends Controller
   	 }
     }
     /*
+     * Удаляет все связ по работе и
      * Выстраивает работы по достижению результата последовательно в диаграмме Ганта
      * 
      */ 
 	public function actionLine_up_works($idEstimateWorkPackages,$idWbs,$idBR){
+		if (!Yii::$app->user->can('LineUpWorks')) {   // проверка права на создание 
+		   Yii::$app->session->addFlash('error',"Нет прав на выполнение операции");
+		   return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
+	     }
 		//удаляем все связи по результату в оценке
 		Yii::$app->db->createCommand('Delete from Links 
 			where idFirstWork in (select idWorksOfEstimate from  WorksOfEstimate where idEstimateWorkPackages = '.$idEstimateWorkPackages.' and idWbs = '.$idWbs.') 
