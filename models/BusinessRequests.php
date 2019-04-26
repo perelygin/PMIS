@@ -345,7 +345,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
               where (wbs.idBr = '.$this->idBR.' and (wbs.rgt - wbs.lft <= 1)) 
 				and (woe.idEstimateWorkPackages = '.$idEWP.' or isnull(woe.idEstimateWorkPackages))
 				and (wbssh.idEstimateWorkPackages = '.$idEWP.')
-			 	order by woe.idWbs';
+			 	order by woe.idWbs, sch.WorkBegin';
 		
 	//$sql1="select 
 			 //sch.WorkBegin,

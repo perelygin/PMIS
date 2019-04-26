@@ -34,7 +34,8 @@ use app\models\vw_settings;
 		//готовим массив для dropdownist c версиями
 		
 		
-		$SystemVersions = SystemVersions::find()->where(['deleted'=>0,'released'=>0])->all();
+		//$SystemVersions = SystemVersions::find()->where(['deleted'=>0,'released'=>0])->all();
+		$SystemVersions = SystemVersions::find()->where(['deleted'=>0])->all();
 		$items3 = ArrayHelper::map($SystemVersions,'idsystem_versions','version_number');
 		$params3 = [
 		

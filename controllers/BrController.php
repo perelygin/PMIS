@@ -463,6 +463,7 @@ class BrController extends Controller
 		    Yii::$app->getUser()->setReturnUrl( Yii::$app->getRequest()->getUrl()); ///Запомнили текущую страницу
 		   
 			$model = Wbs::findOne(['id'=>$id_node]);
+			//Yii::$app->session->addFlash('error',"версия ".$model->idsystem_versions);
 			if(!is_null($model)){
 				if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 		            $model->save();

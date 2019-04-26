@@ -16,11 +16,13 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 	  
 	  $BR = BusinessRequests::findOne(['idBR'=>$idBR]);
 		$mantis_links = array();
-		 if($WBS->idResultType == 2)  //БФТЗ
+		 if($WBS->idResultType == 2 or $WBS->idResultType == 5
+									or $WBS->idResultType == 7)  //БФТЗ или абонемент или МТ банка
 		  {
 			  $mantis_links = $BR->getMantisNumbers(1);
 		  }
-		 if($WBS->idResultType == 3 or $WBS->idResultType == 4)  //ПО
+		 if($WBS->idResultType == 3 or $WBS->idResultType == 4
+									or $WBS->idResultType == 6)  //ПО или тесты внутренние
 		  {
 			  $mantis_links = $BR->getMantisNumbers(2);
 		  }
@@ -62,7 +64,11 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		<div class="col-sm-4">
 			
 			<?php 
-			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4)){
+			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 
+																			  or $WBSInfo['idResultType'] == 4 
+																			  or $WBSInfo['idResultType'] == 5
+																			  or $WBSInfo['idResultType'] == 6
+																			  or $WBSInfo['idResultType'] == 7)){
 			 echo('
 			 <p><b>Перед созданием инцидента в mantis выбери инцидент,  к котрому он будет привязан: </b></p>
 			    <table border = "1" cellpadding="4" cellspacing="2">
@@ -90,7 +96,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		<div class="col-sm-4">
 			<?php 
 			//print_r($MantisPrjLstArray);die;
-			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4)){
+			if(empty($model->mantisNumber) and ($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4 )){
 			 echo('
 			 <p><b>Можно изменить проект mantis, в котором будет создан инцидент: </b></p>
 			    <table border = "1" cellpadding="4" cellspacing="2">

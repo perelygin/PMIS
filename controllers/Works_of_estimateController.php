@@ -690,11 +690,55 @@ class Works_of_estimateController extends Controller
 												              )
 												              );		
 							  }
-							  
-	
+						elseif($wbs_info['idResultType'] == 5 ){ //тип результата - абонемент 
+							 $view_state = array('name'=>'public');
+							 $summary = 'BR-'.$wbs_info['BRNumber'].' Абонемент '.$wbs_info['BRName'].' '.$model->WorkName;
+							 $mantis_project = 'VTB24 SpectrumFront';
+							 $category ='Разработка:Абонемент';
+							 $version = $wbs_info['version_number_s'];
+							 $handler = array('name'=>$username);
+							 $custom_fields = array ('CodevTT_Type' => array (
+													'field' => array (
+														'id' => 23 
+																),
+														'value' => 'Bug' 
+												              ),
+												   'CodevTT_Manager EffortEstim' => array (
+													'field' => array (
+														'id' => 24 
+																),
+														'value' => 0
+												              ),
+												    'CodevTT_EffortEstim' => array (
+													'field' => array (
+														'id' => 22 
+																),
+														'value' => 1
+												              )
+												              );
+						}		  
+					  elseif($wbs_info['idResultType'] == 6 ){ //тип результата - внутрений тест
+							  $view_state = array('name'=>'private');
+							  $summary ='BR-'.$wbs_info['BRNumber'].' Тестирование в составе версии. '. $model->WorkName;
+							  $mantis_project = 'VTB тестирование';
+							  $category ='Разработка';
+							  $version = $wbs_info['version_number_s'];
+							  $handler = array('name'=>$username);
+							  $custom_fields = array();
+							  }
+					elseif($wbs_info['idResultType'] == 7 ){ //тип результата - МТ банка
+							  $view_state = array('name'=>'private');
+							  $summary = 'BR-'.$wbs_info['BRNumber'].' Согласование МТ банка. '.$model->WorkName;
+							  $mantis_project = 'VTB24 Согласование методик тестирования';
+							  $category ='Разработка';
+							  $version = $wbs_info['version_number_s'];
+							  $handler = array('name'=>$username);
+							  $custom_fields = array();
+							  }		  
 					//поиск головного инцидента для привязки	
 						$relationships ='';															              
 						if(isset($a['mantis_link'])) {
+							//Yii::$app->session->addFlash('error',"Онок ".$a['mantis_link']);
 							 if(empty($a['mantis_link'])){
 								 $error_code = 1;
 								 $error_str = 'По выбранной работе не указан инцидент mantis. Привязка невозможна';
@@ -704,7 +748,7 @@ class Works_of_estimateController extends Controller
 								 }	
 							 	 
 							} else{   //головной инцидент не выбран
-								if($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4){   //Для ПО и ТЗ и прочее
+								if($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4 or $wbs_info['idResultType'] == 5){   //Для ПО и ТЗ и прочее
 								   $error_code = 2;
 								   $error_str = 'Не выбран головной инцидент для привязки. Привязка невозможна';
 								}
@@ -754,7 +798,11 @@ class Works_of_estimateController extends Controller
 											$model->mantisNumber = (string)$result;
 											$model->save();
 											//делаем привязку к головному инц
-											if($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4){//Для ПО и ТЗ
+											if($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 
+																			  or $wbs_info['idResultType'] == 4 
+																			  or $wbs_info['idResultType'] == 5
+																			  or $wbs_info['idResultType'] == 6
+																			  or $wbs_info['idResultType'] == 7){//Для ПО и ТЗ и абонемента
 												$issue_id = (int)$result; 
 												$relationship = array (
 													'type' => array (
