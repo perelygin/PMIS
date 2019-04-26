@@ -719,7 +719,7 @@ class Works_of_estimateController extends Controller
 						}		  
 					  elseif($wbs_info['idResultType'] == 6 ){ //тип результата - внутрений тест
 							  $view_state = array('name'=>'private');
-							  $summary ='BR-'.$wbs_info['BRNumber'].' Тестирование в составе версии. '. $model->WorkName;
+							  $summary ='BR-'.$wbs_info['BRNumber'].$model->WorkName;
 							  $mantis_project = 'VTB тестирование';
 							  $category ='Разработка';
 							  $version = $wbs_info['version_number_s'];
@@ -728,7 +728,7 @@ class Works_of_estimateController extends Controller
 							  }
 					elseif($wbs_info['idResultType'] == 7 ){ //тип результата - МТ банка
 							  $view_state = array('name'=>'private');
-							  $summary = 'BR-'.$wbs_info['BRNumber'].' Согласование МТ банка. '.$model->WorkName;
+							  $summary = 'BR-'.$wbs_info['BRNumber'].$model->WorkName;
 							  $mantis_project = 'VTB24 Согласование методик тестирования';
 							  $category ='Разработка';
 							  $version = $wbs_info['version_number_s'];
