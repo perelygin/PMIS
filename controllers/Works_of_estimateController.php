@@ -20,6 +20,7 @@ use app\models\AddWorkEffortForm;
 use app\models\select_Work_search;
 use app\models\Links;
 use app\models\Schedule;
+use app\models\Constraints;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -351,7 +352,30 @@ class Works_of_estimateController extends Controller
         ]);
 		
 	}
-	
+	/*
+	 * редактирование информации об ограничении
+	 * 
+	 * 
+	 */ 
+	public function actionEdit_constr($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$idConstraints){
+		$model = Constraints::findOne(['idConstraints'=>$idConstraints]); 
+		$a = Yii::$app->request->post();  
+		if(isset($a['btn'])) {   // анализируем нажатые кнопки
+				$btn_info = explode("_", $a['btn']);
+				if($btn_info[0] == 'cancl') {   // отмена
+					return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'page_number'=>3]);		
+				}		
+			} 
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+			return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'page_number'=>3]);
+		}
+			
+		 return $this->render('edit_constr', [
+			'model' => $model,
+            'idWbs'=>$idWbs,
+            'idEstimateWorkPackages'=>$idEstimateWorkPackages
+         ]);
+	}	 
 	/*
 	 * редактирование информации о связи между работами
 	 * тип связи, задержка
@@ -360,14 +384,13 @@ class Works_of_estimateController extends Controller
 	public function actionEdit_link($idWorksOfEstimate,$idBR,$idWbs,$idEstimateWorkPackages,$idLink){
 		$model = Links::findOne(['idLink'=>$idLink]); 
 		$a = Yii::$app->request->post();   
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			if(isset($a['btn'])) {   // анализируем нажатые кнопки
+		if(isset($a['btn'])) {   // анализируем нажатые кнопки
 				$btn_info = explode("_", $a['btn']);
 				if($btn_info[0] == 'cancl') {   // отмена
 					return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'page_number'=>3]);		
 				}		
-			}
-
+		}
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'page_number'=>3]);
 		}
 			
@@ -556,6 +579,10 @@ class Works_of_estimateController extends Controller
 						return $this->redirect(['add_work_prev','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWOS'=>$idWorksOfEstimate, 'idEWP'=>$idEstimateWorkPackages]);	
 							
 						}	
+				elseif($btn_info[0] == 'addConstr'){  //добавление ограничения в расписание
+						return $this->redirect(['add_constr','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWOS'=>$idWorksOfEstimate, 'idEWP'=>$idEstimateWorkPackages]);	
+						
+						}			
 				elseif($btn_info[0] == 'dellnk'){  //удаление связи с работы-предшественика
 					   $lnk = new Links();
 				       $lnk->findOne($btn_info[1])->delete();    //$idLaborExpenditures  =$btn_info[1] 
@@ -1119,6 +1146,38 @@ class Works_of_estimateController extends Controller
             'idEstimateWorkPackages' => $idEstimateWorkPackages
         ]);	
     }
+  /*
+   * добавление ограничения
+   * 
+   * 
+   */   
+   public function actionAdd_constr($idWbs,$idBR,$idEWP,$idWOS)   
+   {
+	  //создаем новое ограничение
+	  $constr = new Constraints();
+      $constr->idWorksOfEstimate = $idWOS;
+      $constr->idConstrType = 1;
+      
+      
+      if($constr->save()){
+		//сохраняем и редактируем связь
+			return $this->redirect(['edit_constr','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs
+												 ,'idEstimateWorkPackages'=>$idEWP,'idConstraints'=>$constr->idConstraints]);
+			
+			
+		 } else{
+			 if($constr->hasErrors()){
+				$ErrorsArray = $constr->getErrors(); 	 
+				foreach ($ErrorsArray as $key => $value1){
+					foreach($value1 as $value2){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения. Реквизит ".$key." ".$value2);
+					}
+				}	
+				//// если не удалось сохранить возвращаемся 
+				return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,'page_number'=>3]);		
+			 }
+		}	
+	}
   /*
    * Добавление задачи предшественницы
    * 

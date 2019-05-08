@@ -18,7 +18,7 @@ use vova07\imperavi\Widget;
 	</div>
 </div>
  <div class="row">
-	<div class="col-sm-12">
+	<div class="col-sm-6">
 		<?php 
 			echo '<p><b> Работы предшественики</b>   '
 				 .Html::submitButton('', [
@@ -54,6 +54,18 @@ use vova07\imperavi\Widget;
 		</table>	  
 	</div>
 	<div class="col-sm-6">
-		
-	</div>
+		<?php 
+			echo '<p><b> Ограничения</b>   '
+				 .Html::submitButton('', [
+						'span class' => 'glyphicon glyphicon-plus-sign',
+						'title'=>'Указать ограничение',
+						'name'=>'btn',
+						'value' => 'addConstr_']).'</p>'; 
+		?>
+		<table border = "1" cellpadding="4" cellspacing="2"> 
+		 <tr><th></th><th>Тип огранчения</th><th>Дата</th></tr>
+			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=3>&nbsp;</td></tr>	
+		</table>	
+	</div>	
+	
 </div>
