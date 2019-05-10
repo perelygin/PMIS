@@ -582,6 +582,20 @@ class Works_of_estimateController extends Controller
 				elseif($btn_info[0] == 'addConstr'){  //добавление ограничения в расписание
 						return $this->redirect(['add_constr','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWOS'=>$idWorksOfEstimate, 'idEWP'=>$idEstimateWorkPackages]);	
 						
+						}	
+								
+				elseif($btn_info[0] == 'editconstr'){  //редактирование ограничения в расписание
+						return $this->redirect(['edit_constr','idWorksOfEstimate'=>$idWorksOfEstimate,'idBR'=>$idBR,'idWbs'=>$idWbs
+												 ,'idEstimateWorkPackages'=>$idEstimateWorkPackages,'idConstraints'=>$btn_info[1]]);
+						}	
+				elseif($btn_info[0] == 'delconstr'){  //удаление ограничения
+					   $Constr = new Constraints();
+				       $Constr->findOne($btn_info[1])->delete();    //$idLaborExpenditures  =$btn_info[1] 
+				       if($Constr->hasErrors()){
+								Yii::$app->session->addFlash('error',"Ошибка удаления ограничения " );
+					   }
+					   $page_number = 3;
+						//return $this->redirect(['add_work_prev','idWbs'=>$idWbs, 'idBR' => $idBR, 'idWOS'=>$idWorksOfEstimate, 'idEWP'=>$idEstimateWorkPackages]);	
 						}			
 				elseif($btn_info[0] == 'dellnk'){  //удаление связи с работы-предшественика
 					   $lnk = new Links();
@@ -868,7 +882,7 @@ class Works_of_estimateController extends Controller
 		
 		$ListPrevWorks = Links::getPrevWorks($idWorksOfEstimate);
 		$Workdates = Schedule::getWorkdates($idWorksOfEstimate);
-		
+		$ListConstraints = Constraints::getListConstraintsList($idWorksOfEstimate);
 		$QueryLogDataProvider = Systemlog::find()->where(['IdTypeObject' => 4,'idObject' => $idWorksOfEstimate])->orderBy('DataChange'); //лог для работ
         $LogDataProvider = new ActiveDataProvider([
             'query' => $QueryLogDataProvider,
@@ -883,7 +897,8 @@ class Works_of_estimateController extends Controller
             'idBR'=>$idBR,
             'MantisPrjLstArray' =>$MntPrjLstArray,
             'ListPrevWorks'=>$ListPrevWorks,
-            'Workdates' =>$Workdates
+            'Workdates' =>$Workdates,
+            'ListConstraints' => $ListConstraints
         ]);
     }
 
@@ -1153,10 +1168,15 @@ class Works_of_estimateController extends Controller
    */   
    public function actionAdd_constr($idWbs,$idBR,$idEWP,$idWOS)   
    {
+	   if(Constraints::getConstrCount($idWOS)>=1){  //только одно ограничение по задаче
+		   Yii::$app->session->addFlash('error',"Не больше одного ограничения по работе");
+		   return $this->redirect(['update','idWorksOfEstimate'=>$idWOS,'idBR'=>$idBR,'idWbs'=>$idWbs,'idEstimateWorkPackages'=>$idEWP,'page_number'=>3]);		
+		   }
 	  //создаем новое ограничение
 	  $constr = new Constraints();
       $constr->idWorksOfEstimate = $idWOS;
       $constr->idConstrType = 1;
+      $constr->DataConstr = date("Y-m-d");
       
       
       if($constr->save()){

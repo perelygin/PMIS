@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = 'Изменение параметров раб
         $item1 = array('label' => 'Трудозатраты','content' => $this->render('_WrkUpdWorkEfforts', ['idBR'=>$idBR,'VwListOfWorkEffort'=>$VwListOfWorkEffort,'form' => $form]));
         $item2 = array('label' => 'Mantis','content' => $this->render('_WrkUpdParam', ['idBR'=>$idBR,'WBS'=>$wbs_current_node,'model' => $model,'form' => $form, 'MantisPrjLstArray'=>$MantisPrjLstArray]));
 		
-		$item3 = array('label' => 'Расписание','content' => $this->render('_WrkUpdSchedule', ['form' => $form,'ListPrevWorks'=>$ListPrevWorks, 'Workdates' =>$Workdates]));
+		$item3 = array('label' => 'Расписание','content' => $this->render('_WrkUpdSchedule', ['form' => $form,'ListPrevWorks'=>$ListPrevWorks, 'Workdates' =>$Workdates,'ListConstraints'=>$ListConstraints]));
 		
 		switch ($page_number) { //определяем активную вкладку
 		    case 1:

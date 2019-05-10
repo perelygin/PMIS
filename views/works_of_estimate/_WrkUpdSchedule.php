@@ -65,6 +65,26 @@ use vova07\imperavi\Widget;
 		<table border = "1" cellpadding="4" cellspacing="2"> 
 		 <tr><th></th><th>Тип огранчения</th><th>Дата</th></tr>
 			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=3>&nbsp;</td></tr>	
+			  <?php
+			  if(count($ListConstraints)>0){ // по работе  есть связанные задачи
+					foreach($ListConstraints as $lc){
+							echo('<tr><td>  '
+							.Html::submitButton('', [
+								'span class' => 'glyphicon glyphicon-minus-sign',
+								'title'=>'Удалить ограничение по работе',
+								'name'=>'btn',
+								'value' => 'delconstr_'.$lc['idConstraints']]).' '
+							.Html::submitButton('', [
+								'span class' => 'glyphicon glyphicon-pencil',
+								'title'=>'Изменить ограничение по работе',
+								'name'=>'btn',
+								'value' => 'editconstr_'.$lc['idConstraints']])	
+								.'</td><td>'.$lc['ConstrTypeName']
+								.'</td><td>'.$lc['DataConstr']
+								.'</td></tr>');	
+					}
+			  }			
+			  ?>
 		</table>	
 	</div>	
 	

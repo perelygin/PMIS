@@ -29,9 +29,9 @@ class Constraints extends \yii\db\ActiveRecord
     {
         return [
             [['idWorksOfEstimate', 'idConstrType'], 'integer'],
-            [['DataConstr'], 'safe'],
-            [['idConstrType'], 'exist', 'skipOnError' => true, 'targetClass' => ConstraintType::className(), 'targetAttribute' => ['idConstrType' => 'idConstrType']],
-            [['idWorksOfEstimate'], 'exist', 'skipOnError' => true, 'targetClass' => WorksOfEstimate::className(), 'targetAttribute' => ['idWorksOfEstimate' => 'idWorksOfEstimate']],
+            [['DataConstr'], 'required'],
+            [['DataConstr'], 'default', 'value' => null]
+            
         ];
     }
 
@@ -43,8 +43,47 @@ class Constraints extends \yii\db\ActiveRecord
         return [
             'idConstraints' => 'Id Constraints',
             'idWorksOfEstimate' => 'Id Works Of Estimate',
-            'idConstrType' => 'Id Constr Type',
-            'DataConstr' => 'Data Constr',
+            'idConstrType' => 'Тип ограничения',
+            'DataConstr' => 'Дата ограничения',
         ];
     }
+    /*
+	 * Возвращает перечень ограничений
+	 * 
+	 */    
+	public function getListConstraintsList($idWorksOfEstimate){
+		$sql = "SELECT 
+				 cns.DataConstr,
+				 cns.idConstraints,
+				 cnst.ConstrTypeName
+				FROM Constraints as cns
+				LEFT OUTER JOIN ConstraintType cnst ON cnst.idConstrType = cns.idConstrType
+				where cns.idWorksOfEstimate =  ".$idWorksOfEstimate;
+		
+		$WOElcl = Yii::$app->db->createCommand($sql)->query();		
+		
+		if($WOElcl){
+			if(!empty($WOElcl)){
+				
+				return $WOElcl;	
+			} else {
+				return '';
+					}	
+			} else {
+				return '';
+					}					
+	   
+	   }
+	   
+	   
+	/*
+	 * 
+	 * возвращает количество ограничений для работы
+	 * 
+	 */
+	 public function getConstrCount($idWorksOfEstimate){
+		 $sql = 'SELECT count(*) FROM Constraints where idWorksOfEstimate = '.$idWorksOfEstimate;
+		 $ConstrCount = Yii::$app->db->createCommand($sql)->queryScalar();
+		 return $ConstrCount;
+	 }      
 }

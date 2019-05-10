@@ -22,6 +22,7 @@ use app\models\User;
 use app\models\ServiceType;
 use app\models\Schedule;
 use app\models\Links;
+use app\models\Weekends;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -1176,17 +1177,42 @@ class BrController extends Controller
 				  if(!$BR->isDatasSet($wl['idWorksOfEstimate'])){  //если у работы не установлена дата начала и дата окончания, то начинаем  ее расчитывать
 					//  $WorkDateBegin  =  WorksOfEstimate::getPrevWorkMaxDateEnd($wl['idWorksOfEstimate'],$idBR)['data']; //дата начала работы.  Определяется как максимальная из дат окончания работ-предшествеников с учетом запаздывания
 					//определем и сохраняем даты начала и окончания работы-предшественицы
-					$sch = new Schedule();
+					
 					$begArr = WorksOfEstimate::getPrevWorkMaxDateEnd($wl['idWorksOfEstimate'],$idBR);  //получаем максимальную дату окончания у  работ-предшественицу работы-предшественицы
-					$dbeg=$begArr['data'];
+					$dbeg=$begArr['data'];  //дата начала сохраняемой работы
+					$duration = WorksOfEstimate::getWorkDuration($wl['idWorksOfEstimate']);
+					$dend = \DateTime::createFromFormat('Y-m-d', $dbeg->format('Y-m-d'));		 // дата окончания сохраняемой работы
+					$dend = WorksOfEstimate::addDay($dend,$duration-1);	
+					//а теперь ограничения!!!
+					$constr = WorksOfEstimate::getConstraint($wl['idWorksOfEstimate']);//получаем ограничения для работы,  по которой сохраняем расписание
+					if(!empty($constr)){
+						
+						$dConstr = \DateTime::createFromFormat('Y-m-d', $constr['DataConstr']);  //дата ограничения 
+						if(Weekends::isWeekend($dConstr) ){//проверка ограничения на выходной
+							 Yii::$app->session->addFlash('error',"Дата ограничения приходится на выходной. Расчет графика не корректный. Работа:".$wl['idWorksOfEstimate']);
+						}	
+						if($constr['idConstrType'] == 1){  //Начало не ранее
+							if($dbeg<$dConstr){  //если дата начала меньше даты ограничения, то работа начнется в дату ограничения
+								$dbeg = $dConstr;
+								$dend = \DateTime::createFromFormat('Y-m-d', $dbeg->format('Y-m-d'));		 // дата окончания сохраняемой работы
+								$dend = WorksOfEstimate::addDay($dend,$duration-1);	
+								} //еcли дата начала больше даты ограничения, то ограничение не играет роли
+						}elseif($constr['idConstrType'] == 2){ //Окончание не позже
+							if($dend>$dConstr){ //если  расчитанная дата окончания больше даты ограничения, то работа должна закончитья в дату ограничения
+								$dend = $dConstr;
+								$dbeg = \DateTime::createFromFormat('Y-m-d', $dend->format('Y-m-d'));		 // дата начала сохраняемой работы
+								$dbeg = WorksOfEstimate::subDay($dbeg,$duration-1);	
+								
+							}  //Иначе ограничение не влияет да дату окончания работы
+						}
+					}
+					//сохраняем расписание
+					$sch = new Schedule();	
 					$sch->WorkBegin = $dbeg->format('Y-m-d');
 					$sch->idWorkPrev = $begArr['idWorkPrev'];
 					$sch->lag = $begArr['lag'];
 					$sch->idLinkType = $begArr['idLinkType'];
-					
-					$duration = WorksOfEstimate::getWorkDuration($wl['idWorksOfEstimate']);
 					$sch->duration = $duration;
-					$dend = WorksOfEstimate::addDay($dbeg,$duration-1);
 					$sch->WorkEnd = $dend->format('Y-m-d');
 					$sch->idWorksOfEstimate = $wl['idWorksOfEstimate'];
 				    $sch->DataSetting =date("Y-m-d H:i:s");

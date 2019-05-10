@@ -6,6 +6,7 @@ use Yii;
 use app\models\WorkEffort;
 use app\models\Systemlog;
 use app\models\Schedule;
+use app\models\Weekends;
 
 /**
  * Перечень работ, которые входят в оценку на дату
@@ -280,16 +281,46 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 		foreach($PrevWorkList as $pwl){
 			if(is_null($pwl['WorkEnd'])){    // если у работы предшественицы не установлена дата начала
 				//определем и сохраняем даты начала и окончания работы-предшественицы
-				$sch = new Schedule();
+				
 				$begArr = WorksOfEstimate::getPrevWorkMaxDateEnd($pwl['idFirstWork'],$idBR);  //получаем максимальную дату окончания у  работ-предшественицу работы-предшественицы
-				$dbeg=$begArr['data'];
+				$dbeg=$begArr['data'];  //дата начала сохраняемой работы
+				$duration = WorksOfEstimate::getWorkDuration($pwl['idFirstWork']); //длительность
+				$dend = \DateTime::createFromFormat('Y-m-d', $dbeg->format('Y-m-d'));		 // дата окончания сохраняемой работы
+				$dend = WorksOfEstimate::addDay($dend,$duration-1);	
+					//а теперь ограничения!!!
+					$constr = WorksOfEstimate::getConstraint($pwl['idFirstWork']);//получаем ограничения для работы,  по которой сохраняем расписание
+					if(!empty($constr)){
+						$dConstr = \DateTime::createFromFormat('Y-m-d', $constr['DataConstr']);  //дата ограничения 
+						if(Weekends::isWeekend($dConstr) ){//проверка ограничения на выходной
+							 Yii::$app->session->addFlash('error',"Дата ограничения приходится на выходной. Расчет графика не корректный. Работа:".$pwl['idFirstWork']);
+						}	
+						if($constr['idConstrType'] == 1){  //Начало не ранее
+							if($dbeg<$dConstr){  //если дата начала меньше даты ограничения, то работа начнется в дату ограничения
+								$dbeg = $dConstr;
+								$dend = \DateTime::createFromFormat('Y-m-d', $dbeg->format('Y-m-d'));		 // дата окончания сохраняемой работы
+								$dend = WorksOfEstimate::addDay($dend,$duration-1);	
+								} //еcли дата начала больше даты ограничения, то ограничение не играет роли
+						}elseif($constr['idConstrType'] == 2){ //Окончание не позже
+							if($dend>$dConstr){ //если  расчитанная дата окончания больше даты ограничения, то работа должна закончитья в дату ограничения
+								$dend = $dConstr;
+								$dbeg = \DateTime::createFromFormat('Y-m-d', $dend->format('Y-m-d'));		 // дата начала сохраняемой работы
+								$dbeg = WorksOfEstimate::subDay($dbeg,$duration-1);	
+								
+							}  //Иначе ограничение не влияет да дату окончания работы
+						}
+					}
+					//сохраняем расписание
+				
+				
+				
+				
+				
+				//сохраняем расписание
+				$sch = new Schedule();
 				$sch->WorkBegin = $dbeg->format('Y-m-d');
 				$sch->idWorkPrev = $begArr['idWorkPrev'];
 				$sch->lag = $begArr['lag'];
 				$sch->idLinkType = $begArr['idLinkType'];
-				
-				$duration = WorksOfEstimate::getWorkDuration($pwl['idFirstWork']);
-				$dend = WorksOfEstimate::addDay($dbeg,$duration-1);
 				$sch->duration = $duration;
 				$sch->WorkEnd = $dend->format('Y-m-d');
 				$sch->idWorksOfEstimate = $pwl['idFirstWork'];
@@ -324,7 +355,8 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 					}	
 			}
 		}
-		//для всех дат начала,  определнных на основании всех работ-предшествениц,  определяем максимальную
+		//для всех дат начала,  определнных на основании всех работ-предшествениц,  определяем максимальную, если массив с датами пустой, то берем дату начала проекта
+		
 		if(empty($dates_begin)){  
 			//возвращаем дату начала проекта 
 			 //$d = WorksOfEstimate::subDay($BR->getBRDateBegin(),1); //потому что иначе дата окончания для первой работы будет больше на 1
@@ -373,6 +405,16 @@ class WorksOfEstimate extends \yii\db\ActiveRecord
 		return $str;			
 	}
 			
-		 
+ /*
+  * возвращает тип и дату ограничения по работе
+  * 
+  * 
+  */
+  public function getConstraint($idWOE){
+	  $sql = "SELECT idConstraints,idWorksOfEstimate,idConstrType,DataConstr FROM Constraints where idWorksOfEstimate = ".$idWOE;
+	  $Constraint = Yii::$app->db->createCommand($sql)->queryOne();	
+	  return $Constraint;
+  }
+   		 
 	 
 }
