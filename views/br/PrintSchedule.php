@@ -26,11 +26,18 @@ if($dataEnd){
 	} else{
 		$dBREnd =   date("Y-m-d");
 		}
-		
+	
+	 //число дней между датами 
+	  $dBeg = \DateTime::createFromFormat('Y-m-d', $dBRBeg);
+	  $dEnd = \DateTime::createFromFormat('Y-m-d', $dBREnd);
+	  $dif = $dBeg->diff($dEnd);	
+	  $px_numb = 1000 + 18*$dif->days;
+	  if($px_numb<1920){$px_numb =1920;}
+	 //cho $dif->days; die;
 ?>
 		<style type="text/css">
   		   .container {
-			    width: 10000px;
+			    width: <?php echo   $px_numb.'px;'?>
 			    overflow: scroll;
 			}
 			.xuybex {
