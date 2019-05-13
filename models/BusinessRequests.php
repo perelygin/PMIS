@@ -163,6 +163,7 @@ class BusinessRequests extends \yii\db\ActiveRecord
      * $ResType - 1 экспертиза
      * $ResType - 2 БФТЗ
      * $ResType - 3 Все инциденты по результату idwbs
+     * $ResType - 6 тестирование в версии
      */
     public function getMantisNumbers($ResType = 1, $idwbs = 0)
     {
@@ -184,6 +185,17 @@ class BusinessRequests extends \yii\db\ActiveRecord
 				LEFT OUTER JOIN WorksOfEstimate wef ON wbs.id = wef.idWbs
 				where wbs.idBr =" .$this->idBR. " and wbs.idResultType = ".$ResType." and wef.idEstimateWorkPackages = ".$idLastEWP ;
 				}
+			if($ResType == 6){
+				$sql ="SELECT 
+				 wbs.id,
+				 wbs.name,
+				 wef.idWorksOfEstimate,
+				 wef.WorkName,
+				 wef.mantisNumber
+				FROM wbs
+				LEFT OUTER JOIN WorksOfEstimate wef ON wbs.id = wef.idWbs
+				where wbs.idBr =" .$this->idBR. " and (wbs.idResultType = 1 or wbs.idResultType = 2) and wef.idEstimateWorkPackages = ".$idLastEWP ;
+				}	
 			if($ResType == 3 ){
 				$sql ="SELECT 
 				 wbs.id,

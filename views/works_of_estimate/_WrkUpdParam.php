@@ -21,10 +21,14 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		  {
 			  $mantis_links = $BR->getMantisNumbers(1);
 		  }
-		 if($WBS->idResultType == 3 or $WBS->idResultType == 4
-									or $WBS->idResultType == 6)  //ПО или тесты внутренние
+		 if($WBS->idResultType == 3 or $WBS->idResultType == 4)  //ПО или прочие
 		  {
 			  $mantis_links = $BR->getMantisNumbers(2);
+		  }
+		  if($WBS->idResultType == 6)  // тесты внутренние
+		  {
+			  $mantis_links = $BR->getMantisNumbers(6);
+			 
 		  }
 	$WBSInfo = $WBS->getWbsInfo();	  
 ?>
