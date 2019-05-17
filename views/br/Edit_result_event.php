@@ -8,7 +8,7 @@ use app\models\VwProjectCommand;
 use app\models\BusinessRequests;
 use app\models\vw_settings; 
 use vova07\imperavi\Widget;
-//use kartik\date\DatePicker;
+use kartik\date\DatePicker;
 use kartik\datetime\DateTimePicker;
 
 
@@ -63,7 +63,32 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 		<div class="col-sm-4">
 			<?= $form->field($model, 'ResultEventResponsible')->dropDownList($items1,$params1) ?>  
 		</div> 
-	  </div>	 
+	  </div>	
+	  <div class="row">
+        <div class="col-sm-4">
+			<?= $form->field($model, 'ResultEventsPlannedResponseDate')->widget(DatePicker::className(),[
+				    'pluginOptions' => [
+				        'autoclose'=>true,
+				        'format' => 'yyyy-mm-dd',
+				         'todayHighlight' => true
+				    ]
+				]);  ?>
+		</div>
+		<div class="col-sm-4">
+			<?php 
+				echo $form->field($model, 'ResultEventsFactResponseDate')->widget(DatePicker::className(),[
+				    'pluginOptions' => [
+				        'autoclose'=>true,
+				        'format' => 'yyyy-mm-dd',
+				         'todayHighlight' => true
+				    ]
+				]);
+			  ?>
+		</div> 
+		<div class="col-sm-4">
+			
+		</div> 
+	  </div>   
 	   <div class="row">
 		  <div class="col-sm-12">
 			  <?php 

@@ -6,6 +6,7 @@ use app\models\VwReport2;
 use app\models\VwReport1Search;
 use app\models\BusinessRequests;
 use app\models\WbsSchedule;
+use app\models\ResultEvents;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -57,6 +58,12 @@ class ReportController extends \yii\web\Controller
 			if(!is_null($LastEstimateId)){
 				$dend =  WbsSchedule::getWbsEndDate($LastEstimateId,$vr2['id']);
 				$dend_list =  WbsSchedule::getWbsEndDatelist($LastEstimateId,$vr2['id']);  //список всех дат окончания(из-за переносов их может быть много)
+				$dPlanEvent = ResultEvents::getLastResultEventPlanData($vr2['id']);//дату плановой реакции по последнему событию результата
+				if($dPlanEvent){
+					$dPlanEvent_txt = $dPlanEvent->format('Y-m-d');
+					} else{
+						$dPlanEvent_txt = '';
+						}
 				if($dend){  //есть дата окончания
 					$curentDate = \DateTime::createFromFormat('Y-m-d', date("Y-m-d"));//текущая дата
 					if($dend<$curentDate){  //просроченные
@@ -70,6 +77,7 @@ class ReportController extends \yii\web\Controller
 							          'version_number' => $vr2['version_number'],
 							          'DateEnd' => $dend->format('Y-m-d'),
 							          'DateEndList' => $dend_list,
+							          'dPlanEvent' => $dPlanEvent_txt,
 							          'TypeRes' => '1'
 							          ];	
 						} else{
@@ -85,6 +93,7 @@ class ReportController extends \yii\web\Controller
 							          'version_number' => $vr2['version_number'],
 							          'DateEnd' => $dend->format('Y-m-d'),
 							          'DateEndList' => $dend_list,
+							          'dPlanEvent' => $dPlanEvent->format('Y-m-d'),
 							          'TypeRes' => '2'
 							          ];	
 			 				   } else{
@@ -98,6 +107,7 @@ class ReportController extends \yii\web\Controller
 							          'version_number' => $vr2['version_number'],
 							          'DateEnd' => $dend->format('Y-m-d'),
 							          'DateEndList' => $dend_list,
+							          'dPlanEvent' => $dPlanEvent_txt,
 							          'TypeRes' => '3'
 							          ];	
 								   }
@@ -113,6 +123,7 @@ class ReportController extends \yii\web\Controller
 						          'version_number' => $vr2['version_number'],
 						          'DateEnd' => false,
 						          'DateEndList' => false,
+						          'dPlanEvent' => $dPlanEvent_txt,
 						          'TypeRes' => '0'
 						          ];
 						}

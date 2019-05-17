@@ -15,6 +15,8 @@ use Yii;
  * @property string $ResultEventsMantis
  * @property int $ResultEventResponsible
  * @property int $deleted
+ * * @property string $ResultEventsPlannedResponseDate 
+* @property string $ResultEventsFactResponseDate 
  */
 class ResultEvents extends \yii\db\ActiveRecord
 {
@@ -27,8 +29,9 @@ class ResultEvents extends \yii\db\ActiveRecord
     }
 	public function afterSave($insert, $changedAttributes)
 	{
-	//записываем ответственную организацию по результату на основании ответственного по событию 	
+	
 	parent::afterSave($insert, $changedAttributes);
+	   //записываем ответственную организацию по результату на основании ответственного по событию 	
 		$sql = 'select 
 		  rsl.ResultEventsDate,
 		  rsl.ResultEventResponsible,
@@ -57,7 +60,7 @@ class ResultEvents extends \yii\db\ActiveRecord
     {
         return [
             [['idwbs', 'ResultEventResponsible', 'deleted'], 'integer'],
-            [['ResultEventsDate'], 'safe'],
+            [['ResultEventsDate', 'ResultEventsPlannedResponseDate', 'ResultEventsFactResponseDate'], 'safe'],
             [['ResultEventResponsible','ResultEventsDate','ResultEventsName'], 'required'],
             [['ResultEventsDescription'], 'string', 'max' => 65535 ],
             [['ResultEventsName'], 'string', 'max' => 100],
@@ -79,6 +82,26 @@ class ResultEvents extends \yii\db\ActiveRecord
             'ResultEventsMantis' => 'Result Events Mantis',
             'ResultEventResponsible' => 'Ответственный  по результату',
             'deleted' => 'Deleted',
+            'ResultEventsPlannedResponseDate' => 'Плановая дата обработки события', 
+            'ResultEventsFactResponseDate' => 'Фактическая дата обработки события', 
         ];
     }
+    /*
+     * Возвращает дату плановой реакции по последнему событию результата
+     * 
+     * 
+     * 
+     */ 
+      public function getLastResultEventPlanData($idwbs){
+		  $sql ="SELECT ResultEventsPlannedResponseDate FROM ResultEvents where idwbs =".$idwbs.
+					" order by  ResultEventsDate DESC
+					limit 1";
+					$Results = Yii::$app->db->createCommand($sql)->queryScalar();
+			if($Results){
+				$dPlanEvent = \DateTime::createFromFormat('Y-m-d', $Results);
+				return $dPlanEvent;
+		 } else{
+			 return false;
+			 }		
+		  }
 }

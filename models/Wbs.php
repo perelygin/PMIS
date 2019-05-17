@@ -101,6 +101,7 @@ class Wbs extends \yii\db\ActiveRecord
 		$sql = "SELECT 
 				wbs.id, 
 				wbs.name,
+				wbs.idResultStatus,
 				br.BRName,
 				br.BRNumber,
 				sv.version_number,
@@ -117,7 +118,8 @@ class Wbs extends \yii\db\ActiveRecord
 					     'BRNumber'	=> $WBS['BRNumber'],
 					     'BRName' => $WBS['BRName'],
 					     'version_number_s' => $WBS['version_number_s'],
-						 'idResultType'=>$this->idResultType);
+						 'idResultType'=>$this->idResultType,
+						 'idResultStatus'=>$WBS['idResultStatus']);
         return $WBSInfo;
     }
     public function isWbsHasWork()  //есть ли работы по данному узлу

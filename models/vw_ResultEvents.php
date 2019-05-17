@@ -36,7 +36,7 @@ class vw_ResultEvents extends \yii\db\ActiveRecord
     {
         return [
             [['idResultEvents', 'idwbs', 'deleted'], 'integer'],
-            [['ResultEventsDate'], 'safe'],
+            [['ResultEventsDate','ResultEventsPlannedResponseDate', 'ResultEventsFactResponseDate'], 'safe'],
             [['ResultEventsName'], 'string', 'max' => 100],
             [['ResultEventsMantis'], 'string', 'max' => 45],
             [['team_member'], 'string', 'max' => 247],

@@ -1521,11 +1521,31 @@ class BrController extends Controller
 		   Yii::$app->session->addFlash('error',"Ошибка создания. Нет ни одного члена команды");
 			 return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : null));
 		   }
+	   ////если у предыдущего события незаполненна фактическая дата реакции на событие, то нужно его заполнить датой создания нового события
+	   $sql = 'select 
+	      rsl.idResultEvents,
+		  rsl.ResultEventsDate,
+		  rsl.ResultEventResponsible
+	   	from ResultEvents rsl
+		where idwbs = '.$idWbs. 
+		' Order by ResultEventsDate desc
+		LIMIT 1';
+		$LastEventId = Yii::$app->db->createCommand($sql)->queryOne();
+		if (!empty($LastEventId)){  //если есть последнее событие, проставить по нему  дату фактической реакции 
+			$LastEvent = ResultEvents::findOne(['idResultEvents'=>$LastEventId['idResultEvents']]);
+			$LastEvent->ResultEventsFactResponseDate =  date("Y-m-d");
+			$LastEvent->save();
+		}
+	   //	   
 	   $model = new ResultEvents();
 	   $model->idwbs = $idWbs;
 	   $model->ResultEventsName = 'Новое событие';
 	   $model->ResultEventsDate = date("Y-m-d H:i:s");
 	   $model->ResultEventResponsible = $idAnyTeamMember;
+	   
+	   $PlannedResponseDate = \DateTime::createFromFormat('Y-m-d',  date("Y-m-d"));		 // плановая дата реакции
+	   $PlannedResponseDate = WorksOfEstimate::addDay($PlannedResponseDate,2);	//+2 дня
+	   $model->ResultEventsPlannedResponseDate = $PlannedResponseDate->format('Y-m-d');
 	   if ($model->validate()){
 		   $model->save();
 		   return  $this->redirect(['update_result_event','idResultEvents' => $model->idResultEvents]);	            

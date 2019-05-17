@@ -117,7 +117,7 @@ use app\models\vw_settings;
 
    </div> 
   <div class="row">
-		<div class="col-sm-6">
+		<div class="col-sm-4">
 			<?php 
 				echo $form->field($model, 'description')->widget(Widget::className(), [
 				    'settings' => [
@@ -130,7 +130,7 @@ use app\models\vw_settings;
 				]);
 	        ?>
 	    </div>
-	   <div class="col-sm-6">
+	   <div class="col-sm-8">
 		   <p>
 		    <?= Html::submitButton('', [
 						'span class' => 'glyphicon glyphicon-plus-sign',
@@ -145,6 +145,8 @@ use app\models\vw_settings;
 			       <th>&nbsp Событие &nbsp </th>
 			       <th>&nbsp Ответственный &nbsp </th>
 			       <th>&nbsp Mantis &nbsp </th>
+			       <th>&nbsp План &nbsp </th>
+			       <th>&nbsp Факт &nbsp </th>
 			     </tr>
 			   <?php
 			   if(count($events)>0){ // по работе  есть оценки трудозатрат
@@ -165,10 +167,12 @@ use app\models\vw_settings;
 								  .$evn['ResultEventsName'].'</td><td>'
 								  .$evn['responsible'].'</td><td>'
 								  .Html::a($evn['ResultEventsMantis'], $url_mantis.$evn['ResultEventsMantis'],['target' => '_blank'])
-								  .'</td></tr>');
+								  .'</td  width=70><td>'.$evn['ResultEventsPlannedResponseDate']
+								  .'</td  width=70><td>'.$evn['ResultEventsFactResponseDate'].'</td></tr>'
+								  );
 					}
 				}else {
-					echo '<tr><td colspan="5"> нет данных </td></tr>';
+					echo '<tr><td colspan="7"> нет данных </td></tr>';
 					}	
 			   ?>
 			   
