@@ -22,6 +22,8 @@ use app\models\Links;
 use app\models\Schedule;
 use app\models\Constraints;
 
+use app\components\myHelper;
+
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -1129,6 +1131,59 @@ class Works_of_estimateController extends Controller
         ]);	
     }
     
+  /*
+   * 
+   * 
+   */
+     public function actionPut_inc_to_mantis($idEstimateWorkPackages,$idWbs,$idBR)
+     {
+		  $BR = BusinessRequests::findOne($idBR);
+      
+       
+       //Считывание настроек
+		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
+						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
+						  else $url_mantis_cr = '';
+	 //wsdl клиент
+		/*$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+		$username = $User->getUserMantisName();
+		$password = $User->getMantisPwd();
+		$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));					  
+		*/ 
+       $a = Yii::$app->request->post();
+	   if (!empty($a)) {
+		if(isset($a['selectedWorks'])) {
+			//переносим работы
+			foreach($a['selectedWorks'] as $r){
+				Yii::$app->db->createCommand()->update('WorksOfEstimate'
+				, ['idWbs' => $model->NewResult	,'idEstimateWorkPackages'=>$idEstimateWorkPackages], 'idWorksOfEstimate = '.$r)->execute();
+				}
+			$this->redirect(['index', 'id_node' => $model->NewResult ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
+			} else {
+				Yii::$app->session->addFlash('error','Не выбраны работы для переноса' );
+				}
+	    }
+	    if(isset($a['btn'])) {   // анализируем нажатые кнопки
+				$btn_info = explode("_", $a['btn']);
+				if($btn_info[0] == 'mnt') { // выполнить генерацию инцидентов по выбранным работам
+									
+					
+				}	
+				if($btn_info[0] == 'cancl') { // отмена
+					
+					$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);					
+				}	
+		}	       
+	  $VwListOfWorkEffort = VwListOfWorkEffort::find()->where(['idEstimateWorkPackages'=>$idEstimateWorkPackages, 'idWbs'=>$idWbs])->all();	
+	  $MntPrjLstArray = MyHelper::getMantisprojects(); //массив с перечнем проектов из мантис
+	  return $this->render('PutIncToMantis', [
+			'idBR'=>$idBR,
+            'id_node'=>$idWbs,
+            'VwListOfWorkEffort' => $VwListOfWorkEffort,
+            'idEstimateWorkPackages' => $idEstimateWorkPackages,
+            'MantisPrjLstArray' =>$MntPrjLstArray,
+        ]);		 
+	 } 
  /* 
  * Перемещение работ в другой результат
  */
@@ -1323,4 +1378,6 @@ class Works_of_estimateController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+    
+
 }

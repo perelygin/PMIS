@@ -35,4 +35,49 @@ class myHelper{
 		//if ($decimal == 9) { $decimal = 90; } echo 'The dollar amount is ' . $whole . ' and the decimal amount is ' . $decimal; 
 		
 	}
+	/*
+     * //список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
+     * 
+     */ 
+	public static function getMantisprojects(){
+		$MntPrjLstArray =  array();
+		//if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
+			//$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 	
+			//$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
+				 //if (is_soap_fault($result_1)){   //Ошибка
+				    //Yii::$app->session->addFlash('error',"Ошибка связи с mantis SOAP: (faultcode: ".$result_1->faultcode.
+				    //" faultstring: ".$result_1->faultstring);
+				  //// и вываливаемся
+				  //return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
+				
+			     //}else{
+					 //foreach($result_1 as $rs){
+						  //if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13 or $rs->id == 26 or $rs->id == 21){
+							  //$mntprjArr = array('name' =>$rs->name,'Checked' =>' ');
+							  //$MntPrjLstArray[$rs->id] = $mntprjArr;
+						  //}
+						 //} 
+						 //// проставляем признак выбранности
+						   //if($wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4 or $wbs_info['idResultType'] == 2){
+							   ////SpectrumFront
+							    //$name = $MntPrjLstArray['12']['name'];
+								//$MntPrjLstArray['12']  = array('name'=>$name,'Checked' =>'checked');
+							//}
+							//if($wbs_info['idResultType'] == 1){
+							   ////VTB24 Согласование экспертиз
+							    //$name = $MntPrjLstArray['17']['name'];
+								//$MntPrjLstArray['17']  = array('name'=>$name,'Checked' =>'checked');
+							//}
+					   ////print_r($MntPrjLstArray);
+					   ////die;
+					 //}
+			////[13]  VTB24 SpectrumAdmin 
+			////[12]  VTB24 SpectrumFront 
+			////[22]  VTB24 SpectrumTrs24 
+			////[17]  VTB24 Согласование экспертиз 
+			////[26]  VTB тестирование
+			////[21]  VTB24 Согласование методик тестирования
+		//}
+		return $MntPrjLstArray;
+	}	
 }
