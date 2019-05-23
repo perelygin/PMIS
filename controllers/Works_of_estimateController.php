@@ -442,6 +442,7 @@ class Works_of_estimateController extends Controller
 			
 		//список проектов мантис,  который нам нужен только для результов  типа "ПО" и если не заполнен номер инцидента, в противном случа - нефиг дергать сервис
 		$MntPrjLstArray =  array();
+		//$MntPrjLstArray = MyHelper::getMantisprojects($idWbs); //массив с перечнем проектов из мантис
 		if(empty($model->mantisNumber) and ($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4)){
 			$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 	
 			$result_1 =  $client->mc_projects_get_user_accessible($username, $password);
@@ -1133,9 +1134,9 @@ class Works_of_estimateController extends Controller
     
   /*
    * 
-   * 
+   * //$select_all	//признак выбора всех записей
    */
-     public function actionPut_inc_to_mantis($idEstimateWorkPackages,$idWbs,$idBR)
+     public function actionPut_inc_to_mantis($idEstimateWorkPackages,$idWbs,$idBR,$select_all=1)
      {
 		  $BR = BusinessRequests::findOne($idBR);
       
@@ -1144,44 +1145,209 @@ class Works_of_estimateController extends Controller
 		$settings = vw_settings::findOne(['Prm_name'=>'Mantis_path_create']);   //путь к wsdl тянем из настроек
 						if (!is_null($settings)) $url_mantis_cr = $settings->enm_str_value; //путь к мантиссе
 						  else $url_mantis_cr = '';
-	 //wsdl клиент
-		/*$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
-		$username = $User->getUserMantisName();
-		$password = $User->getMantisPwd();
-		$client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0));					  
-		*/ 
-       $a = Yii::$app->request->post();
+		//wsdl клиент
+			$User = User::findOne(['id'=>Yii::$app->user->getId()]); 
+			$username = $User->getUserMantisName();
+			$password = $User->getMantisPwd();	
+			
+		    $MntPrjLstArray = MyHelper::getMantisprojects($idWbs); //массив с перечнем проектов из мантис	
+		    
+	   $a = Yii::$app->request->post();
+	   
 	   if (!empty($a)) {
-		if(isset($a['selectedWorks'])) {
-			//переносим работы
-			foreach($a['selectedWorks'] as $r){
-				Yii::$app->db->createCommand()->update('WorksOfEstimate'
-				, ['idWbs' => $model->NewResult	,'idEstimateWorkPackages'=>$idEstimateWorkPackages], 'idWorksOfEstimate = '.$r)->execute();
-				}
-			$this->redirect(['index', 'id_node' => $model->NewResult ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
-			} else {
-				Yii::$app->session->addFlash('error','Не выбраны работы для переноса' );
-				}
-	    }
 	    if(isset($a['btn'])) {   // анализируем нажатые кнопки
 				$btn_info = explode("_", $a['btn']);
+				
 				if($btn_info[0] == 'mnt') { // выполнить генерацию инцидентов по выбранным работам
+					if(isset($a['selectedWorks'])) {
+					////переносим работы
+					foreach($a['selectedWorks'] as $r){
+						$wbs = Wbs::findOne(['id'=>$idWbs]); 
+						$wbs_info = $wbs->getWbsInfo();  
+						$model = WorksOfEstimate::findOne($r);
+						/////////////////////////////////////////////
+						  //синхронизация с mantis
+						$LastEstimateSumm = 0;
+						$error_code = 0;
+						$error_str = '';
+					
+						  
+					
+						//Yii::$app->session->addFlash('success',"Номер инцидента не указан. Создаем инцидент в mantis");
+						//ищем менеджера проекта по Br
+						$BR = BusinessRequests::findOne(['idBR'=>$idBR]);
+						$pm_login = $BR->get_pm_login();
+						$handler = array('name'=>'pmis'); // испольнитель по умолчанию
+						
+						//ищем аналитика по задаче
+						//$analit_login = $model->get_analit_login();					
+						////определяем тип результата
+						$mantis_project = '';
+																
+						if($wbs_info['idResultType'] == 1){  //тип результата - экспертиза
+							$error_code = 4;
+							$error_str = 'массовая генерация инцидентов в мантис возможна только для типа результата "Программное обеспечение"';
+						}
+						elseif($wbs_info['idResultType'] == 2 ){ //тип результата - БФТЗ
+							$error_code = 4;
+							$error_str = 'массовая генерация инцидентов в мантис возможна только для типа результата "Программное обеспечение"';	
+								 }
+						elseif($wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4){ //тип результата - ПО или прочее
+														  $view_state = array('name'=>'private');
+							  $summary = $model->WorkName;
+							  $mantis_project = 'VTB24 SpectrumFront';
+							  $category ='Разработка';
+							  $version = $wbs_info['version_number_s'];
+							  $handler = array('name'=>$username);
+							  //настраиваемые поля
+							  
+							  $custom_fields = array ('CodevTT_Type' => array (
+													'field' => array (
+														'id' => 23 
+																),
+														'value' => 'Bug' 
+												              ),
+												   'CodevTT_Manager EffortEstim' => array (
+													'field' => array (
+														'id' => 24 
+																),
+														'value' => 0
+												              ),
+												    'CodevTT_EffortEstim' => array (
+													'field' => array (
+														'id' => 22 
+																),
+														'value' => 1
+												              )
+												              );	
+								  }
+						elseif($wbs_info['idResultType'] == 5 ){ //тип результата - абонемент 
+							$error_code = 4;
+							$error_str = 'массовая генерация инцидентов в мантис возможна только для типа результата "Программное обеспечение"';$error_code = 4;
+							$error_str = 'массовая генерация инцидентов в мантис возможна только для типа результата "Программное обеспечение"';
+							}		  
+						elseif($wbs_info['idResultType'] == 6 ){ //тип результата - внутрений тест
+							$error_code = 4;
+							$error_str = 'массовая генерация инцидентов в мантис возможна только для типа результата "Программное обеспечение"';	 
+								  }
+						elseif($wbs_info['idResultType'] == 7 ){ //тип результата - МТ банка
+							$error_code = 4;
+							$error_str = 'массовая генерация инцидентов в мантис возможна только для типа результата "Программное обеспечение"';	  
+								  }		  
+					//поиск головного инцидента для привязки	
+						$relationships ='';															              
+						if(isset($a['mantis_link'])) {
+							//Yii::$app->session->addFlash('error',"Онок ".$a['mantis_link']);
+							 if(empty($a['mantis_link'])){
+								 $error_code = 1;
+								 $error_str = 'По выбранной работе не указан инцидент mantis. Привязка невозможна';
+			  
+								 } else{
+									$target_id = (int)$a['mantis_link'];
+								 }	
+							 	 
+							} else{   //головной инцидент не выбран
+								if($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 or $wbs_info['idResultType'] == 4 or $wbs_info['idResultType'] == 5){   //Для ПО и ТЗ и прочее
+								   $error_code = 2;
+								   $error_str = 'Не выбран головной инцидент для привязки. Привязка невозможна';
+								}
+							}	
+					//выбор проекта мантис
+						if(isset($a['mantis_prj'])) {
+							$mantis_project = $MntPrjLstArray[$a['mantis_prj']]['name'];
+						}		 
+					//проверка проекта в мантис		
+					if(empty($mantis_project)){
+						$error_code = 3;
+						$error_str = 'Для типа результата не определен проект mantis';
+						}
+				  
+							  if($error_code == 0){
+								   $issue = array(
+										'project' => array( 'name' => $mantis_project ),
+										'category' => $category,
+										'severity' => array('id'=>10),//нововведение
+										'reproducibility' => array('id'=>100),  //неприменимо
+										'summary' =>  $summary, 
+										'description' => $model->WorkDescription,
+										'custom_fields' => $custom_fields,
+										'target_version' => $version,
+										'handler' =>$handler,
+										'relationships'=>$relationships,
+										'sponsorship_total'=>$LastEstimateSumm, 
+										'view_state' => $view_state  
+									);
+									 $client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 
+									 $result =  $client->mc_issue_add($username, $password, $issue);
+									 if (is_soap_fault($result)){   //Ошибка
+									    Yii::$app->session->addFlash('error',"Ошибка SOAP: (faultcode: ".$result->faultcode.
+									    " faultstring: ".$result->faultstring);
+									    //"detail".$result->detail);
 									
+								     }else{  //Сохраняем номер созданного инцидента
+											$model->mantisNumber = (string)$result;
+											$model->save();
+											//делаем привязку к головному инц
+											if($wbs_info['idResultType'] == 2 or $wbs_info['idResultType'] == 3 
+																			  or $wbs_info['idResultType'] == 4 
+																			  or $wbs_info['idResultType'] == 5
+																			  or $wbs_info['idResultType'] == 6
+																			  or $wbs_info['idResultType'] == 7){//Для ПО и ТЗ и абонемента
+												$issue_id = (int)$result; 
+												$relationship = array (
+													'type' => array (
+																'id' => 1,
+															  ),
+													'target_id' => $target_id
+												 );
+											$relation =  $client->mc_issue_relationship_add($username, $password,$issue_id,$relationship);
+											if (is_soap_fault($relation)){   //Ошибка привязки
+												Yii::$app->session->addFlash('error',"Ошибка привязки инцидента. Ошибка SOAP: (faultcode: ".$relation->faultcode.
+													" faultstring: ".$relation->faultstring);
+											} else {Yii::$app->session->addFlash('success','Инциденты '.$issue_id.' и '.$target_id.' связаны');}
+											}
+											
+										}
+								} else{
+									Yii::$app->session->addFlash('error',$error_str);
+									}
+							  
+							   
+					$page_number = 2;
+					
+				
+						/////////////////////////////////////////////
+						
+					}
+					$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
+					} else {
+						Yii::$app->session->addFlash('error','Не выбраны работы для генерации инцидентов мантис' );
+						}				
 					
 				}	
-				if($btn_info[0] == 'cancl') { // отмена
+				elseif($btn_info[0] == 'cancl') { // отмена
 					
 					$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);					
 				}	
-		}	       
+				//elseif($btn_info[0] == 'select') { // отмена
+					//if($select_all == 1){
+						//$select_all = 0;
+						//} else {
+							//$select_all = 1;
+							//}
+					////$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);					
+				//}
+		}	
+	  }	       
 	  $VwListOfWorkEffort = VwListOfWorkEffort::find()->where(['idEstimateWorkPackages'=>$idEstimateWorkPackages, 'idWbs'=>$idWbs])->all();	
-	  $MntPrjLstArray = MyHelper::getMantisprojects(); //массив с перечнем проектов из мантис
+	
 	  return $this->render('PutIncToMantis', [
 			'idBR'=>$idBR,
             'id_node'=>$idWbs,
             'VwListOfWorkEffort' => $VwListOfWorkEffort,
             'idEstimateWorkPackages' => $idEstimateWorkPackages,
             'MantisPrjLstArray' =>$MntPrjLstArray,
+            'select_all'=>$select_all
         ]);		 
 	 } 
  /* 

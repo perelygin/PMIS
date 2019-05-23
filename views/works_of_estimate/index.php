@@ -77,9 +77,11 @@ use app\models\BusinessRequests;
 					 $url2 = Url::to(['works_of_estimate/create', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-plus-sign"></span>', $url2,['title' => 'Добавить работу',]);
 					 echo "   ";
-					 $url6 = Url::to(['works_of_estimate/put_inc_to_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
-					 echo  Html::a('<span class="glyphicon glyphicon-knight"></span>', $url6,['title' => 'Cоздать инциденты на основе работ',]);
-					 echo "   ";
+					 if($wbs_current_node->idResultType == 3){
+						 $url6 = Url::to(['works_of_estimate/put_inc_to_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
+						 echo  Html::a('<span class="glyphicon glyphicon-knight"></span>', $url6,['title' => 'Cоздать инциденты на основе работ',]);
+						 echo "   ";
+					 }	 
 					 $url3 = Url::to(['works_of_estimate/take_works_from_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-bishop"></span>', $url3,['title' => 'Cоздать работы на основе инцидентов mantis',]);
 					 echo "   ";

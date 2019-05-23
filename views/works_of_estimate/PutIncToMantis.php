@@ -73,6 +73,7 @@ $this->title = "Массовое создание инцидентов в mantis
 
 
 $this->params['breadcrumbs'][] = $this->title;
+$form = ActiveForm::begin(); 
 ?>
 <div class="works-of-estimate-view">
 
@@ -84,65 +85,99 @@ $this->params['breadcrumbs'][] = $this->title;
     <br>
     Выбери работы,  по которым нужно создать инциденты в mantis:
     <p>
-     <?php 
-		$form = ActiveForm::begin(); 
-        
-        if(count($VwListOfWorkEffort)>0){ // по элементу wbs есть работы
-		echo('<table border = "1" cellpadding="4" cellspacing="2">');  
-        $id = $VwListOfWorkEffort[0]['idWorksOfEstimate'];
-        $i =0;
-        $checkbox_str = (!empty($VwListOfWorkEffort[$i]['mantisNumber'])) ?  ' ' :'<input name="selectedWorks[]" type="checkbox" checked="checked" value='.$id.'>'; 
-        
-        echo('<tr><td colspan="2" ><b>'
-                .Html::a($VwListOfWorkEffort[$i]['mantisNumber'], $url_mantis.$VwListOfWorkEffort[$i]['mantisNumber'],['target' => '_blank']).' '
-		        .$VwListOfWorkEffort[$i]['WorkName']
-		        .'</td><td>' 
-		        .$checkbox_str
-		        .'</td></tr>');
-		 
-        
-		foreach($VwListOfWorkEffort as $vlwe){
-			if($vlwe['idWorksOfEstimate'] == $id){
-				if(isset($vlwe['workEffort'])){
-					echo('<tr><td>'
-						.$vlwe['team_member']
-						.'</td><td>'
-						.$vlwe['workEffort'].' ч.д.'
-						.'</td><td></td></tr>');	
-			    }
-			}	else{
-				 $id = $vlwe['idWorksOfEstimate'];	
- 				 $checkbox_str = (!empty($vlwe['mantisNumber'])) ?  ' ' :'<input name="selectedWorks[]" type="checkbox" checked="checked" value='.$id.'>'; 
-				 echo('<tr><td colspan="2"><b>'
-				 .Html::a($vlwe['mantisNumber'], $url_mantis.$vlwe['mantisNumber'],['target' => '_blank']).' '
-				 .$vlwe['WorkName']
-				 .'</td><td>'
-				 .$checkbox_str
- 			     .'</td></tr>');
-				 if(isset($vlwe['workEffort'])){
-					 echo('<tr><td>'
-					 
-					 .$vlwe['team_member']
-					 
-					 .'</td><td>'
-					 .$vlwe['workEffort'].' ч.д.'
-					 
-					 .'</td><td></td></tr>');		
-				 }	 
-			}
-			
-			
-			$i =$i+1;
-	      } 
-	      echo '  </table>';
-	      echo '<br>';
-		}
-         ?>
+  
        
        
         
     </p>
     <div class="container">
+		<div class="row">
+			<div class="col-sm-10">
+			</div>
+			<div class="col-sm-2">
+				<?php
+				
+					  
+									     
+					 if($select_all == 1){
+						   $url2 = Url::to(['works_of_estimate/put_inc_to_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node,'select_all'=>0]);
+						   echo  Html::a('<span class="glyphicon glyphicon-ok"></span>', $url2,['title' => 'Снять отметку',]);
+						 } else{
+						     $url2 = Url::to(['works_of_estimate/put_inc_to_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node,'select_all'=>1]);	 
+							 echo  Html::a('<span class="glyphicon glyphicon-unchecked"></span>', $url2,['title' => 'Отметить все',]);
+						 }
+				?>
+			</div>
+		</div>		
+		<div class="row">
+			<div class="col-sm-12">
+			   <?php 
+					
+			        
+			        if(count($VwListOfWorkEffort)>0){ // по элементу wbs есть работы
+					echo('<table border = "1" cellpadding="4" cellspacing="2">');  
+			        $id = $VwListOfWorkEffort[0]['idWorksOfEstimate'];
+			        $i =0;
+			        //снять-поставить отметку выбора
+					if($select_all == 1){
+						$checkbox_str = (!empty($VwListOfWorkEffort[$i]['mantisNumber'])) ?  ' ' :'<input name="selectedWorks[]" type="checkbox" checked="checked" value='.$id.'>'; 
+						} else {
+						   $checkbox_str = (!empty($VwListOfWorkEffort[$i]['mantisNumber'])) ?  ' ' :'<input name="selectedWorks[]" type="checkbox"  value='.$id.'>'; 
+							}
+			        
+			        
+			        echo('<tr><td colspan="2" ><b>'
+			                .Html::a($VwListOfWorkEffort[$i]['mantisNumber'], $url_mantis.$VwListOfWorkEffort[$i]['mantisNumber'],['target' => '_blank']).' '
+					        .$VwListOfWorkEffort[$i]['WorkName']
+					        .'</td><td>' 
+					        .$checkbox_str
+					        .'</td></tr>');
+					 
+			        
+					foreach($VwListOfWorkEffort as $vlwe){
+						if($vlwe['idWorksOfEstimate'] == $id){
+							if(isset($vlwe['workEffort'])){
+								echo('<tr><td>'
+									.$vlwe['team_member']
+									.'</td><td>'
+									.$vlwe['workEffort'].' ч.д.'
+									.'</td><td></td></tr>');	
+						    }
+						}	else{
+							 $id = $vlwe['idWorksOfEstimate'];	
+			 				//снять-поставить отметку выбора
+							 if($select_all == 1){
+							   $checkbox_str = (!empty($VwListOfWorkEffort[$i]['mantisNumber'])) ?  ' ' :'<input name="selectedWorks[]" type="checkbox" checked="checked" value='.$id.'>'; 
+							  } else {
+							   $checkbox_str = (!empty($VwListOfWorkEffort[$i]['mantisNumber'])) ?  ' ' :'<input name="selectedWorks[]" type="checkbox"  value='.$id.'>'; 
+							  }
+							 echo('<tr><td colspan="2"><b>'
+							 .Html::a($vlwe['mantisNumber'], $url_mantis.$vlwe['mantisNumber'],['target' => '_blank']).' '
+							 .$vlwe['WorkName']
+							 .'</td><td>'
+							 .$checkbox_str
+			 			     .'</td></tr>');
+							 if(isset($vlwe['workEffort'])){
+								 echo('<tr><td>'
+								 
+								 .$vlwe['team_member']
+								 
+								 .'</td><td>'
+								 .$vlwe['workEffort'].' ч.д.'
+								 
+								 .'</td><td></td></tr>');		
+							 }	 
+						}
+						
+						
+						$i =$i+1;
+				      } 
+				      echo '  </table>';
+				      echo '<br>';
+					}
+			 ?>				
+			</div>
+		</div>	
 		<div class="row">
 			<div class="col-sm-6">
 			<?php 
