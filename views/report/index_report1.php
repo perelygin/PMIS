@@ -6,7 +6,7 @@ use yii\helpers\Url;
 use app\models\BusinessRequests;
 use app\models\EstimateWorkPackages;
 use app\models\vw_settings; 
-
+use app\models\WbsSchedule;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\VwReport1Search */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -38,17 +38,42 @@ $this->params['breadcrumbs'][] = $this->title;
     
       <table border = "1" cellpadding="4" cellspacing="2">
 		  <?php 
-		    echo '<tr><th>Проект</th><th>Результат проекта</th><th>Статус результата</th><th>Ответственный</th><th>Плановая версия</th><th>Организация отв.</th></tr>';
+		    echo '<tr><th>Проект</th><th>Результат проекта</th>
+					  <th>Статус результата</th>
+					  <th>Ответственный</th>
+					  <th>Плановая версия</th>
+					  <th>Организация отв.</th>
+					  <th>План. дата реакции</th>
+					  <th>План. дата результата</th>
+					  </tr>';
 		    if(!empty($dataProvider)){
 				$i = $dataProvider[0]['idBr'];
+				$BR = BusinessRequests::findOne($i);	 
+				if(!is_null($BR)){   //  получаем id актуальной оценки для BR  покаждому результату.
+						$LastEstimateId = $BR->getLastEstimateId();
+				}	
 			}else {
 				$i=0;
 				}
 		    foreach($dataProvider as $dp_str){
+				$dend_str = ""; // строка для даты по результату
 				 if($i <> $dp_str->idBr){
-					   echo '<tr bgcolor="#b1b84f" ><td colspan="6">&nbsp</td></tr>';
+					  echo '<tr bgcolor="#b1b84f" ><td colspan="6">&nbsp</td></tr>';
+				      //получаем дату результата по последней оценке трудозатрат	 
+					  $BR = BusinessRequests::findOne($dp_str->idBr);	 
+					  if(!is_null($BR)){   //  получаем id актуальной оценки для BR  покаждому результату.
+							$LastEstimateId = $BR->getLastEstimateId();
+					  }	
 					  $i = $dp_str->idBr ;
-				} 
+				 } 
+			 if(!is_null($LastEstimateId)){
+				 $dend =  WbsSchedule::getWbsEndDate($LastEstimateId,$dp_str->id);
+				 if($dend){
+					 $dend_str = $dend->format('Y-m-d');
+					 }
+				 
+			 }
+			 	 
 			 echo '<tr>
 			  <td> BR-'.$dp_str->BRNumber.' '.$dp_str->BRName.'</td>
 			  <td>'.Html::a($dp_str->name, Url::toRoute(['br/update_wbs_node', 'id_node'=>$dp_str->id,'idBR'=>$dp_str->idBr]),['title' => '','target' => '_blank']). '</td>
@@ -56,6 +81,8 @@ $this->params['breadcrumbs'][] = $this->title;
 			  <td>'. $dp_str->fio.'</td>
 			  <td>'. $dp_str->version_number.'</td>
 			  <td>'. $dp_str->CustomerName.'</td>
+			  <td>'. $dp_str->ResultEventsPlannedResponseDate.'</td>
+			  <td>'. $dend_str.'</td>
 			  </tr>';	
 			  $idEstPckg = BusinessRequests::findOne(['idBR'=>$dp_str->idBr])->getLastEstimateId(); 
 			  if(!is_null($idEstPckg)){  //если есть пакет оценок по BR
@@ -67,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
 					foreach($WorksList as $wl){
 					  echo '<tr>
 					  <td></td>
-					  <td colspan="4">'.Html::a($wl['mantisNumber'], $url_mantis.$wl['mantisNumber'],['target' => '_blank']).' '.$wl['WorkName']. '</td><td></td>
+					  <td colspan="7">'.Html::a($wl['mantisNumber'], $url_mantis.$wl['mantisNumber'],['target' => '_blank']).' '.$wl['WorkName']. '</td>
 				
 					  </tr>';	
 				    }

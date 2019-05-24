@@ -46,6 +46,7 @@ class VwReport1 extends \yii\db\ActiveRecord
             [['ResultStatusName'], 'string', 'max' => 45],
             [['fio'], 'string', 'max' => 302],
             [['CustomerName'], 'string', 'max' => 120],
+            [['ResultEventsDate', 'ResultEventsPlannedResponseDate'], 'safe'], 
         ];
     }
 

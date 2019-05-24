@@ -136,4 +136,32 @@ class ReportController extends \yii\web\Controller
         ]);
         
     }  
+   ///*
+    //* сводный сетевой график вариант2
+    //* перед запуском отчета делается пересчет графика по всем BR, у которых есть хотя бы один результат в работе
+    //* для каждого результата в работе выводится информация о плановой дате получения результата 
+    //* и о плановой дате реакции по  событию результата
+    //*/  
+   //public function actionReport3()
+   //{
+		////получаем перечень результатов со статусом 2(в работе)
+		//$VwReport2 = VwReport2::find()->all();
+		//$idBR = -1;
+		//$LastEstimateId = -1;
+		//$result =  array();
+		//foreach($VwReport2 as $vr2){
+			//$res_str = array();
+			//if($idBR != $vr2['idBR']){  //id BR повторяются для каждого результата
+				//$idBR = $vr2['idBR'];
+				//$BR = BusinessRequests::findOne($idBR);
+			    //if(!is_null($BR)){   //  получаем id актуальной оценки для BR  покаждому результату.
+					//$LastEstimateId = $BR->getLastEstimateId();
+				//}				
+			//}
+			//if(!is_null($LastEstimateId)){
+				
+			//}
+			
+		//}	
+   //}	
 }
