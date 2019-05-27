@@ -763,7 +763,7 @@ class Works_of_estimateController extends Controller
 						}		  
 					  elseif($wbs_info['idResultType'] == 6 ){ //тип результата - внутрений тест
 							  $view_state = array('name'=>'private');
-							  $summary ='BR-'.$wbs_info['BRNumber'].$model->WorkName;
+							  $summary ='BR-'.$wbs_info['BRNumber'].' '.$model->WorkName;
 							  $mantis_project = 'VTB тестирование';
 							  $category ='Разработка';
 							  $version = $wbs_info['version_number_s'];
