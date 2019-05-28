@@ -187,7 +187,7 @@ $form = ActiveForm::begin();
 											     or $WBSInfo['idResultType'] == 6
 											     or $WBSInfo['idResultType'] == 7){
 				 echo('
-				 <p><b>Перед созданием инцидентов в mantis выбери инцидент,  к котрому они будет привязаны: </b></p>
+				 <p><b>Перед созданием инцидентов в mantis выбери инцидент,  к которому они будет привязаны: </b></p>
 				    <table border = "1" cellpadding="4" cellspacing="2">
 					 <tr><th>Результат</th><th>Работа</th><th>Номер инцидента</th><th></th></tr>
 				  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=4>&nbsp;</td></tr>');
@@ -214,7 +214,7 @@ $form = ActiveForm::begin();
 			<?php 
 			if($WBSInfo['idResultType'] == 2 or $WBSInfo['idResultType'] == 3 or $WBSInfo['idResultType'] == 4 ){
 			 echo('
-			 <p><b>Можно изменить проект mantis, в котором будетут созданы инциденты: </b></p>
+			 <p><b>Можно изменить проект mantis, в котором будут созданы инциденты: </b></p>
 			    <table border = "1" cellpadding="4" cellspacing="2">
 				 <tr><th>Название проекта mantis</th><th></th></tr>
 			  <tr><td bgcolor="#FFFFFF" style="line-height:10px;" colspan=2>&nbsp;</td></tr>');

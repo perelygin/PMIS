@@ -11,7 +11,7 @@
 			  <?php echo Html::a('Сводный отчет по статусу результатов', Url::toRoute(['report/report1']),['title' => '',]); ?>
 		  </div>
 		  <div class="col-sm-6">
-			  <?php echo Html::a('Сетевой график', Url::toRoute(['report/report2']),['title' => '',]); ?>
+			  <?php // echo Html::a('Сетевой график', Url::toRoute(['report/report2']),['title' => '',]); ?>
 		  </div>
 		</div>			  
 </div>

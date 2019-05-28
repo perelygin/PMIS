@@ -58,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
 		    foreach($dataProvider as $dp_str){
 				$dend_str = ""; // строка для даты по результату
 				 if($i <> $dp_str->idBr){
-					  echo '<tr bgcolor="#b1b84f" ><td colspan="6">&nbsp</td></tr>';
+					  echo '<tr bgcolor="#b1b84f" ><td colspan="8">&nbsp</td></tr>';
 				      //получаем дату результата по последней оценке трудозатрат	 
 					  $BR = BusinessRequests::findOne($dp_str->idBr);	 
 					  if(!is_null($BR)){   //  получаем id актуальной оценки для BR  покаждому результату.

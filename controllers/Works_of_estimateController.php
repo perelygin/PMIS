@@ -718,7 +718,7 @@ class Works_of_estimateController extends Controller
 													'field' => array (
 														'id' => 23 
 																),
-														'value' => 'Bug' 
+														'value' => 'Task' 
 												              ),
 												   'CodevTT_Manager EffortEstim' => array (
 													'field' => array (
