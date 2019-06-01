@@ -57,13 +57,14 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 			    ]
 			]) ?>
 		</div>
+		
+	  </div>	
+	  <div class="row">
 		<div class="col-sm-4">
 			<?= $form->field($model, 'ResultEventsName') ?>
 		</div> 
-		<div class="col-sm-4">
-			<?= $form->field($model, 'ResultEventResponsible')->dropDownList($items1,$params1) ?>  
-		</div> 
-	  </div>	
+		
+	  </div>
 	  <div class="row">
         <div class="col-sm-4">
 			<?= $form->field($model, 'ResultEventsPlannedResponseDate')->widget(DatePicker::className(),[
@@ -86,8 +87,8 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 			  ?>
 		</div> 
 		<div class="col-sm-4">
-			
-		</div> 
+			<?= $form->field($model, 'ResultEventResponsible')->dropDownList($items1,$params1) ?>  
+		</div>   
 	  </div>   
 	   <div class="row">
 		  <div class="col-sm-12">
@@ -95,7 +96,7 @@ $settings = vw_settings::findOne(['Prm_name'=>'Mantis_path']);
 				echo $form->field($model, 'ResultEventsDescription')->widget(Widget::className(), [
 				    'settings' => [
 				        'lang' => 'ru',
-				        'minHeight' => 200,
+				        'minHeight' => 150,
 				        'plugins' => [
 			            'fullscreen',
 				        ],
