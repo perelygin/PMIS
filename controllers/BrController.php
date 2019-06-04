@@ -121,11 +121,16 @@ class BrController extends Controller
 										}
 									}	
 						   //Yii::$app->session->addFlash('error',"Ошибка копирования работ из пакета оценок ".print_r($NewWorksOfEstimate->errors));
-						  }else{	     //копируем трудозатраты
+						  }else{	     
+							  //копируем трудозатраты
 						    $sql= "insert into WorkEffort (idWorksOfEstimate, idTeamMember,WorkEffort,workEffortHour,idServiceType) 
 									select '".$NewWorksOfEstimate->idWorksOfEstimate."',idTeamMember,WorkEffort,workEffortHour,idServiceType from WorkEffort
 									 where idWorksOfEstimate = ".$woe['idWorksOfEstimate'];
 						    $a = Yii::$app->db->createCommand($sql)->execute(); 
+						    //копируем ограничения
+						    $sql1 = "insert into Constraints (idWorksOfEstimate,idConstrType,DataConstr) 
+										Select '".$NewWorksOfEstimate->idWorksOfEstimate."', idConstrType, DataConstr from Constraints where idWorksOfEstimate = ".$woe['idWorksOfEstimate'];
+						     $a1 = Yii::$app->db->createCommand($sql1)->execute(); 
 						 }     
 					   }
 					   //копируем связи между работами
