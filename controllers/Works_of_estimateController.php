@@ -21,11 +21,13 @@ use app\models\select_Work_search;
 use app\models\Links;
 use app\models\Schedule;
 use app\models\Constraints;
+use app\models\GetFile_WorkFromTZ;
 
 use app\components\myHelper;
 
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -956,6 +958,55 @@ class Works_of_estimateController extends Controller
 	   //return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate, 'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
     }
     
+    /*
+     * Создать работы на основе ТЗ(распарсить dbk)
+     * 
+     */ 
+    
+     public function actionTake_works_from_tz($idEstimateWorkPackages,$idWbs,$idBR)
+     {
+		$model = new GetFile_WorkFromTZ(); 
+		//if (Yii::$app->request->isPost) {
+			//$model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
+            //if ($model->upload()) {
+                //// file is uploaded successfully
+                //return;
+            //}
+        //}
+        
+		$a = Yii::$app->request->post();
+ 		if (!empty($a)) {
+			if(isset($a['btn'])) {   // анализируем нажатые кнопки
+				$btn_info = explode("_", $a['btn']);
+				if($btn_info[0] == 'prs') {
+				 if (Yii::$app->request->isPost) {
+					     $model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
+		            if ($model->upload()) {// file is uploaded successfully
+		                $smpl_xml=simplexml_load_file('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
+		                foreach ($smpl_xml->section as $section) {
+						   echo $section->title, PHP_EOL;
+						}
+		                	                
+		                return;
+		            }
+		         }					
+				}
+				if($btn_info[0] == 'cancl') {  //отмена
+					$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
+				}
+			}	
+		} 
+		 
+		 return $this->render('TakeWorksFromTZ', [
+			'idBR'=>$idBR,
+            'id_node'=>$idWbs,
+            'model' => $model,
+            'idEstimateWorkPackages' => $idEstimateWorkPackages,
+            //'mantis_links' => $BR->getMantisNumbers(2),
+            //'related_issue'=>$related_issue,
+            //'missingMembers'=>$missingMembers
+        ]);	
+	 }
     /**
  * 
  * Cоздать работы на основе инцидентов mantis

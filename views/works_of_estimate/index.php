@@ -77,9 +77,12 @@ use app\models\BusinessRequests;
 					 $url2 = Url::to(['works_of_estimate/create', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 					 echo  Html::a('<span class="glyphicon glyphicon-plus-sign"></span>', $url2,['title' => 'Добавить работу',]);
 					 echo "   ";
-					 if($wbs_current_node->idResultType == 3){
+					 if($wbs_current_node->idResultType == 3){ //тольо для работ по созданию ПО
 						 $url6 = Url::to(['works_of_estimate/put_inc_to_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
 						 echo  Html::a('<span class="glyphicon glyphicon-knight"></span>', $url6,['title' => 'Cоздать инциденты на основе работ',]);
+						 echo "   ";
+						  $url7 = Url::to(['works_of_estimate/take_works_from_tz', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
+						 echo  Html::a('<span class="glyphicon glyphicon-book"></span>', $url7,['title' => 'Cоздать работы на основе ТЗ(*.dbk)',]);
 						 echo "   ";
 					 }	 
 					 $url3 = Url::to(['works_of_estimate/take_works_from_mantis', 'idBR'=>$idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages , 'idWbs'=>$id_node]);;
