@@ -7,6 +7,7 @@
     use vova07\imperavi\Widget;
     use kartik\datetime\DateTimePicker;
     use kartik\date\DatePicker;
+    use app\models\BRStatus;
     
 		$Organization = Projects::find()->all();
 		$items = ArrayHelper::map($Organization,'idProject','ProjectName');
@@ -26,30 +27,40 @@
 			'prompt' => 'Выберите шаблон wbs',
 			'disabled'=>"disabled"
 		];
+		$BRStatus = BRStatus::find()->all();
+		 $items3 = ArrayHelper::map($BRStatus,'idBRStatus','BRStatusName');
+		  $params3 = [
+		        'prompt' => 'Выберите cтатус BR'
+		        //'1'=>['selected'=>true]
+		    ]; 
+		
  ?>
   
   
   
    <div class="container">
 	   <div class="row">
-		  <div class="col-sm-4">
+		  <div class="col-sm-3">
 				<?= $form->field($model, 'idProject')->dropDownList($items,$params); ?>
 	      </div>
-	      <div class="col-sm-4">
+	      <div class="col-sm-3">
 				<?= $form->field($model, 'BRRoleModelType')->dropDownList($items1,$params1); ?>
 		  </div>
-		  <div class="col-sm-4">
+		  <div class="col-sm-3">
 				<?= $form->field($model, 'BRLifeCycleType')->dropDownList($items2,$params2); ?>
+		  </div>
+		  <div class="col-sm-3">
+				<?= $form->field($model, 'BRStatus')->dropDownList($items3,$params3); ?>
 		  </div>
 		 </div>
 	   <div class="row">
-		   <div class="col-sm-4">
+		   <div class="col-sm-3">
 				<?= $form->field($model, 'BRNumber')->textInput() ?>
 	      </div>
-	      <div class="col-sm-4">
+	      <div class="col-sm-3">
 				<?= $form->field($model, 'BRName')->textInput(['maxlength' => true]) ?>
 	      </div>
-	      <div class="col-sm-4">
+	      <div class="col-sm-3">
 				<?php
 				//$form->field($model, 'BRDateBegin')->widget(DateTimePicker::className(),[
 			    //'pluginOptions' => [

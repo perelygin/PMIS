@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use app\models\Projects;
+use app\models\BRStatus;
 
 use yii\helpers\ArrayHelper;
 /* @var $this yii\web\View */
@@ -14,6 +15,13 @@ use yii\helpers\ArrayHelper;
   $params = [
         'prompt' => 'Выберите проект'
     ];
+    
+ $BRStatus = BRStatus::find()->all();
+ $items1 = ArrayHelper::map($BRStatus,'idBRStatus','BRStatusName');
+  $params1 = [
+        'prompt' => 'Выберите cтатус BR'
+       // '1'=>['selected'=>true]
+    ];  
 ?>
 
 <div class="vw-list-of-br-search">
@@ -25,7 +33,13 @@ use yii\helpers\ArrayHelper;
 
   <div class="container">
 	   <div class="row">
-		  <div class="col-sm-10">
+		  
+		  <div class="col-sm-3">
+  			<?php
+  				  echo $form->field($model, 'idBRStatusFilter')->dropDownList($items1,$params1);  
+				 ?>
+		  </div>  
+		  <div class="col-sm-7">
   			<?= $form->field($model, 'ProjectName')->dropDownList($items,$params);  ?>
 		  </div>  
 		  <div class="col-sm-2">

@@ -59,11 +59,14 @@ class BrController extends Controller
     /**
      * Lists all VwListOfBR models.
      * @return mixed
+     * $ShowAll - 0 показать все BR 
+     *  	  	  1 показать только действующие
      */
     public function actionIndex()
     {
         Yii::$app->getUser()->setReturnUrl( Yii::$app->getRequest()->getUrl()); ///Запомнили текущую страницу
-        $searchModel = new VwListOfBRSearch();
+         $searchModel = new VwListOfBRSearch();
+		$searchModel->idBRStatusFilter = 1; //по умолчанию - только в статусе "действует"
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -175,6 +178,7 @@ class BrController extends Controller
         $sysver =  new SystemVersions(); //актуальная версия
         $model = new BusinessRequests();
         $model->BRDateBegin = date("Y-m-d");
+        $model->BRStatus = 1; //статус Действует
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 			//создаем роли для BR
 			$roleModel = new RoleModel();
@@ -188,7 +192,11 @@ class BrController extends Controller
 				$prjComm->save();
 				if($prjComm->hasErrors()){
 					Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону ролевой модели ");
-				}
+				} else{
+					if($model->BRRoleModelType == 1 and $prjComm->idRole == 3){  //iаблон ВТБ и роль Аналитик
+							Yii::$app->session->addFlash('error',"аблон ВТБ и роль Аналитик ");
+						}
+					}
 			}
 			//создаем wBS по шаблону(два уровня)
 			$LifeCycleStages = new LifeCycleStages();

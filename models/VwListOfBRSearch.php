@@ -16,11 +16,13 @@ class VwListOfBRSearch extends VwListOfBR
      * {@inheritdoc}
      */
     public $mantis_filter; 
+    public $idBRStatusFilter;
+   
     public function rules()
     {
         return [
             [['idBR', 'BRDeleted', 'BRnumber'], 'integer'],
-            [['BRName', 'ProjectName','mantis_filter'], 'safe'],
+            [['BRName', 'ProjectName','mantis_filter','idBRStatusFilter','ShowAll'], 'safe'],
         ];
     }
 
@@ -36,6 +38,8 @@ class VwListOfBRSearch extends VwListOfBR
     {
         return [
             'mantis_filter' => 'Номер инцидента',
+            'ProjectName' => 'Проект',
+            'idBRStatusFilter'=>'Cтатус BR',
              ];
     }
     /**
@@ -81,6 +85,9 @@ class VwListOfBRSearch extends VwListOfBR
 				  $query->andFilterWhere(['in','idBR',$BRstr]);
 				}
 		}
+		if(!empty($this->idBRStatusFilter)){
+			 $query->andFilterWhere(['=','idBRStatus',$this->idBRStatusFilter]);
+		}
         
 				
         if (!$this->validate()) {
@@ -100,6 +107,7 @@ class VwListOfBRSearch extends VwListOfBR
         $query->andFilterWhere(['like', 'BRName', $this->BRName])
             ->andFilterWhere(['like', 'BRnumber', $this->BRnumber])
             ->andFilterWhere(['like', 'ProjectName', $this->ProjectName]);
+            //->andFilterWhere(['like', 'BRStatusName', $this->BRStatusName]);
 
         
         return $dataProvider;

@@ -53,6 +53,7 @@ class VwListOfBR extends \yii\db\ActiveRecord
             'BRnumber' => 'Номер BR',
             'BRName' => 'Наименование BR',
             'ProjectName' => 'Проект',
-        ];
+            'idBRStatus'=>'Cтатус BR',
+         ];
     }
 }

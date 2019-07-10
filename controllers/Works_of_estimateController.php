@@ -983,9 +983,22 @@ class Works_of_estimateController extends Controller
 					     $model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
 		            if ($model->upload()) {// file is uploaded successfully
 		                $smpl_xml=simplexml_load_file('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
-		                foreach ($smpl_xml->section as $section) {
-						   echo $section->title, PHP_EOL;
-						}
+		                //foreach ($smpl_xml->section as $section) {
+						   echo $smpl_xml->getName() . "<br>";
+						   foreach ($smpl_xml->children() as $child)
+							{
+							    echo "___".$child->getName()."  ".$child->title."<br>";
+							    
+								foreach($child->attributes('xml',true) as $a => $b) {
+									echo  "_____",$a,'=',$b,"<br>";
+									echo " ";    
+								}  
+							}
+						   //echo $section->title;
+						   //foreach($section->attributes() as $a => $b) {
+								//echo $a,'="',$b,"\"\n";
+						   //}
+						//}
 		                	                
 		                return;
 		            }
