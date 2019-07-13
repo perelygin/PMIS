@@ -23,6 +23,7 @@ use app\models\ServiceType;
 use app\models\Schedule;
 use app\models\Links;
 use app\models\Weekends;
+use app\models\People;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -33,6 +34,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use app\components\myHelper;
+use yii\helpers\ArrayHelper;
 use SoapClient;
 
 
@@ -183,6 +185,15 @@ class BrController extends Controller
 			//создаем роли для BR
 			$roleModel = new RoleModel();
 			$roles = $roleModel->get_RoleModel($model->BRRoleModelType);
+			//универсальные ресурсы
+				$UR_array = array();
+				$UR_array[3] = array('name'=>"УНИВЕРСАЛЬНЫЙ", 'family'=>"АНАЛИТИК",'parent_id'=>0);
+				$UR_array[4] = array('name'=>"УНИВЕРСАЛЬНЫЙ", 'family'=>"РАЗРАБОТЧИК",'parent_id'=>0);
+				$UR_array[6] = array('name'=>"УНИВЕРСАЛЬНЫЙ", 'family'=>"ТЕСТЕР",'parent_id'=>0);
+				$UR_array[5] = array('name'=>"Андрей", 'family'=>"Москалев",'parent_id'=>0);
+				$UR_array[7] = array('name'=>"Тимур", 'family'=>"Перелыгин",'parent_id'=>0);
+				$UR_array[8] = array('name'=>"УНИВЕРСАЛЬНЫЙ", 'family'=>"АНАЛИТИК",'parent_id'=>0);
+				
 			foreach ($roles as $role) {
 				$prjComm = new ProjectCommand();
 				$prjComm->parent_id = 0;
@@ -193,11 +204,33 @@ class BrController extends Controller
 				if($prjComm->hasErrors()){
 					Yii::$app->session->addFlash('error',"Ошибка сохранения по шаблону ролевой модели ");
 				} else{
-					if($model->BRRoleModelType == 1 and $prjComm->idRole == 3){  //iаблон ВТБ и роль Аналитик
-							Yii::$app->session->addFlash('error',"аблон ВТБ и роль Аналитик ");
-						}
+					//добавляем в универсальные ресурсы parent_id для роли
+					if (ArrayHelper::keyExists($prjComm->idRole, $UR_array, false)){
+						$UR_array[$prjComm->idRole]['parent_id'] = $prjComm->id;
 					}
+				}
+			
 			}
+			
+			////добавляем универсальные ресурсы
+			if($model->BRRoleModelType == 1){
+				foreach($UR_array as $key => $value){
+					$idPpl = People::getPeopleByFI($value['name'],$value['family']); //найти человека с фамилией и именем 
+					if($idPpl){ //если найден
+						$prjCommUniRes = new ProjectCommand();
+						$prjCommUniRes->parent_id = $value['parent_id'];
+						$prjCommUniRes->idBR = $model->idBR;
+						$prjCommUniRes->idRole = $key;
+						$prjCommUniRes->idHuman = $idPpl;
+						$prjCommUniRes->save();	
+						if($prjCommUniRes->hasErrors()){
+							Yii::$app->session->addFlash('error',"Ошибка сохранения универсального ресурса");
+						}
+					}else{
+					  Yii::$app->session->addFlash('error',"Ошибка добавления универсального ресурса. Не найден ". $value['name'].' '.$value['family'] );
+					}
+				}	
+			}			
 			//создаем wBS по шаблону(два уровня)
 			$LifeCycleStages = new LifeCycleStages();
 			$wbs_template = $LifeCycleStages->getLifeCycleStages($model->BRLifeCycleType);

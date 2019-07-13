@@ -32,6 +32,7 @@ use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
+use DOMDocument;
 use SoapClient;
 
 /**
@@ -958,6 +959,8 @@ class Works_of_estimateController extends Controller
 	   //return $this->redirect(['update','idWorksOfEstimate'=>$idWorksOfEstimate, 'idWbs' => $idWbs ,'idBR' => $idBR, 'idEstimateWorkPackages'=>$idEstimateWorkPackages]);
     }
     
+   
+     //public function getChildNode
     /*
      * Создать работы на основе ТЗ(распарсить dbk)
      * 
@@ -965,6 +968,54 @@ class Works_of_estimateController extends Controller
     
      public function actionTake_works_from_tz($idEstimateWorkPackages,$idWbs,$idBR)
      {
+		/*
+		 *Вложенная функция
+		 * Возвращает текст тэга 
+		 */ 
+		function getChildNodeText($chn){
+			$str = '';
+			if($chn->hasChildNodes()){   //есть подчиненные
+			 $childNd = $chn->childNodes;
+			 foreach($childNd as $a){
+				 if($a->nodeName == 'listitem'){
+					 $str = $str.'---';
+				 }
+					$bstr= getChildNodeText($a);
+					if(strlen(trim($bstr))>0){
+						$str = $str.' '.trim($bstr).' ';
+						}else {
+							$str = $str;	
+						}
+			 }
+			} else{
+				if(strlen(trim($chn->nodeValue))>0){
+					//анализируем тэг-предок
+					if($chn->parentNode->nodeName == 'para' ){
+						$str =$chn->nodeValue.'<br/>';
+					} elseif($chn->parentNode->nodeName == 'title' or $chn->parentNode->nodeName == 'emphasis'){
+						$str ='<b>'.$chn->nodeValue.'</b><br/>';
+					} elseif($chn->parentNode->nodeName == 'guiicon'){
+						$str ='<b>'.$chn->nodeValue.'</b>';
+					} elseif($chn->parentNode->nodeName == 'guisubmenu'){
+						$str ='->'.$chn->nodeValue;	
+					}elseif($chn->parentNode->nodeName == 'entry'){
+						$str =$chn->nodeValue.'<br/>';
+						}else{
+							//анализируем имя тэга
+							if($chn->nodeName != '#comment'){
+								$str ='*****'.$chn->parentNode->nodeName.' '.$chn->nodeName.' '.$chn->nodeValue.'<br>';
+							} 
+			
+						}
+					
+					} else {
+						$str = '';	
+						}
+				
+				
+			}	
+			return $str;
+		}  
 		$model = new GetFile_WorkFromTZ(); 
 		//if (Yii::$app->request->isPost) {
 			//$model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
@@ -982,25 +1033,62 @@ class Works_of_estimateController extends Controller
 				 if (Yii::$app->request->isPost) {
 					     $model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
 		            if ($model->upload()) {// file is uploaded successfully
-		                $smpl_xml=simplexml_load_file('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
-		                //foreach ($smpl_xml->section as $section) {
-						   echo $smpl_xml->getName() . "<br>";
-						   foreach ($smpl_xml->children() as $child)
-							{
-							    echo "___".$child->getName()."  ".$child->title."<br>";
-							    
-								foreach($child->attributes('xml',true) as $a => $b) {
-									echo  "_____",$a,'=',$b,"<br>";
-									echo " ";    
-								}  
+						$doc = new DOMDocument();
+						$a = $doc->load('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
+						if($a){
+								Yii::$app->session->addFlash('error',"загрузка выполнена");
+								$mod=$doc->getElementsByTagName("section");
+								foreach ($mod as $element){
+									//
+									$title = $element->getElementsByTagName("title");
+									
+									if($title->count()==1){
+										    //echo $element->nodeName.'<br />';
+											//foreach($title as $ttl){
+												//echo '____'.$ttl->nodeName.' '.$ttl->textContent.'<br />';
+											//}
+										 $childNodes = $element->childNodes;
+										 foreach($childNodes as $chn){
+											 echo getChildNodeText($chn);
+											 //if($chn->nodeName == 'title'){
+												 //echo $chn->nodeName.'----'.$chn->nodeValue.'<br />';
+												 //if($chn->hasChildNodes()){   //есть подчиненные
+													 //$childNd = $chn->childNodes;
+													 //foreach($childNd as $a){
+														  //echo '***'.$a->nodeName.'***----'.$a->nodeValue.'<br />';
+														 //}
+											     //} 
+											 //}										 
+											 //if($chn->hasChildNodes()){   //есть подчиненные
+												 
+											 //} else{
+												////echo $chn->nodeName.'----'.$chn->nodeValue.'<br />';
+											 //}
+										 }	
+										//echo $element->nodeValue.'<br />';	
+										}
+									
+									  
+									
+									
+								}
+							}else{
+								Yii::$app->session->addFlash('error',"ошибка загрузки");
 							}
-						   //echo $section->title;
-						   //foreach($section->attributes() as $a => $b) {
-								//echo $a,'="',$b,"\"\n";
-						   //}
-						//}
+		                //$smpl_xml=simplexml_load_file('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
+		              	   //echo $smpl_xml->getName() . "<br>";
+						   //foreach ($smpl_xml->children() as $child)
+							//{
+							    //echo "___".$child->getName()."  ".$child->title."<br>";
+							    
+								//foreach($child->attributes('xml',true) as $a => $b) {
+									//echo  "_____*",$a,'=',$b,"<br>";
+									//echo " ";    
+								//}  
+							//}
+						
 		                	                
-		                return;
+		                //return;
 		            }
 		         }					
 				}

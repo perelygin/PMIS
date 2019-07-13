@@ -95,4 +95,19 @@ class People extends \yii\db\ActiveRecord
     {
         return $this->idHuman;
     }
+    /*
+     * Возращает id человека по Имени и фамилии
+    */ 
+    
+    public function getPeopleByFI($name, $family)
+    {
+		$sql = 'SELECT idHuman FROM People where  name Like "'.$name.'"  and Family Like "'.$family.'"';
+		$pplId = Yii::$app->db->createCommand($sql)->queryOne();
+		if($pplId){
+			return $pplId['idHuman'];
+			} else {
+				return false;
+				}
+        return $pplList;
+    }
 }
