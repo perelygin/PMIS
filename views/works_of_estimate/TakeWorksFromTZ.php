@@ -36,6 +36,17 @@ use yii\widgets\ActiveForm;
      <br>
     Выбери файл для разбора
     <?= $form->field($model, 'DbkFile')->fileInput() ?>
+    <?php 
+		if($TextForWorks){
+			echo '<table  border="1" cellpadding="5" width="100%">';
+			 foreach($TextForWorks as $tfw){
+				 
+				 echo '<tr><td><b>'.$tfw['title'].'</b></td><td><input name="selectedWorks[]" type="checkbox"  value= 1></td></tr>';
+				 echo '<tr><td colspan="2">'.$tfw['text'].'</td></tr>';
+				 }
+			echo '</table>';
+			}
+    ?>
 </div>		
 
 

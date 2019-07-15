@@ -992,7 +992,9 @@ class Works_of_estimateController extends Controller
 					//анализируем тэг-предок
 					if($chn->parentNode->nodeName == 'para' ){
 						$str =$chn->nodeValue.'<br/>';
-					} elseif($chn->parentNode->nodeName == 'title' or $chn->parentNode->nodeName == 'emphasis'){
+					} elseif($chn->parentNode->nodeName == 'title'){
+						$str ='';
+					} elseif($chn->parentNode->nodeName == 'emphasis'){
 						$str ='<b>'.$chn->nodeValue.'</b><br/>';
 					} elseif($chn->parentNode->nodeName == 'guiicon'){
 						$str ='<b>'.$chn->nodeValue.'</b>';
@@ -1016,7 +1018,9 @@ class Works_of_estimateController extends Controller
 			}	
 			return $str;
 		}  
+		//конец вложенной процедуры
 		$model = new GetFile_WorkFromTZ(); 
+		$TextForWorks = array(); //массив с информацией по работам
 		//if (Yii::$app->request->isPost) {
 			//$model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
             //if ($model->upload()) {
@@ -1034,61 +1038,26 @@ class Works_of_estimateController extends Controller
 					     $model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
 		            if ($model->upload()) {// file is uploaded successfully
 						$doc = new DOMDocument();
-						$a = $doc->load('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
-						if($a){
+						$file = $doc->load('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
+						
+						if($file){
 								Yii::$app->session->addFlash('error',"загрузка выполнена");
 								$mod=$doc->getElementsByTagName("section");
-								foreach ($mod as $element){
+								foreach ($mod as $element){ //перебираем все элемены section 
 									//
 									$title = $element->getElementsByTagName("title");
 									
-									if($title->count()==1){
-										    //echo $element->nodeName.'<br />';
-											//foreach($title as $ttl){
-												//echo '____'.$ttl->nodeName.' '.$ttl->textContent.'<br />';
-											//}
-										 $childNodes = $element->childNodes;
-										 foreach($childNodes as $chn){
-											 echo getChildNodeText($chn);
-											 //if($chn->nodeName == 'title'){
-												 //echo $chn->nodeName.'----'.$chn->nodeValue.'<br />';
-												 //if($chn->hasChildNodes()){   //есть подчиненные
-													 //$childNd = $chn->childNodes;
-													 //foreach($childNd as $a){
-														  //echo '***'.$a->nodeName.'***----'.$a->nodeValue.'<br />';
-														 //}
-											     //} 
-											 //}										 
-											 //if($chn->hasChildNodes()){   //есть подчиненные
-												 
-											 //} else{
-												////echo $chn->nodeName.'----'.$chn->nodeValue.'<br />';
-											 //}
-										 }	
-										//echo $element->nodeValue.'<br />';	
+									if($title->count()==1){ //работаем только с теми у которых есть только  один titel
+										 foreach($title as $ttl){
+											 $titeleText = $ttl->nodeValue; 
+											 }
+										 $work_info =  array('title'=>$titeleText, 'text'=>getChildNodeText($element));
+										 $TextForWorks[] =  $work_info;
 										}
-									
-									  
-									
-									
 								}
 							}else{
 								Yii::$app->session->addFlash('error',"ошибка загрузки");
 							}
-		                //$smpl_xml=simplexml_load_file('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
-		              	   //echo $smpl_xml->getName() . "<br>";
-						   //foreach ($smpl_xml->children() as $child)
-							//{
-							    //echo "___".$child->getName()."  ".$child->title."<br>";
-							    
-								//foreach($child->attributes('xml',true) as $a => $b) {
-									//echo  "_____*",$a,'=',$b,"<br>";
-									//echo " ";    
-								//}  
-							//}
-						
-		                	                
-		                //return;
 		            }
 		         }					
 				}
@@ -1103,10 +1072,8 @@ class Works_of_estimateController extends Controller
             'id_node'=>$idWbs,
             'model' => $model,
             'idEstimateWorkPackages' => $idEstimateWorkPackages,
-            //'mantis_links' => $BR->getMantisNumbers(2),
-            //'related_issue'=>$related_issue,
-            //'missingMembers'=>$missingMembers
-        ]);	
+            'TextForWorks'=>$TextForWorks
+         ]);	
 	 }
     /**
  * 
