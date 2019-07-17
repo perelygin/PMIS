@@ -976,10 +976,10 @@ class Works_of_estimateController extends Controller
 			$str = '';
 			if($chn->hasChildNodes()){   //есть подчиненные
 			 $childNd = $chn->childNodes;
-			 foreach($childNd as $a){
-				 if($a->nodeName == 'listitem'){
-					 $str = $str.'---';
-				 }
+			 foreach($childNd as $a){ //получаем строку с вложенными тэгами
+				 //if($a->nodeName == 'listitem'){
+					 //$str = $str.'---';
+				 //}
 					$bstr= getChildNodeText($a);
 					if(strlen(trim($bstr))>0){
 						$str = $str.' '.trim($bstr).' ';
@@ -987,28 +987,44 @@ class Works_of_estimateController extends Controller
 							$str = $str;	
 						}
 			 }
+			 // как обрамить тэг с вложенными узлами
+			 if($chn->nodeName =='para'){ 
+				 $str = '<p>'.$str.'</p>';	
+				 }elseif($chn->nodeName =='emphasis'){
+					$str ='<b>'.$str.'</b>'; 
+				 }elseif($chn->nodeName =='title'){
+						$str =''; 
+				 }elseif($chn->nodeName =='guiicon'){
+						$str ='<b>'.$str.'</b>'; 
+				 }elseif($chn->nodeName =='guisubmenu'){
+						$str ='->'.$str; 
+				 }elseif($chn->nodeName =='listitem'){
+						$str ='<li>'.$str.'</li>'; 
+				 }elseif($chn->nodeName =='orderedlist'){
+						$str ='<ul>'.$str.'</ul>'; 
+				 }
 			} else{
 				if(strlen(trim($chn->nodeValue))>0){
+					$str =$chn->nodeValue;
 					//анализируем тэг-предок
-					if($chn->parentNode->nodeName == 'para' ){
-						$str =$chn->nodeValue.'<br/>';
-					} elseif($chn->parentNode->nodeName == 'title'){
-						$str ='';
-					} elseif($chn->parentNode->nodeName == 'emphasis'){
-						$str ='<b>'.$chn->nodeValue.'</b><br/>';
-					} elseif($chn->parentNode->nodeName == 'guiicon'){
-						$str ='<b>'.$chn->nodeValue.'</b>';
-					} elseif($chn->parentNode->nodeName == 'guisubmenu'){
-						$str ='->'.$chn->nodeValue;	
-					}elseif($chn->parentNode->nodeName == 'entry'){
-						$str =$chn->nodeValue.'<br/>';
-						}else{
-							//анализируем имя тэга
-							if($chn->nodeName != '#comment'){
-								$str ='*****'.$chn->parentNode->nodeName.' '.$chn->nodeName.' '.$chn->nodeValue.'<br>';
-							} 
-			
-						}
+					//if($chn->parentNode->nodeName == 'para' ){
+						//$str =$chn->nodeValue;
+					//} elseif($chn->parentNode->nodeName == 'title'){
+						//$str ='';
+					//} elseif($chn->parentNode->nodeName == 'emphasis'){
+						//$str ='<b>'.$chn->nodeValue.'</b>';
+					//} elseif($chn->parentNode->nodeName == 'guiicon'){
+						//$str ='<b>'.$chn->nodeValue.'</b>';
+					//} elseif($chn->parentNode->nodeName == 'guisubmenu'){
+						//$str ='->'.$chn->nodeValue;	
+					//}elseif($chn->parentNode->nodeName == 'entry'){
+						//$str =$chn->nodeValue;
+						//}else{
+							////анализируем имя тэга
+							//if($chn->nodeName != '#comment'){
+								//$str ='*****'.$chn->parentNode->nodeName.' '.$chn->nodeName.' '.$chn->nodeValue.'<br>';
+							//} 
+						//}
 					
 					} else {
 						$str = '';	
@@ -1041,13 +1057,14 @@ class Works_of_estimateController extends Controller
 						$file = $doc->load('uploads/' . $model->DbkFile->baseName . '.' . $model->DbkFile->extension);
 						
 						if($file){
-								Yii::$app->session->addFlash('error',"загрузка выполнена");
+								Yii::$app->session->addFlash('success',"загрузка выполнена");
 								$mod=$doc->getElementsByTagName("section");
 								foreach ($mod as $element){ //перебираем все элемены section 
-									//
+									$tag_mnt = $element->getAttribute('role'); 
 									$title = $element->getElementsByTagName("title");
 									
-									if($title->count()==1){ //работаем только с теми у которых есть только  один titel
+									//if( $title->count()==1){ //работаем только с теми у которых есть только  один title
+									  if($tag_mnt == 'mantis'){ //hfботаем только с теми,  у которых есть атрибут role и он равен mantis
 										 foreach($title as $ttl){
 											 $titeleText = $ttl->nodeValue; 
 											 }
