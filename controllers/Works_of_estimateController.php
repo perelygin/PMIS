@@ -22,6 +22,7 @@ use app\models\Links;
 use app\models\Schedule;
 use app\models\Constraints;
 use app\models\GetFile_WorkFromTZ;
+use app\models\AnalysisDBKtemp;
 
 use app\components\myHelper;
 
@@ -977,9 +978,6 @@ class Works_of_estimateController extends Controller
 			if($chn->hasChildNodes()){   //есть подчиненные
 			 $childNd = $chn->childNodes;
 			 foreach($childNd as $a){ //получаем строку с вложенными тэгами
-				 //if($a->nodeName == 'listitem'){
-					 //$str = $str.'---';
-				 //}
 					$bstr= getChildNodeText($a);
 					if(strlen(trim($bstr))>0){
 						$str = $str.' '.trim($bstr).' ';
@@ -1002,31 +1000,13 @@ class Works_of_estimateController extends Controller
 						$str ='<li>'.$str.'</li>'; 
 				 }elseif($chn->nodeName =='orderedlist'){
 						$str ='<ul>'.$str.'</ul>'; 
+				 }elseif($chn->nodeName =='row'){
+						$str =$str.'<br>'; 
 				 }
 			} else{
 				if(strlen(trim($chn->nodeValue))>0){
 					$str =$chn->nodeValue;
-					//анализируем тэг-предок
-					//if($chn->parentNode->nodeName == 'para' ){
-						//$str =$chn->nodeValue;
-					//} elseif($chn->parentNode->nodeName == 'title'){
-						//$str ='';
-					//} elseif($chn->parentNode->nodeName == 'emphasis'){
-						//$str ='<b>'.$chn->nodeValue.'</b>';
-					//} elseif($chn->parentNode->nodeName == 'guiicon'){
-						//$str ='<b>'.$chn->nodeValue.'</b>';
-					//} elseif($chn->parentNode->nodeName == 'guisubmenu'){
-						//$str ='->'.$chn->nodeValue;	
-					//}elseif($chn->parentNode->nodeName == 'entry'){
-						//$str =$chn->nodeValue;
-						//}else{
-							////анализируем имя тэга
-							//if($chn->nodeName != '#comment'){
-								//$str ='*****'.$chn->parentNode->nodeName.' '.$chn->nodeName.' '.$chn->nodeValue.'<br>';
-							//} 
-						//}
-					
-					} else {
+				} else {
 						$str = '';	
 						}
 				
@@ -1037,6 +1017,8 @@ class Works_of_estimateController extends Controller
 		//конец вложенной процедуры
 		$model = new GetFile_WorkFromTZ(); 
 		$TextForWorks = array(); //массив с информацией по работам
+		
+		
 		//if (Yii::$app->request->isPost) {
 			//$model->DbkFile = UploadedFile::getInstance($model, 'DbkFile');
             //if ($model->upload()) {
@@ -1064,32 +1046,59 @@ class Works_of_estimateController extends Controller
 									$title = $element->getElementsByTagName("title");
 									
 									//if( $title->count()==1){ //работаем только с теми у которых есть только  один title
-									  if($tag_mnt == 'mantis'){ //hfботаем только с теми,  у которых есть атрибут role и он равен mantis
+									  if($tag_mnt == 'mantis'){ //работаем только с теми,  у которых есть атрибут role и он равен mantis
 										 foreach($title as $ttl){
 											 $titeleText = $ttl->nodeValue; 
 											 }
-										 $work_info =  array('title'=>$titeleText, 'text'=>getChildNodeText($element));
-										 $TextForWorks[] =  $work_info;
+										 // $txt =getChildNodeText($element);
+										 // $work_info =  array('title'=>$titeleText, 'text'=>$txt);
+										 $DBK_rez = new AnalysisDBKtemp();  //таблица для результатов анализа
+										 $DBK_rez->Title = $titeleText;
+										 $DBK_rez->Text = getChildNodeText($element);
+										 $DBK_rez->save();
+										 //$TextForWorks[] =  $work_info;
 										}
 								}
 							}else{
 								Yii::$app->session->addFlash('error',"ошибка загрузки");
 							}
 		            }
+				  
 		         }					
 				}
 				if($btn_info[0] == 'cancl') {  //отмена
 					$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);	
 				}
+				if($btn_info[0] == 'mnt') {  //генерация работ
+					
+					if(isset($a['selectedReq'])) {
+						foreach($a['selectedReq'] as $r){
+							
+							$req = AnalysisDBKtemp::GetReq($r);
+							//Yii::$app->session->addFlash('error',"Поехали ".$req['Title']);
+							$modelWOS = new WorksOfEstimate();
+							$result = $modelWOS->addWork($idEstimateWorkPackages,$idWbs,$req['Title'],$req['Text']);
+							if($result<0){
+								Yii::$app->session->addFlash('error',"Ошибка создания работы на основе инцидента ".$r);
+							}else{
+								Yii::$app->session->addFlash('success',"Создана работа на основе инцидента ".$r);
+							}
+							
+							}
+						$this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);		
+						}
+				}
 			}	
-		} 
+		} else{ // первый вход на форму
+			AnalysisDBKtemp::truncateTempTable(); //чистм временную таблицу
+			}
 		 
 		 return $this->render('TakeWorksFromTZ', [
 			'idBR'=>$idBR,
             'id_node'=>$idWbs,
             'model' => $model,
             'idEstimateWorkPackages' => $idEstimateWorkPackages,
-            'TextForWorks'=>$TextForWorks
+            //'DBK_rez'=>$DBK_rez
          ]);	
 	 }
     /**

@@ -14,14 +14,16 @@ class GetFile_WorkFromTZ extends Model
     public function rules()
     {
         return [
-            [['DbkFile'], 'safe'],
-            //[['DbkFile'], 'file', 'skipOnEmpty' => false, 'extensions' => ['dbk','xml']],
+            //[['DbkFile'], 'required'],
+            //[['DbkFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'dbk'],
+            [['DbkFile'], 'file', 'extensions' => 'dbk',  'skipOnEmpty' => false,'checkExtensionByMimeType' => false]
         ];
     }
     
     public function upload()
     {
         if ($this->validate()) {
+			//echo '-'.$this->DbkFile->extension.'-'; die;
             $this->DbkFile->saveAs('uploads/' . $this->DbkFile->baseName . '.' . $this->DbkFile->extension);
             return true;
         } else {
