@@ -832,7 +832,7 @@ class Works_of_estimateController extends Controller
 										'target_version' => $version,
 										'handler' =>$handler,
 										'relationships'=>$relationships,
-										'sponsorship_total'=>$LastEstimateSumm, 
+										//'sponsorship_total'=>$LastEstimateSumm, 
 										'view_state' => $view_state  
 									);
 									 $client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 
@@ -1419,7 +1419,7 @@ class Works_of_estimateController extends Controller
 										'target_version' => $version,
 										'handler' =>$handler,
 										'relationships'=>$relationships,
-										'sponsorship_total'=>$LastEstimateSumm, 
+										//'sponsorship_total'=>$LastEstimateSumm, 
 										'view_state' => $view_state  
 									);
 									 $client = new SoapClient($url_mantis_cr,array('trace'=>1,'exceptions' => 0)); 
