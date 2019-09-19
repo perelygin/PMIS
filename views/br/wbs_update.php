@@ -10,6 +10,7 @@ use app\models\ResultStatus;
 use app\models\SystemVersions;
 use app\models\Wbs;
 use app\models\vw_settings;
+use app\models\ResultPriority;
 /* @var $this yii\web\View */
 /* @var $model app\models\Wbs */
 /* @var $form ActiveForm */
@@ -20,6 +21,14 @@ use app\models\vw_settings;
 		$ResultType = ResultType::find()->where(['deleted'=>0])->all();
 		$items1 = ArrayHelper::map($ResultType,'idResultType','ResultTypeName');
 		$params1 = [
+		
+		];
+		
+			//готовим массив для dropdownist c приоритетами
+		
+		$ResultPriority = ResultPriority::find()->all();
+		$items4 = ArrayHelper::map($ResultPriority,'idResultPriority','ResultPriorityName');
+		$params4 = [
 		
 		];
 		
@@ -96,8 +105,11 @@ use app\models\vw_settings;
 	    </div>  
    </div> 	
    <div class="row">
-		<div class="col-sm-12">
+		<div class="col-sm-10">
 			<?= $form->field($model, 'name') ?>   
+	    </div>
+	    <div class="col-sm-2">
+			<?= $form->field($model, 'idResultPriority')->dropDownList($items4,$params4) ?>   
 	    </div>
    </div>	    
    <div class="row">

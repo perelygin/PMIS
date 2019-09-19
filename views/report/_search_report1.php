@@ -33,8 +33,11 @@ $params2 = [
     ]); ?>
  <div class="container">
 	<div class="row">
-		  <div class="col-sm-3">
+		  <div class="col-sm-2">
 			  <?php  echo $form->field($model, 'BRNumber') ?>
+		  </div>
+		  <div class="col-sm-1">
+			  <?php  echo $form->field($model, 'ResultPriorityOrder') ?>
 		  </div>
 		  <div class="col-sm-3">
 			  <?php  echo $form->field($model, 'BRName') ?>
@@ -63,8 +66,19 @@ $params2 = [
 </div>
   
     <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+        
+         <?php
+                  echo Html::submitButton('Искать', ['class' => 'btn btn-primary',
+                 		'title'=>'Строить отчет',
+						'name'=>'btn',
+						'value' => 'filter'
+                   ]).'  '.
+				   Html::submitButton('в Excel', ['class' => 'btn btn-primary',
+						'title'=>'Выгрузить в Excel',
+						'name'=>'btn',
+						'value' => 'excel'
+				   ]) ;
+              ?>
     </div>
 
     <?php ActiveForm::end(); ?>

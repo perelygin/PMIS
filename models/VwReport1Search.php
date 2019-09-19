@@ -19,7 +19,7 @@ class VwReport1Search extends VwReport1
     {
         return [
             [['BRNumber', 'id', 'idBr', 'idOrgResponsible', 'idResultStatus','version_number','idsystem_versions'], 'integer'],
-            [['BRName', 'name', 'mantis', 'ResultStatusName', 'fio', 'CustomerName'], 'safe'],
+            [['BRName', 'name', 'mantis', 'ResultStatusName', 'fio', 'CustomerName','ResultPriorityOrder'], 'safe'],
         ];
     }
 
@@ -67,7 +67,8 @@ class VwReport1Search extends VwReport1
             'idBr' => $this->idBr,
             'idOrgResponsible' => $this->idOrgResponsible,
             'idResultStatus' => $this->idResultStatus,
-            'idsystem_versions' => $this->idsystem_versions
+            'idsystem_versions' => $this->idsystem_versions,
+           //'ResultPriorityOrder'=>$this->ResultPriorityOrder,
         ]);
 
 //Yii::$app->session->addFlash('error',$this->idResultStatus);
@@ -79,6 +80,13 @@ class VwReport1Search extends VwReport1
             ->andFilterWhere(['like', 'fio', $this->fio])
             ->andFilterWhere(['like', 'CustomerName', $this->CustomerName]);
 
+		if(!empty($this->ResultPriorityOrder)){
+			$RPO_arr = explode(",", $this->ResultPriorityOrder);
+			// Yii::$app->session->addFlash('error',"Ошибка копирования пакета оценок ".$RPO_arr);
+			 //$RPO_arr = array(5,6);
+			 $query->andFilterWhere(['in','ResultPriorityOrder',$RPO_arr]);
+		}
+		
         return $query->all();
     }
 }

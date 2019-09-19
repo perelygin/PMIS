@@ -61,7 +61,7 @@ class Wbs extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 255],
             [['mantis'], 'string', 'max' => 150],
             [['description'], 'string', 'max' => 1000],
-            [['lft', 'rgt', 'depth','tree','idResultType','idResultStatus','idsystem_versions'],'safe']
+            [['lft', 'rgt', 'depth','tree','idResultType','idResultStatus','idsystem_versions','idResultPriority'],'safe']
         ];
     }
 
@@ -82,7 +82,8 @@ class Wbs extends \yii\db\ActiveRecord
             'idBr' => 'Id Br',
             'idResultType'=>'Тип результата',
             'idResultStatus'=>'Текущий статус',
-            'idsystem_versions'=>'Плановая версия'
+            'idsystem_versions'=>'Плановая версия',
+            'idResultPriority'=>'Приоритет результата',
         ];
     }
     //public function getChildren()

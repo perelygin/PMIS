@@ -46,7 +46,7 @@ class VwReport1 extends \yii\db\ActiveRecord
             [['ResultStatusName'], 'string', 'max' => 45],
             [['fio'], 'string', 'max' => 302],
             [['CustomerName'], 'string', 'max' => 120],
-            [['ResultEventsDate', 'ResultEventsPlannedResponseDate'], 'safe'], 
+            [['ResultEventsDate', 'ResultEventsPlannedResponseDate','ResultPriorityOrder','ResultEventsName'], 'safe'], 
         ];
     }
 
@@ -67,7 +67,8 @@ class VwReport1 extends \yii\db\ActiveRecord
             'ResultStatusName' => 'Статус',
             'fio' => 'Ответственный',
             'CustomerName' => 'Отв.  организация',
-            'idsystem_versions' => 'Плановая версия'
+            'idsystem_versions' => 'Плановая версия',
+            'ResultPriorityOrder'=>'Приоритет'
         ];
     }
 }

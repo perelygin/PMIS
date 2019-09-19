@@ -12,18 +12,18 @@ class m190704_135754_BRStatus extends Migration
      */
     public function safeUp()
     {
-			$this->insert('BRStatus', [
-	            'idBRStatus' => '1',
-	            'BRStatusName' => 'Действует',
-	        ]);
-	        $this->insert('BRStatus', [
-	            'idBRStatus' => '2',
-	            'BRStatusName' => 'Завершена',
-	        ]);
-	        $this->insert('BRStatus', [
-	            'idBRStatus' => '3',
-	            'BRStatusName' => 'Отложена',
-	        ]);
+				//$this->insert('BRStatus', [
+		            //'idBRStatus' => '1',
+		            //'BRStatusName' => 'Действует',
+		        //]);
+		        //$this->insert('BRStatus', [
+		            //'idBRStatus' => '2',
+		            //'BRStatusName' => 'Завершена',
+		        //]);
+		        //$this->insert('BRStatus', [
+		            //'idBRStatus' => '3',
+		            //'BRStatusName' => 'Отложена',
+		        //]);
 	        
     }
 

@@ -48,6 +48,8 @@ $this->params['breadcrumbs'][] = $this->title;
 					  <th>Организация отв.</th>
 					  <th>Плановая дата реакции</th>
 					  <th>План. дата результата</th>
+					  <th>Приоритет</th>
+					  
 					  </tr>';
 		    if(!empty($dataProvider)){
 				$i = $dataProvider[0]['idBr'];
@@ -64,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				$color ='';
 				$color1 ='';
 				 if($i <> $dp_str->idBr){
-					  echo '<tr bgcolor="#b1b84f" ><td colspan="8">&nbsp</td></tr>';
+					  echo '<tr bgcolor="#b1b84f" ><td colspan="9">&nbsp</td></tr>';
 				      //получаем дату результата по последней оценке трудозатрат	 
 					  $BR = BusinessRequests::findOne($dp_str->idBr);	 
 					  if(!is_null($BR)){   //  получаем id актуальной оценки для BR  покаждому результату.
@@ -112,8 +114,10 @@ $this->params['breadcrumbs'][] = $this->title;
 			  <td>'. $dp_str->fio.'</td>
 			  <td>'. $dp_str->version_number.'</td>
 			  <td>'. $dp_str->CustomerName.'</td>
-			  <td '.$color1.'>'. $reprd_str.'</td>
-			  <td '.$color.'>'. $dend_str.'</td>
+			  <td '. $color1.'>'. $reprd_str.'</td>
+			  <td '. $color.'>'. $dend_str.'</td>
+			  <td>'. $dp_str->ResultPriorityOrder.'</td>
+			  
 			  </tr>';	
 			  $idEstPckg = BusinessRequests::findOne(['idBR'=>$dp_str->idBr])->getLastEstimateId(); 
 			  if(!is_null($idEstPckg)){  //если есть пакет оценок по BR
@@ -125,7 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
 					foreach($WorksList as $wl){
 					  echo '<tr>
 					  <td></td>
-					  <td colspan="7">'.Html::a($wl['mantisNumber'], $url_mantis.$wl['mantisNumber'],['target' => '_blank']).' '.$wl['WorkName']. '</td>
+					  <td colspan="8">'.Html::a($wl['mantisNumber'], $url_mantis.$wl['mantisNumber'],['target' => '_blank']).' '.$wl['WorkName']. '</td>
 				
 					  </tr>';	
 				    }

@@ -10,6 +10,10 @@ use app\models\ResultEvents;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class ReportController extends \yii\web\Controller
 {
@@ -24,6 +28,109 @@ class ReportController extends \yii\web\Controller
 		
         $searchModel = new VwReport1Search();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$a = Yii::$app->request->get();
+		if(isset($a['btn'])) {   // анализируем нажатые кнопки
+		   if($a['btn'] == 'excel'){ //dыгрузка в ексель
+				$Alfabet = 'ABCDEFGHIJKLMNOPQR';
+				$CurrentDate = \DateTime::createFromFormat('Y-m-d',  date("Y-m-d"));	 //текущая дата
+				
+				$ex_row = 2;
+				$spreadsheet = new Spreadsheet();
+				$sheet = $spreadsheet->getActiveSheet();
+				$sheet->getColumnDimension('A')->setWidth(80);  
+				$sheet->getColumnDimension('B')->setWidth(20);  
+				$sheet->getColumnDimension('C')->setWidth(12);  
+				$sheet->getColumnDimension('D')->setWidth(20);  
+				$sheet->getColumnDimension('E')->setWidth(12);  
+				$sheet->getColumnDimension('F')->setWidth(15);  
+				$sheet->getColumnDimension('G')->setWidth(12);  
+				$sheet->getColumnDimension('H')->setWidth(15);  
+				$sheet->getColumnDimension('I')->setWidth(12);  
+				$sheet->getColumnDimension('J')->setWidth(30);  
+				
+				$sheet->setCellValue('A'.$ex_row, 'Сводный отчет по результатам по состоянию на '.$CurrentDate->format('d-m-Y'));
+				$ex_row = $ex_row+1;
+				
+				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getFont()->setBold(true);
+				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('A'.$ex_row.':J'.$ex_row)->setRowHeight(-1);
+				
+				$sheet->setCellValue('A'.$ex_row, 'BR');
+				$sheet->setCellValue('B'.$ex_row, 'Результат проекта');
+				$sheet->setCellValue('C'.$ex_row, 'Статус результата');
+				$sheet->setCellValue('D'.$ex_row, 'Ответственный');
+				$sheet->setCellValue('E'.$ex_row, 'План. верс.');
+				$sheet->setCellValue('F'.$ex_row, 'Организация отв.');
+				$sheet->setCellValue('G'.$ex_row, 'Плановая дата реакции');
+				$sheet->setCellValue('H'.$ex_row, 'Приоритет');
+				$sheet->setCellValue('I'.$ex_row, 'Число дней без движения (-2 от даты последнего события) ');
+				$sheet->setCellValue('J'.$ex_row, 'Последнее событие');
+				$ex_row = $ex_row+1;
+				foreach($dataProvider as $dp_str){
+					$reprd_str =""; //строка для даты по событию
+					$reprd = \DateTime::createFromFormat('Y-m-d', $dp_str->ResultEventsPlannedResponseDate);		 // дата окончания сохраняемой работы
+					if($reprd){
+						$reprd_str = $reprd->format('d-m-Y');
+					}
+					if($reprd<$CurrentDate){  //проверка  на просроченую реакцию
+						  $diff1 = $CurrentDate->diff($reprd);
+						  $sheet->setCellValue('I'.$ex_row, $diff1->days);
+					} 
+					$sheet->setCellValue('A'.$ex_row, 'BR'.$dp_str->BRNumber.' '.$dp_str->BRName);
+					$sheet->setCellValue('B'.$ex_row, $dp_str->name);
+					$sheet->setCellValue('C'.$ex_row, $dp_str->ResultStatusName);
+					$sheet->setCellValue('D'.$ex_row, $dp_str->fio);
+					$sheet->setCellValue('E'.$ex_row, $dp_str->version_number);
+					$sheet->setCellValue('F'.$ex_row, $dp_str->CustomerName);
+					$sheet->setCellValue('G'.$ex_row, $reprd_str);
+					$sheet->setCellValue('H'.$ex_row, $dp_str->ResultPriorityOrder);
+					$sheet->setCellValue('J'.$ex_row, $dp_str->ResultEventsName);
+					
+					$ex_row = $ex_row+1;
+				}
+					  
+				$sheet->getStyle('A3:A'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('A3:A'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('B3:B'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('B3:B'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('C3:C'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('C3:C'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('D3:D'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('D3:D'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('E3:E'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('E3:E'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('F3:F'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('F3:F'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('G3:G'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('G3:G'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('H3:H'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('H3:H'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('I3:I'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('I3:I'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('J3:J'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('J3:J'.$ex_row)->setRowHeight(-1);
+				//ставим границы
+				$styleThinBlackBorderOutline = [
+				    'borders' => [
+					    'allBorders' => [
+		                    'borderStyle' => Border::BORDER_THIN,
+		                ],
+				    ],
+				];
+				$sheet->getStyle('A3:'.'J'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
+				
+				$writer = new Xlsx($spreadsheet);
+				$file_name = 'report1_'.$CurrentDate->format('d-m-Y').'.xlsx';
+				$writer->save($file_name);
+	            Yii::$app->response->sendFile('/var/www/html/pmis_app/web/'.$file_name)->send();  
+	            return $this->render('index_report1', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+		   }
+		}
 
         return $this->render('index_report1', [
             'searchModel' => $searchModel,
