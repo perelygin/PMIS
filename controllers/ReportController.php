@@ -7,6 +7,7 @@ use app\models\VwReport1Search;
 use app\models\BusinessRequests;
 use app\models\WbsSchedule;
 use app\models\ResultEvents;
+use app\models\EstimateWorkPackages;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -73,12 +74,30 @@ class ReportController extends \yii\web\Controller
 					$reprd = \DateTime::createFromFormat('Y-m-d', $dp_str->ResultEventsPlannedResponseDate);		 // дата окончания сохраняемой работы
 					if($reprd){
 						$reprd_str = $reprd->format('d-m-Y');
-					}
-					if($reprd<$CurrentDate){  //проверка  на просроченую реакцию
+						if($reprd<$CurrentDate){  //проверка  на просроченую реакцию
 						  $diff1 = $CurrentDate->diff($reprd);
 						  $sheet->setCellValue('I'.$ex_row, $diff1->days);
-					} 
-					$sheet->setCellValue('A'.$ex_row, 'BR'.$dp_str->BRNumber.' '.$dp_str->BRName);
+						} 
+					}
+					
+					$idEstPckg = BusinessRequests::findOne(['idBR'=>$dp_str->idBr])->getLastEstimateId(); 
+					  if(!is_null($idEstPckg)){  //если есть пакет оценок по BR
+						  $a = EstimateWorkPackages::findOne($idEstPckg);
+						  if(is_null($a)) {echo($idEstPckg." ".$dp_str->idBr);  die;}
+						  $WorksList = $a->getWorksList($dp_str->id);
+						  
+						  if(count($WorksList)>0){
+							$str_mantis = "";
+							foreach($WorksList as $wl){
+								if(!empty($wl['mantisNumber'])){
+									$str_mantis = $wl['mantisNumber'].','.$str_mantis;
+								}
+						    }
+						  }
+			 		  } 
+					
+					
+					$sheet->setCellValue('A'.$ex_row, $str_mantis.' BR'.$dp_str->BRNumber.' '.$dp_str->BRName);
 					$sheet->setCellValue('B'.$ex_row, $dp_str->name);
 					$sheet->setCellValue('C'.$ex_row, $dp_str->ResultStatusName);
 					$sheet->setCellValue('D'.$ex_row, $dp_str->fio);
