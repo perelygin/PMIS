@@ -8,6 +8,7 @@ use app\models\BusinessRequests;
 use app\models\WbsSchedule;
 use app\models\ResultEvents;
 use app\models\EstimateWorkPackages;
+use app\models\ProjectCommand;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -38,7 +39,7 @@ class ReportController extends \yii\web\Controller
 				$ex_row = 2;
 				$spreadsheet = new Spreadsheet();
 				$sheet = $spreadsheet->getActiveSheet();
-				$sheet->getColumnDimension('A')->setWidth(80);  
+				$sheet->getColumnDimension('A')->setWidth(70);  
 				$sheet->getColumnDimension('B')->setWidth(20);  
 				$sheet->getColumnDimension('C')->setWidth(12);  
 				$sheet->getColumnDimension('D')->setWidth(20);  
@@ -48,15 +49,17 @@ class ReportController extends \yii\web\Controller
 				$sheet->getColumnDimension('H')->setWidth(15);  
 				$sheet->getColumnDimension('I')->setWidth(12);  
 				$sheet->getColumnDimension('J')->setWidth(30);  
+				$sheet->getColumnDimension('K')->setWidth(20);  
+				$sheet->getColumnDimension('L')->setWidth(20);  
 				
 				$sheet->setCellValue('A'.$ex_row, 'Сводный отчет по результатам по состоянию на '.$CurrentDate->format('d-m-Y'));
 				$ex_row = $ex_row+1;
 				
-				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getFont()->setBold(true);
-				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-				$sheet->getStyle('A'.$ex_row.':J'.$ex_row)->getAlignment()->setWrapText(true);
-				$sheet->getRowDimension('A'.$ex_row.':J'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('A'.$ex_row.':L'.$ex_row)->getFont()->setBold(true);
+				$sheet->getStyle('A'.$ex_row.':L'.$ex_row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+				$sheet->getStyle('A'.$ex_row.':L'.$ex_row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+				$sheet->getStyle('A'.$ex_row.':L'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('A'.$ex_row.':L'.$ex_row)->setRowHeight(-1);
 				
 				$sheet->setCellValue('A'.$ex_row, 'BR');
 				$sheet->setCellValue('B'.$ex_row, 'Результат проекта');
@@ -68,10 +71,15 @@ class ReportController extends \yii\web\Controller
 				$sheet->setCellValue('H'.$ex_row, 'Приоритет');
 				$sheet->setCellValue('I'.$ex_row, 'Число дней без движения (-2 от даты последнего события) ');
 				$sheet->setCellValue('J'.$ex_row, 'Последнее событие');
+				$sheet->setCellValue('K'.$ex_row, 'Аналитик');
+				$sheet->setCellValue('L'.$ex_row, 'Технолог');
 				$ex_row = $ex_row+1;
 				foreach($dataProvider as $dp_str){
 					$reprd_str =""; //строка для даты по событию
 					$reprd = \DateTime::createFromFormat('Y-m-d', $dp_str->ResultEventsPlannedResponseDate);		 // дата окончания сохраняемой работы
+					$analit_fio = ProjectCommand::getFIOByRole($dp_str->idBr,3);//фио аналитика
+					$tehno_fio = ProjectCommand::getFIOByRole($dp_str->idBr,2);//фио технолога
+					
 					if($reprd){
 						$reprd_str = $reprd->format('d-m-Y');
 						if($reprd<$CurrentDate){  //проверка  на просроченую реакцию
@@ -106,6 +114,9 @@ class ReportController extends \yii\web\Controller
 					$sheet->setCellValue('G'.$ex_row, $reprd_str);
 					$sheet->setCellValue('H'.$ex_row, $dp_str->ResultPriorityOrder);
 					$sheet->setCellValue('J'.$ex_row, $dp_str->ResultEventsName);
+					$sheet->setCellValue('K'.$ex_row, $analit_fio);
+					$sheet->setCellValue('L'.$ex_row, $tehno_fio);
+					
 					
 					$ex_row = $ex_row+1;
 				}
@@ -130,6 +141,10 @@ class ReportController extends \yii\web\Controller
 				$sheet->getRowDimension('I3:I'.$ex_row)->setRowHeight(-1);
 				$sheet->getStyle('J3:J'.$ex_row)->getAlignment()->setWrapText(true);
 				$sheet->getRowDimension('J3:J'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('K3:K'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('K3:K'.$ex_row)->setRowHeight(-1);
+				$sheet->getStyle('L3:L'.$ex_row)->getAlignment()->setWrapText(true);
+				$sheet->getRowDimension('L3:L'.$ex_row)->setRowHeight(-1);
 				//ставим границы
 				$styleThinBlackBorderOutline = [
 				    'borders' => [
@@ -138,7 +153,7 @@ class ReportController extends \yii\web\Controller
 		                ],
 				    ],
 				];
-				$sheet->getStyle('A3:'.'J'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
+				$sheet->getStyle('A3:'.'L'.$ex_row)->applyFromArray($styleThinBlackBorderOutline);
 				
 				$writer = new Xlsx($spreadsheet);
 				$file_name = 'report1_'.$CurrentDate->format('d-m-Y').'.xlsx';

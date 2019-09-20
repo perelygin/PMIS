@@ -80,12 +80,16 @@ class VwReport1Search extends VwReport1
             ->andFilterWhere(['like', 'fio', $this->fio])
             ->andFilterWhere(['like', 'CustomerName', $this->CustomerName]);
 
-		if(!is_null($this->ResultPriorityOrder)){
+		if(!empty($this->ResultPriorityOrder)){
 			$RPO_arr = explode(",", $this->ResultPriorityOrder);
-			// Yii::$app->session->addFlash('error',"Ошибка копирования пакета оценок ".$RPO_arr);
-			 //$RPO_arr = array(5,6);
-			 $query->andFilterWhere(['in','ResultPriorityOrder',$RPO_arr]);
-		}
+			$query->andFilterWhere(['in','ResultPriorityOrder',$RPO_arr]);
+		} else{
+			//echo($this->ResultPriorityOrder);die;
+			if($this->ResultPriorityOrder == '0'){
+				//echo('нуль');die;
+				$query->andFilterWhere(['ResultPriorityOrder' => 0,]);
+				} 
+			}
 		
         return $query->all();
     }
