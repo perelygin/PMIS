@@ -140,13 +140,13 @@ class ProjectCommand extends \yii\db\ActiveRecord
 	 
 /*
  * dозвращает фио по id роли и id BR
- * 
+ * dы выборку не попадают псевдо-члены команды с bvенем "Универсальный"
  */ 
   public function getFIOByRole($idBr,$idRole){
-		 $sql = 'select ppl.Family,ppl.Name,ppl.patronymic from ProjectCommand 
+		 $sql = "select ppl.Family,ppl.Name,ppl.patronymic from ProjectCommand 
 					  LEFT OUTER JOIN People ppl ON ProjectCommand.idHuman = ppl.idHuman
-					where ProjectCommand.idBR = '.$idBr.' and ProjectCommand.idRole='.$idRole.' and ProjectCommand.idHuman <> -1
-					limit 1';
+					where ProjectCommand.idBR = ".$idBr." and ProjectCommand.idRole=".$idRole." and ProjectCommand.idHuman <> -1 and ppl.Name NOT LIKE 'УНИВЕРСАЛЬНЫЙ'
+					limit 1";
 		$FIOByRole = Yii::$app->db->createCommand($sql)->queryOne();	
 		if($FIOByRole){
 			
