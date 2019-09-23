@@ -93,9 +93,9 @@ class ReportController extends \yii\web\Controller
 						  $a = EstimateWorkPackages::findOne($idEstPckg);
 						  if(is_null($a)) {echo($idEstPckg." ".$dp_str->idBr);  die;}
 						  $WorksList = $a->getWorksList($dp_str->id);
-						  
+						  $str_mantis = "";
 						  if(count($WorksList)>0){
-							$str_mantis = "";
+							
 							foreach($WorksList as $wl){
 								if(!empty($wl['mantisNumber'])){
 									$str_mantis = $wl['mantisNumber'].','.$str_mantis;
