@@ -77,8 +77,8 @@ class ReportController extends \yii\web\Controller
 				foreach($dataProvider as $dp_str){
 					$reprd_str =""; //строка для даты по событию
 					$reprd = \DateTime::createFromFormat('Y-m-d', $dp_str->ResultEventsPlannedResponseDate);		 // дата окончания сохраняемой работы
-					$analit_fio = ProjectCommand::getFIOByRole($dp_str->idBr,3);//фио аналитика
-					$tehno_fio = ProjectCommand::getFIOByRole($dp_str->idBr,2);//фио технолога
+					$analit_fio = ProjectCommand::getFIOsByRole($dp_str->idBr,3);//фио аналитика
+					$tehno_fio = ProjectCommand::getFIOsByRole($dp_str->idBr,2);//фио технолога
 					
 					if($reprd){
 						$reprd_str = $reprd->format('d-m-Y');

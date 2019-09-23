@@ -139,21 +139,27 @@ class ProjectCommand extends \yii\db\ActiveRecord
 	 }
 	 
 /*
- * dозвращает фио по id роли и id BR
- * dы выборку не попадают псевдо-члены команды с bvенем "Универсальный"
+ * dозвращает фио через запятую по id роли и id BR
+ * в выборку не попадают псевдо-члены команды с именем "Универсальный"
  */ 
-  public function getFIOByRole($idBr,$idRole){
+  public function getFIOsByRole($idBr,$idRole){
 		 $sql = "select ppl.Family,ppl.Name,ppl.patronymic from ProjectCommand 
 					  LEFT OUTER JOIN People ppl ON ProjectCommand.idHuman = ppl.idHuman
-					where ProjectCommand.idBR = ".$idBr." and ProjectCommand.idRole=".$idRole." and ProjectCommand.idHuman <> -1 and ppl.Name NOT LIKE 'УНИВЕРСАЛЬНЫЙ'
-					limit 1";
-		$FIOByRole = Yii::$app->db->createCommand($sql)->queryOne();	
-		if($FIOByRole){
-			
-			 return $FIOByRole['Family'];
-			 } else{
+					where ProjectCommand.idBR = ".$idBr." and ProjectCommand.idRole=".$idRole." and ProjectCommand.idHuman <> -1 and ppl.Name NOT LIKE 'УНИВЕРСАЛЬНЫЙ'";
+		$FIOsByRole = Yii::$app->db->createCommand($sql)->queryAll();	
+		if($FIOsByRole){
+			$str_fio = "";
+			foreach($FIOsByRole as $fs){
+				if(strlen($str_fio)>0){
+					$str_fio = $fs['Family'].','.$str_fio;
+					} else{
+						$str_fio = $fs['Family'];
+						}
+				}
+			 return $str_fio;
+		} else{
 				 return null;
-				 }
+		 }
   }
  
  
