@@ -4,6 +4,7 @@ namespace app\controllers;
 use Yii;
 use app\models\VwReport2;
 use app\models\VwReport1Search;
+use app\models\VwReport3Search;
 use app\models\BusinessRequests;
 use app\models\WbsSchedule;
 use app\models\ResultEvents;
@@ -305,4 +306,28 @@ class ReportController extends \yii\web\Controller
 			
 		//}	
    //}	
+   
+   
+   /*
+    * Входные параметры отчета(фильтр): 
+			•	Дата начала работ по задаче. В отчет попадают все BR удовлетворяющие фильтру, первое событие по которым(запрос ресурсов), 
+		* произошел не раньше указанной даты.
+		•	Название. Фильтр по названию BR.
+		•	Номер BR
+		
+		В отчете отображается информация о результатах по BR, удовлетворяющих фильтру. Для каждого результата в статусе «В Работе» или «Выполнен» указывается 
+		* дата первого события, дата последнего события, статус результата. Так же для каждого результата указывается длительность в рабочих днях 
+		* (Разница между текущей датой и датой первого события, для результатов в статусе «В Работе». И разница между датой последнего и первого события, 
+		* для результатов в статусе «Выполнен»)
+	    */ 
+    public function actionReport3()
+    {
+		$searchModel = new VwReport3Search();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$a = Yii::$app->request->get();
+		return $this->render('index_report3', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+	}	
 }

@@ -14,5 +14,13 @@
 			  <?php // echo Html::a('Сетевой график', Url::toRoute(['report/report2']),['title' => '',]); ?>
 		  </div>
 		</div>			  
+		<div class="row">
+		  <div class="col-sm-6">
+			  <?php echo Html::a('Отчет по абонементу', Url::toRoute(['report/report3']),['title' => '',]); ?>
+		  </div>
+		  <div class="col-sm-6">
+			  <?php // echo Html::a('Сетевой график', Url::toRoute(['report/report2']),['title' => '',]); ?>
+		  </div>
+		</div>	
 </div>
 
