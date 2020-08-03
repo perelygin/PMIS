@@ -457,8 +457,13 @@ class Works_of_estimateController extends Controller
 				  return $this->redirect(['index', 'id_node' => $idWbs ,'idBR' => $idBR, 'idEWP'=>$idEstimateWorkPackages]);			
 				
 			     }else{
+					 //для просмотра номеров проектов -))
+					 //foreach($result_1 as $rs){
+						 //echo $rs->id." ".$rs->name.'<br>';
+						 //}
+					//die;	 
 					 foreach($result_1 as $rs){
-						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13 or $rs->id == 26 or $rs->id == 21){
+						  if($rs->id == 12 or $rs->id == 22 or $rs->id == 17 or $rs->id == 13 or $rs->id == 26 or $rs->id == 21 or $rs->id == 29){
 							  $mntprjArr = array('name' =>$rs->name,'Checked' =>' ');
 							  $MntPrjLstArray[$rs->id] = $mntprjArr;
 						  }
@@ -483,6 +488,7 @@ class Works_of_estimateController extends Controller
 			//[17]  VTB24 Согласование экспертиз 
 			//[26]  VTB тестирование
 			//[21]  VTB24 Согласование методик тестирования
+			//[29] VTB24 SpectrumFrontAPI
 		}
 		
 		
